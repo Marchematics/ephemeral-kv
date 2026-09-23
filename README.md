@@ -1,48 +1,75 @@
 # EphemeralKV
 
-**The conversation is durable. The KV cache is disposable.**
+**A long-lived LLM session should have an identity, not a home.**
 
-A long-lived LLM session currently accumulates model state: every turn appends keys
-and values, and serving systems treat that KV as an object worth *keeping* — pinned in
-HBM, tiered to DRAM, offloaded to NVMe, restored on the next turn. This project tests
-the opposite abstraction:
+Agent-serving stacks increasingly make a session *sticky*: a follow-up turn is routed
+back to the worker that already owns its KV prefix because moving or rebuilding a
+history-sized KV cache is expensive. EphemeralKV tests a different systems abstraction:
 
-> The durable state of a session is its **transcript plus a cheap semantic index**.
-> Model state is a **compile product** of the current request against that transcript,
-> and it can die when the turn ends.
+> The transcript and its compact retrieval index are durable. Per-worker KV is an
+> opportunistic execution cache, not session ownership. A turn may move when the
+> queueing benefit exceeds the cost of rematerializing its active working set.
 
-If that holds, the consequences are measurable and counterintuitive:
+The core hypothesis is stronger than "KV can be evicted." It is that **session affinity
+is a consequence of history-sized migration cost, not a fundamental property of agent
+serving**. If a cold route costs `index_lookup + prefill(active_set)` instead of
+`move_or_recompute(full_history)`, session age no longer determines where the next
+turn may run.
 
-1. **Discard + recompile can be cheaper than restore.** Past the crossover, rebuilding
-   a small working set from the transcript beats loading a large KV from HBM/DRAM/NVMe.
-2. **Longer sessions get *relatively* cheaper.** Active state tracks the request's
-   working set, not the session history, so a 1M-token agent session can hold an active
-   HBM footprint close to a 128K session's.
-3. **A longer request can occupy less GPU memory than a shorter one** — because the
-   *working set*, not the history, sets the footprint.
+## What this project must establish
+
+1. **History-free mobility.** With the active working set held fixed, measured remote
+   materialization cost stays roughly flat as history grows from 32K toward 1M tokens,
+   while full-KV movement/re-prefill grows with history.
+2. **A routing phase change.** Under realistic load skew, tool gaps, or worker failure,
+   soft-affinity routing improves p99 latency / SLO goodput over sticky routing because
+   it can escape a hot worker without paying a history-sized miss.
+3. **The inversion.** A 1M-token session with a small active set can be cheaper to move
+   than a 32K-token session with a larger active set.
+4. **No hidden QCC dependency.** BM25/embedding/provenance-style compilers are
+   first-class backends. QCC may be evaluated as one optional backend but is never
+   required for the claim.
+
+## What is *not* the novelty
+
+The first scaffold used the slogan "the conversation is durable; the KV cache is
+disposable." The literature/implementation audit in
+[`docs/NOVELTY.md`](docs/NOVELTY.md) found that this is not sufficient: regenerable-KV
+designs already treat text as source and KV as a derived artifact, and KVMem /
+sparse-attention systems already keep bounded active KV working sets.
+
+Those observations remain useful enabling mechanisms. The paper claim is now about
+**breaking hard session affinity by bounding the cost of a cold route**.
 
 ## Relationship to QCC
 
-This is a separate project from [qcc-transformer](https://github.com/Marchematics/qcc-transformer),
-and deliberately so: QCC asks *how much state does one query need* (a single-request
-context-compilation question). EphemeralKV asks *whether model state should be durable
-at all* (an OS state-lifecycle question). **Nothing here may depend on QCC**: the
-compiler is a pluggable interface, and a BM25 or embedding compiler is a first-class
-participant. A QCC-shaped compiler is one column in the results, never a requirement.
+This is deliberately separate from
+[qcc-transformer](https://github.com/Marchematics/qcc-transformer).
 
-## Status
+* QCC asks: **how much live state does one query need?**
+* EphemeralKV asks: **when should a long-lived session be free to move between workers?**
 
-Scaffold plus the kill-gate plan. No result is claimed yet: every headline above is a
-hypothesis with a decision rule in [`docs/PLAN.md`](docs/PLAN.md), and the project is
-designed to be killed cheaply if the gates fail — see
-[`docs/CLAIMS.md`](docs/CLAIMS.md) for the ledger format.
+Paper A's context compiler is not copied here. EphemeralKV owns a routing/lifecycle
+problem, different workloads (multi-turn agents), and different primary metrics
+(p99/TTFT/SLO goodput/failover rather than single-request quality-state curves).
+
+## Current gate signal
+
+G1's accounting model produced a useful negative result: with its original
+history-scanning index assumption, `discard + recompile` did **not** beat DRAM/NVMe KV
+restore by 512 turns. So tiered-storage latency is not the headline.
+
+G3 now asks the sharper question: if the durable index supports bounded/sublinear
+lookup, does the **remote-route tax** stop scaling with history? The checked-in
+accounting artifact only defines the phase boundary; it is not a hardware result.
 
 ## Repository layout
 
-```
-benchmarks/   one script per measurement; each writes JSON under artifacts/
-docs/        PLAN.md (kill gates), CLAIMS.md (ledger), README.md (index)
-tests/       CPU tests; no GPU and no downloads
+```text
+benchmarks/   kill gates; each emits a machine-readable JSON artifact
+artifacts/    checked-in gate receipts; accounting is labelled as accounting
+docs/        PLAN.md, CLAIMS.md, NOVELTY.md
+tests/       CPU tests; no GPU/downloads
 ```
 
 ## Running
@@ -51,5 +78,10 @@ tests/       CPU tests; no GPU and no downloads
 python -m venv .venv && . .venv/bin/activate
 pip install -e '.[dev]'
 pytest -q
-python benchmarks/kill_gate_crossover.py --help
+
+python benchmarks/kill_gate_crossover.py \
+  --out artifacts/g1-accounting.json
+
+python benchmarks/kill_gate_mobility.py \
+  --out artifacts/g3-mobility-accounting.json
 ```
