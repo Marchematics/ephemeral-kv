@@ -39,10 +39,10 @@ def route_costs(history_tokens: int, working_set_tokens: int, model=None):
     m = {**DEFAULT_MODEL, **(model or {})}
     kv_bytes = history_tokens * m["kv_bytes_per_token"]
     full_kv_transfer = kv_bytes / (m["link_bandwidth_gbs"] * 1e9)
-    full_reprefill = history_tokens / m["full_prefill_tokens_per_s"]
+    full_reprefill = history_tokens / m["prefill_tokens_per_s"]
     ephemeral = (
         m["indexed_lookup_ms"] / 1000.0
-        + working_set_tokens / m["active_prefill_tokens_per_s"]
+        + working_set_tokens / m["prefill_tokens_per_s"]
     )
     return {
         "history_tokens": history_tokens,
