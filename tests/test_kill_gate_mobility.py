@@ -39,4 +39,8 @@ def test_cli_labels_accounting_not_measurement(tmp_path):
     assert p["kind"] == "accounting"
     assert "assumptions" in p["honesty"]
     assert "measured" in p["decision_rule"]
-\n\ndef test_declared_full_kv_transfer_crossover_is_long_context():\n    cross = transfer_crossover_history(4096)\n    assert 700_000 < cross < 900_000\n
+
+
+def test_declared_full_kv_transfer_crossover_is_long_context():
+    cross = transfer_crossover_history(4096)
+    assert 700_000 < cross < 900_000
