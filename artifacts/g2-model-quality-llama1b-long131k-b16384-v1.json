@@ -1,0 +1,2107 @@
+{
+  "schema": "ephemeral-kv-g2-model-quality-v1",
+  "kind": "model_quality_measurement",
+  "model": "/root/qcc/models/Llama-3.2-1B-Instruct",
+  "token_budget": 16384,
+  "max_length": 131072,
+  "sessions": 4,
+  "summary": {
+    "examples": 128,
+    "active_fraction_p50": 0.8357125200111871,
+    "active_fraction_p95": 1.0,
+    "nll_delta_active_minus_full_p50": 0.0089179128408432,
+    "nll_delta_active_minus_full_p95": 1.1114353209733963,
+    "token_accuracy_delta_p50": 0.0,
+    "token_accuracy_delta_p05": -0.2222222222222222
+  },
+  "by_history_bucket": {
+    "<=8K": {
+      "examples": 20,
+      "active_fraction_p50": 0.9985494329896121,
+      "active_fraction_p95": 1.0,
+      "nll_delta_active_minus_full_p50": 0.0,
+      "nll_delta_active_minus_full_p95": 0.4494490504264832,
+      "token_accuracy_delta_p50": 0.0,
+      "token_accuracy_delta_p05": -0.02717391304347823
+    },
+    "8K-32K": {
+      "examples": 108,
+      "active_fraction_p50": 0.7645775128549827,
+      "active_fraction_p95": 1.0,
+      "nll_delta_active_minus_full_p50": 0.019754469394683838,
+      "nll_delta_active_minus_full_p95": 1.1445729225873944,
+      "token_accuracy_delta_p50": 0.0,
+      "token_accuracy_delta_p05": -0.2462962962962963
+    }
+  },
+  "verdict_by_bucket": {
+    "verdict": "advance",
+    "reason": "active fraction and accuracy both hold across buckets",
+    "readable_buckets": [
+      "<=8K",
+      "8K-32K"
+    ],
+    "active_fraction_p50_by_bucket": {
+      "<=8K": 0.9985494329896121,
+      "8K-32K": 0.7645775128549827
+    },
+    "token_accuracy_delta_p50_by_bucket": {
+      "<=8K": 0.0,
+      "8K-32K": 0.0
+    },
+    "worst_token_accuracy_delta_p50": 0.0,
+    "accuracy_tolerance": -0.02
+  },
+  "advance_rule": "every readable history bucket keeps token-accuracy p50 >= -0.02 and the longest bucket's active fraction does not exceed the shortest bucket's; buckets need >= 8 examples to be read",
+  "rows": [
+    {
+      "history_tokens_estimate": 4916,
+      "active_tokens_estimate": 4907,
+      "full": {
+        "nll": 2.6591603755950928,
+        "target_tokens": 11,
+        "token_accuracy": 0.18181818181818182,
+        "context_tokens": 4950
+      },
+      "active": {
+        "nll": 2.770747661590576,
+        "target_tokens": 11,
+        "token_accuracy": 0.18181818181818182,
+        "context_tokens": 4932
+      }
+    },
+    {
+      "history_tokens_estimate": 10135,
+      "active_tokens_estimate": 10132,
+      "full": {
+        "nll": 3.369368314743042,
+        "target_tokens": 14,
+        "token_accuracy": 0.42857142857142855,
+        "context_tokens": 10175
+      },
+      "active": {
+        "nll": 3.372687816619873,
+        "target_tokens": 14,
+        "token_accuracy": 0.42857142857142855,
+        "context_tokens": 10166
+      }
+    },
+    {
+      "history_tokens_estimate": 10826,
+      "active_tokens_estimate": 10816,
+      "full": {
+        "nll": 2.4630043506622314,
+        "target_tokens": 25,
+        "token_accuracy": 0.4,
+        "context_tokens": 10877
+      },
+      "active": {
+        "nll": 2.4468860626220703,
+        "target_tokens": 25,
+        "token_accuracy": 0.4,
+        "context_tokens": 10856
+      }
+    },
+    {
+      "history_tokens_estimate": 10914,
+      "active_tokens_estimate": 10879,
+      "full": {
+        "nll": 1.3961174488067627,
+        "target_tokens": 23,
+        "token_accuracy": 0.6521739130434783,
+        "context_tokens": 10971
+      },
+      "active": {
+        "nll": 1.3318891525268555,
+        "target_tokens": 23,
+        "token_accuracy": 0.6521739130434783,
+        "context_tokens": 10919
+      }
+    },
+    {
+      "history_tokens_estimate": 11054,
+      "active_tokens_estimate": 11019,
+      "full": {
+        "nll": 3.0957326889038086,
+        "target_tokens": 16,
+        "token_accuracy": 0.4375,
+        "context_tokens": 11117
+      },
+      "active": {
+        "nll": 2.9179296493530273,
+        "target_tokens": 16,
+        "token_accuracy": 0.5,
+        "context_tokens": 11065
+      }
+    },
+    {
+      "history_tokens_estimate": 11342,
+      "active_tokens_estimate": 11307,
+      "full": {
+        "nll": 1.6951407194137573,
+        "target_tokens": 26,
+        "token_accuracy": 0.6538461538461539,
+        "context_tokens": 11411
+      },
+      "active": {
+        "nll": 1.7614669799804688,
+        "target_tokens": 26,
+        "token_accuracy": 0.6538461538461539,
+        "context_tokens": 11359
+      }
+    },
+    {
+      "history_tokens_estimate": 16470,
+      "active_tokens_estimate": 16381,
+      "full": {
+        "nll": 1.9911766052246094,
+        "target_tokens": 11,
+        "token_accuracy": 0.6363636363636364,
+        "context_tokens": 16545
+      },
+      "active": {
+        "nll": 1.9960476160049438,
+        "target_tokens": 11,
+        "token_accuracy": 0.5454545454545454,
+        "context_tokens": 16442
+      }
+    },
+    {
+      "history_tokens_estimate": 17086,
+      "active_tokens_estimate": 16377,
+      "full": {
+        "nll": 4.372353553771973,
+        "target_tokens": 8,
+        "token_accuracy": 0.25,
+        "context_tokens": 17172
+      },
+      "active": {
+        "nll": 4.373231887817383,
+        "target_tokens": 8,
+        "token_accuracy": 0.25,
+        "context_tokens": 16437
+      }
+    },
+    {
+      "history_tokens_estimate": 18022,
+      "active_tokens_estimate": 12803,
+      "full": {
+        "nll": 1.4747618436813354,
+        "target_tokens": 235,
+        "token_accuracy": 0.6340425531914894,
+        "context_tokens": 18114
+      },
+      "active": {
+        "nll": 1.5108237266540527,
+        "target_tokens": 235,
+        "token_accuracy": 0.6510638297872341,
+        "context_tokens": 12879
+      }
+    },
+    {
+      "history_tokens_estimate": 19244,
+      "active_tokens_estimate": 14014,
+      "full": {
+        "nll": 3.4725213050842285,
+        "target_tokens": 13,
+        "token_accuracy": 0.23076923076923078,
+        "context_tokens": 19342
+      },
+      "active": {
+        "nll": 3.534205913543701,
+        "target_tokens": 13,
+        "token_accuracy": 0.23076923076923078,
+        "context_tokens": 14093
+      }
+    },
+    {
+      "history_tokens_estimate": 19435,
+      "active_tokens_estimate": 14216,
+      "full": {
+        "nll": 1.9502744674682617,
+        "target_tokens": 48,
+        "token_accuracy": 0.5833333333333334,
+        "context_tokens": 19539
+      },
+      "active": {
+        "nll": 1.9490938186645508,
+        "target_tokens": 48,
+        "token_accuracy": 0.6041666666666666,
+        "context_tokens": 14304
+      }
+    },
+    {
+      "history_tokens_estimate": 19638,
+      "active_tokens_estimate": 14356,
+      "full": {
+        "nll": 2.2923145294189453,
+        "target_tokens": 70,
+        "token_accuracy": 0.5857142857142857,
+        "context_tokens": 19754
+      },
+      "active": {
+        "nll": 2.329575300216675,
+        "target_tokens": 70,
+        "token_accuracy": 0.6142857142857143,
+        "context_tokens": 14441
+      }
+    },
+    {
+      "history_tokens_estimate": 19714,
+      "active_tokens_estimate": 14617,
+      "full": {
+        "nll": 1.3300838470458984,
+        "target_tokens": 283,
+        "token_accuracy": 0.7243816254416962,
+        "context_tokens": 19836
+      },
+      "active": {
+        "nll": 1.780017375946045,
+        "target_tokens": 283,
+        "token_accuracy": 0.607773851590106,
+        "context_tokens": 14641
+      }
+    },
+    {
+      "history_tokens_estimate": 20253,
+      "active_tokens_estimate": 15039,
+      "full": {
+        "nll": 1.869356393814087,
+        "target_tokens": 35,
+        "token_accuracy": 0.5142857142857142,
+        "context_tokens": 20381
+      },
+      "active": {
+        "nll": 1.838865876197815,
+        "target_tokens": 35,
+        "token_accuracy": 0.4857142857142857,
+        "context_tokens": 15152
+      }
+    },
+    {
+      "history_tokens_estimate": 20402,
+      "active_tokens_estimate": 15111,
+      "full": {
+        "nll": 1.838958740234375,
+        "target_tokens": 36,
+        "token_accuracy": 0.5833333333333334,
+        "context_tokens": 20537
+      },
+      "active": {
+        "nll": 1.7871907949447632,
+        "target_tokens": 36,
+        "token_accuracy": 0.5833333333333334,
+        "context_tokens": 15212
+      }
+    },
+    {
+      "history_tokens_estimate": 20562,
+      "active_tokens_estimate": 15274,
+      "full": {
+        "nll": 2.3521249294281006,
+        "target_tokens": 20,
+        "token_accuracy": 0.4,
+        "context_tokens": 20703
+      },
+      "active": {
+        "nll": 2.376410722732544,
+        "target_tokens": 20,
+        "token_accuracy": 0.4,
+        "context_tokens": 15381
+      }
+    },
+    {
+      "history_tokens_estimate": 20913,
+      "active_tokens_estimate": 15611,
+      "full": {
+        "nll": 2.455242872238159,
+        "target_tokens": 25,
+        "token_accuracy": 0.44,
+        "context_tokens": 21066
+      },
+      "active": {
+        "nll": 2.4191508293151855,
+        "target_tokens": 25,
+        "token_accuracy": 0.4,
+        "context_tokens": 15727
+      }
+    },
+    {
+      "history_tokens_estimate": 21483,
+      "active_tokens_estimate": 16208,
+      "full": {
+        "nll": 2.5772387981414795,
+        "target_tokens": 27,
+        "token_accuracy": 0.4074074074074074,
+        "context_tokens": 21642
+      },
+      "active": {
+        "nll": 2.5238895416259766,
+        "target_tokens": 27,
+        "token_accuracy": 0.4074074074074074,
+        "context_tokens": 16336
+      }
+    },
+    {
+      "history_tokens_estimate": 22039,
+      "active_tokens_estimate": 16344,
+      "full": {
+        "nll": 2.997575521469116,
+        "target_tokens": 28,
+        "token_accuracy": 0.39285714285714285,
+        "context_tokens": 22204
+      },
+      "active": {
+        "nll": 2.8690924644470215,
+        "target_tokens": 28,
+        "token_accuracy": 0.39285714285714285,
+        "context_tokens": 16480
+      }
+    },
+    {
+      "history_tokens_estimate": 22567,
+      "active_tokens_estimate": 16384,
+      "full": {
+        "nll": 3.608539581298828,
+        "target_tokens": 8,
+        "token_accuracy": 0.25,
+        "context_tokens": 22738
+      },
+      "active": {
+        "nll": 3.6962132453918457,
+        "target_tokens": 8,
+        "token_accuracy": 0.125,
+        "context_tokens": 16474
+      }
+    },
+    {
+      "history_tokens_estimate": 22715,
+      "active_tokens_estimate": 16372,
+      "full": {
+        "nll": 3.893089532852173,
+        "target_tokens": 15,
+        "token_accuracy": 0.3333333333333333,
+        "context_tokens": 22892
+      },
+      "active": {
+        "nll": 3.8370325565338135,
+        "target_tokens": 15,
+        "token_accuracy": 0.3333333333333333,
+        "context_tokens": 16468
+      }
+    },
+    {
+      "history_tokens_estimate": 22818,
+      "active_tokens_estimate": 16369,
+      "full": {
+        "nll": 4.476969242095947,
+        "target_tokens": 9,
+        "token_accuracy": 0.2222222222222222,
+        "context_tokens": 23001
+      },
+      "active": {
+        "nll": 4.445302963256836,
+        "target_tokens": 9,
+        "token_accuracy": 0.4444444444444444,
+        "context_tokens": 16488
+      }
+    },
+    {
+      "history_tokens_estimate": 23373,
+      "active_tokens_estimate": 16382,
+      "full": {
+        "nll": 2.8889033794403076,
+        "target_tokens": 23,
+        "token_accuracy": 0.43478260869565216,
+        "context_tokens": 23562
+      },
+      "active": {
+        "nll": 3.7934393882751465,
+        "target_tokens": 23,
+        "token_accuracy": 0.30434782608695654,
+        "context_tokens": 16469
+      }
+    },
+    {
+      "history_tokens_estimate": 24720,
+      "active_tokens_estimate": 16383,
+      "full": {
+        "nll": 2.8833892345428467,
+        "target_tokens": 50,
+        "token_accuracy": 0.42,
+        "context_tokens": 24915
+      },
+      "active": {
+        "nll": 3.1248526573181152,
+        "target_tokens": 50,
+        "token_accuracy": 0.4,
+        "context_tokens": 16447
+      }
+    },
+    {
+      "history_tokens_estimate": 24858,
+      "active_tokens_estimate": 16382,
+      "full": {
+        "nll": 3.706132173538208,
+        "target_tokens": 17,
+        "token_accuracy": 0.5294117647058824,
+        "context_tokens": 25065
+      },
+      "active": {
+        "nll": 3.685621738433838,
+        "target_tokens": 17,
+        "token_accuracy": 0.35294117647058826,
+        "context_tokens": 16511
+      }
+    },
+    {
+      "history_tokens_estimate": 25399,
+      "active_tokens_estimate": 16378,
+      "full": {
+        "nll": 2.7417895793914795,
+        "target_tokens": 25,
+        "token_accuracy": 0.44,
+        "context_tokens": 25612
+      },
+      "active": {
+        "nll": 3.1214611530303955,
+        "target_tokens": 25,
+        "token_accuracy": 0.36,
+        "context_tokens": 16456
+      }
+    },
+    {
+      "history_tokens_estimate": 25430,
+      "active_tokens_estimate": 15444,
+      "full": {
+        "nll": 2.0372581481933594,
+        "target_tokens": 104,
+        "token_accuracy": 0.6442307692307693,
+        "context_tokens": 25649
+      },
+      "active": {
+        "nll": 2.4986345767974854,
+        "target_tokens": 104,
+        "token_accuracy": 0.5192307692307693,
+        "context_tokens": 15480
+      }
+    },
+    {
+      "history_tokens_estimate": 26126,
+      "active_tokens_estimate": 16384,
+      "full": {
+        "nll": 3.2577130794525146,
+        "target_tokens": 23,
+        "token_accuracy": 0.43478260869565216,
+        "context_tokens": 26351
+      },
+      "active": {
+        "nll": 3.3827497959136963,
+        "target_tokens": 23,
+        "token_accuracy": 0.391304347826087,
+        "context_tokens": 16447
+      }
+    },
+    {
+      "history_tokens_estimate": 26273,
+      "active_tokens_estimate": 16384,
+      "full": {
+        "nll": 2.987438678741455,
+        "target_tokens": 19,
+        "token_accuracy": 0.42105263157894735,
+        "context_tokens": 26504
+      },
+      "active": {
+        "nll": 3.166870594024658,
+        "target_tokens": 19,
+        "token_accuracy": 0.3684210526315789,
+        "context_tokens": 16483
+      }
+    },
+    {
+      "history_tokens_estimate": 26469,
+      "active_tokens_estimate": 16384,
+      "full": {
+        "nll": 2.9816505908966064,
+        "target_tokens": 16,
+        "token_accuracy": 0.375,
+        "context_tokens": 26706
+      },
+      "active": {
+        "nll": 3.662278175354004,
+        "target_tokens": 16,
+        "token_accuracy": 0.25,
+        "context_tokens": 16466
+      }
+    },
+    {
+      "history_tokens_estimate": 26692,
+      "active_tokens_estimate": 16384,
+      "full": {
+        "nll": 1.6668790578842163,
+        "target_tokens": 329,
+        "token_accuracy": 0.6261398176291794,
+        "context_tokens": 26935
+      },
+      "active": {
+        "nll": 1.7963496446609497,
+        "target_tokens": 329,
+        "token_accuracy": 0.6231003039513677,
+        "context_tokens": 16508
+      }
+    },
+    {
+      "history_tokens_estimate": 4727,
+      "active_tokens_estimate": 4727,
+      "full": {
+        "nll": 1.4717788696289062,
+        "target_tokens": 30,
+        "token_accuracy": 0.7333333333333333,
+        "context_tokens": 4757
+      },
+      "active": {
+        "nll": 1.4717788696289062,
+        "target_tokens": 30,
+        "token_accuracy": 0.7333333333333333,
+        "context_tokens": 4757
+      }
+    },
+    {
+      "history_tokens_estimate": 5433,
+      "active_tokens_estimate": 5433,
+      "full": {
+        "nll": 0.8619788885116577,
+        "target_tokens": 179,
+        "token_accuracy": 0.8268156424581006,
+        "context_tokens": 5471
+      },
+      "active": {
+        "nll": 0.8619788885116577,
+        "target_tokens": 179,
+        "token_accuracy": 0.8268156424581006,
+        "context_tokens": 5471
+      }
+    },
+    {
+      "history_tokens_estimate": 5629,
+      "active_tokens_estimate": 4909,
+      "full": {
+        "nll": 1.4171507358551025,
+        "target_tokens": 23,
+        "token_accuracy": 0.6521739130434783,
+        "context_tokens": 5675
+      },
+      "active": {
+        "nll": 1.8652734756469727,
+        "target_tokens": 23,
+        "token_accuracy": 0.6086956521739131,
+        "context_tokens": 4937
+      }
+    },
+    {
+      "history_tokens_estimate": 5872,
+      "active_tokens_estimate": 5857,
+      "full": {
+        "nll": 1.0796360969543457,
+        "target_tokens": 252,
+        "token_accuracy": 0.7182539682539683,
+        "context_tokens": 5925
+      },
+      "active": {
+        "nll": 1.0907633304595947,
+        "target_tokens": 252,
+        "token_accuracy": 0.7103174603174603,
+        "context_tokens": 5907
+      }
+    },
+    {
+      "history_tokens_estimate": 6306,
+      "active_tokens_estimate": 6306,
+      "full": {
+        "nll": 0.980448305606842,
+        "target_tokens": 28,
+        "token_accuracy": 0.6785714285714286,
+        "context_tokens": 6366
+      },
+      "active": {
+        "nll": 0.980448305606842,
+        "target_tokens": 28,
+        "token_accuracy": 0.6785714285714286,
+        "context_tokens": 6366
+      }
+    },
+    {
+      "history_tokens_estimate": 6554,
+      "active_tokens_estimate": 6539,
+      "full": {
+        "nll": 1.4771208763122559,
+        "target_tokens": 38,
+        "token_accuracy": 0.6052631578947368,
+        "context_tokens": 6621
+      },
+      "active": {
+        "nll": 1.4985843896865845,
+        "target_tokens": 38,
+        "token_accuracy": 0.5789473684210527,
+        "context_tokens": 6603
+      }
+    },
+    {
+      "history_tokens_estimate": 7480,
+      "active_tokens_estimate": 7480,
+      "full": {
+        "nll": 2.063262462615967,
+        "target_tokens": 61,
+        "token_accuracy": 0.6065573770491803,
+        "context_tokens": 7554
+      },
+      "active": {
+        "nll": 2.063262462615967,
+        "target_tokens": 61,
+        "token_accuracy": 0.6065573770491803,
+        "context_tokens": 7554
+      }
+    },
+    {
+      "history_tokens_estimate": 7935,
+      "active_tokens_estimate": 7935,
+      "full": {
+        "nll": 1.1923980712890625,
+        "target_tokens": 38,
+        "token_accuracy": 0.8421052631578947,
+        "context_tokens": 8017
+      },
+      "active": {
+        "nll": 1.1923980712890625,
+        "target_tokens": 38,
+        "token_accuracy": 0.8421052631578947,
+        "context_tokens": 8017
+      }
+    },
+    {
+      "history_tokens_estimate": 8644,
+      "active_tokens_estimate": 8629,
+      "full": {
+        "nll": 1.2691282033920288,
+        "target_tokens": 39,
+        "token_accuracy": 0.7948717948717948,
+        "context_tokens": 8734
+      },
+      "active": {
+        "nll": 1.274107575416565,
+        "target_tokens": 39,
+        "token_accuracy": 0.7948717948717948,
+        "context_tokens": 8716
+      }
+    },
+    {
+      "history_tokens_estimate": 8867,
+      "active_tokens_estimate": 8867,
+      "full": {
+        "nll": 0.7637041807174683,
+        "target_tokens": 256,
+        "token_accuracy": 0.82421875,
+        "context_tokens": 8965
+      },
+      "active": {
+        "nll": 0.7637041807174683,
+        "target_tokens": 256,
+        "token_accuracy": 0.82421875,
+        "context_tokens": 8965
+      }
+    },
+    {
+      "history_tokens_estimate": 9387,
+      "active_tokens_estimate": 9387,
+      "full": {
+        "nll": 0.5732756853103638,
+        "target_tokens": 28,
+        "token_accuracy": 0.8928571428571429,
+        "context_tokens": 9492
+      },
+      "active": {
+        "nll": 0.5732756853103638,
+        "target_tokens": 28,
+        "token_accuracy": 0.8928571428571429,
+        "context_tokens": 9492
+      }
+    },
+    {
+      "history_tokens_estimate": 9635,
+      "active_tokens_estimate": 9620,
+      "full": {
+        "nll": 0.6493048667907715,
+        "target_tokens": 37,
+        "token_accuracy": 0.8108108108108109,
+        "context_tokens": 9747
+      },
+      "active": {
+        "nll": 0.6642268300056458,
+        "target_tokens": 37,
+        "token_accuracy": 0.8108108108108109,
+        "context_tokens": 9729
+      }
+    },
+    {
+      "history_tokens_estimate": 10557,
+      "active_tokens_estimate": 10557,
+      "full": {
+        "nll": 0.9879052042961121,
+        "target_tokens": 79,
+        "token_accuracy": 0.7468354430379747,
+        "context_tokens": 10676
+      },
+      "active": {
+        "nll": 0.9879052042961121,
+        "target_tokens": 79,
+        "token_accuracy": 0.7468354430379747,
+        "context_tokens": 10676
+      }
+    },
+    {
+      "history_tokens_estimate": 10863,
+      "active_tokens_estimate": 10863,
+      "full": {
+        "nll": 1.275305986404419,
+        "target_tokens": 68,
+        "token_accuracy": 0.7647058823529411,
+        "context_tokens": 10989
+      },
+      "active": {
+        "nll": 1.275305986404419,
+        "target_tokens": 68,
+        "token_accuracy": 0.7647058823529411,
+        "context_tokens": 10989
+      }
+    },
+    {
+      "history_tokens_estimate": 11115,
+      "active_tokens_estimate": 11115,
+      "full": {
+        "nll": 0.26792430877685547,
+        "target_tokens": 512,
+        "token_accuracy": 0.9375,
+        "context_tokens": 11249
+      },
+      "active": {
+        "nll": 0.26792430877685547,
+        "target_tokens": 512,
+        "token_accuracy": 0.9375,
+        "context_tokens": 11249
+      }
+    },
+    {
+      "history_tokens_estimate": 12484,
+      "active_tokens_estimate": 12484,
+      "full": {
+        "nll": 0.7819981575012207,
+        "target_tokens": 27,
+        "token_accuracy": 0.8148148148148148,
+        "context_tokens": 12625
+      },
+      "active": {
+        "nll": 0.7819981575012207,
+        "target_tokens": 27,
+        "token_accuracy": 0.8148148148148148,
+        "context_tokens": 12625
+      }
+    },
+    {
+      "history_tokens_estimate": 14729,
+      "active_tokens_estimate": 14729,
+      "full": {
+        "nll": 1.158888339996338,
+        "target_tokens": 99,
+        "token_accuracy": 0.7272727272727273,
+        "context_tokens": 14877
+      },
+      "active": {
+        "nll": 1.158888339996338,
+        "target_tokens": 99,
+        "token_accuracy": 0.7272727272727273,
+        "context_tokens": 14877
+      }
+    },
+    {
+      "history_tokens_estimate": 15065,
+      "active_tokens_estimate": 15050,
+      "full": {
+        "nll": 0.2526339888572693,
+        "target_tokens": 378,
+        "token_accuracy": 0.9365079365079365,
+        "context_tokens": 15220
+      },
+      "active": {
+        "nll": 0.25040555000305176,
+        "target_tokens": 378,
+        "token_accuracy": 0.9338624338624338,
+        "context_tokens": 15202
+      }
+    },
+    {
+      "history_tokens_estimate": 15774,
+      "active_tokens_estimate": 15774,
+      "full": {
+        "nll": 0.6754109859466553,
+        "target_tokens": 27,
+        "token_accuracy": 0.9259259259259259,
+        "context_tokens": 15936
+      },
+      "active": {
+        "nll": 0.6754109859466553,
+        "target_tokens": 27,
+        "token_accuracy": 0.9259259259259259,
+        "context_tokens": 15936
+      }
+    },
+    {
+      "history_tokens_estimate": 16842,
+      "active_tokens_estimate": 16383,
+      "full": {
+        "nll": 0.372259259223938,
+        "target_tokens": 407,
+        "token_accuracy": 0.9066339066339066,
+        "context_tokens": 17011
+      },
+      "active": {
+        "nll": 0.3805721700191498,
+        "target_tokens": 407,
+        "token_accuracy": 0.8992628992628993,
+        "context_tokens": 16528
+      }
+    },
+    {
+      "history_tokens_estimate": 17618,
+      "active_tokens_estimate": 16383,
+      "full": {
+        "nll": 0.6238196492195129,
+        "target_tokens": 27,
+        "token_accuracy": 0.9259259259259259,
+        "context_tokens": 17794
+      },
+      "active": {
+        "nll": 1.3449305295944214,
+        "target_tokens": 27,
+        "token_accuracy": 0.7407407407407407,
+        "context_tokens": 16494
+      }
+    },
+    {
+      "history_tokens_estimate": 18149,
+      "active_tokens_estimate": 16381,
+      "full": {
+        "nll": 0.42088717222213745,
+        "target_tokens": 489,
+        "token_accuracy": 0.9038854805725971,
+        "context_tokens": 18332
+      },
+      "active": {
+        "nll": 0.41886091232299805,
+        "target_tokens": 489,
+        "token_accuracy": 0.9059304703476483,
+        "context_tokens": 16474
+      }
+    },
+    {
+      "history_tokens_estimate": 19088,
+      "active_tokens_estimate": 16373,
+      "full": {
+        "nll": 0.7096481323242188,
+        "target_tokens": 27,
+        "token_accuracy": 0.9259259259259259,
+        "context_tokens": 19278
+      },
+      "active": {
+        "nll": 1.8244737386703491,
+        "target_tokens": 27,
+        "token_accuracy": 0.6666666666666666,
+        "context_tokens": 16463
+      }
+    },
+    {
+      "history_tokens_estimate": 19758,
+      "active_tokens_estimate": 16378,
+      "full": {
+        "nll": 1.534467339515686,
+        "target_tokens": 30,
+        "token_accuracy": 0.6,
+        "context_tokens": 19955
+      },
+      "active": {
+        "nll": 2.319021463394165,
+        "target_tokens": 30,
+        "token_accuracy": 0.4666666666666667,
+        "context_tokens": 16463
+      }
+    },
+    {
+      "history_tokens_estimate": 19808,
+      "active_tokens_estimate": 16185,
+      "full": {
+        "nll": 0.20735584199428558,
+        "target_tokens": 383,
+        "token_accuracy": 0.9451697127937336,
+        "context_tokens": 20013
+      },
+      "active": {
+        "nll": 0.6352519989013672,
+        "target_tokens": 383,
+        "token_accuracy": 0.8746736292428199,
+        "context_tokens": 16283
+      }
+    },
+    {
+      "history_tokens_estimate": 20560,
+      "active_tokens_estimate": 16382,
+      "full": {
+        "nll": 0.7151625752449036,
+        "target_tokens": 27,
+        "token_accuracy": 0.9259259259259259,
+        "context_tokens": 20772
+      },
+      "active": {
+        "nll": 1.8757532835006714,
+        "target_tokens": 27,
+        "token_accuracy": 0.7037037037037037,
+        "context_tokens": 16481
+      }
+    },
+    {
+      "history_tokens_estimate": 21153,
+      "active_tokens_estimate": 16377,
+      "full": {
+        "nll": 0.3030368983745575,
+        "target_tokens": 512,
+        "token_accuracy": 0.9296875,
+        "context_tokens": 21372
+      },
+      "active": {
+        "nll": 0.33908766508102417,
+        "target_tokens": 512,
+        "token_accuracy": 0.921875,
+        "context_tokens": 16456
+      }
+    },
+    {
+      "history_tokens_estimate": 22318,
+      "active_tokens_estimate": 16384,
+      "full": {
+        "nll": 0.7456038594245911,
+        "target_tokens": 27,
+        "token_accuracy": 0.9259259259259259,
+        "context_tokens": 22544
+      },
+      "active": {
+        "nll": 1.6906689405441284,
+        "target_tokens": 27,
+        "token_accuracy": 0.6296296296296297,
+        "context_tokens": 16474
+      }
+    },
+    {
+      "history_tokens_estimate": 23562,
+      "active_tokens_estimate": 16371,
+      "full": {
+        "nll": 0.23975752294063568,
+        "target_tokens": 512,
+        "token_accuracy": 0.939453125,
+        "context_tokens": 23795
+      },
+      "active": {
+        "nll": 0.23757696151733398,
+        "target_tokens": 512,
+        "token_accuracy": 0.939453125,
+        "context_tokens": 16434
+      }
+    },
+    {
+      "history_tokens_estimate": 24919,
+      "active_tokens_estimate": 16376,
+      "full": {
+        "nll": 0.733112096786499,
+        "target_tokens": 27,
+        "token_accuracy": 0.9259259259259259,
+        "context_tokens": 25159
+      },
+      "active": {
+        "nll": 1.7606186866760254,
+        "target_tokens": 27,
+        "token_accuracy": 0.7037037037037037,
+        "context_tokens": 16467
+      }
+    },
+    {
+      "history_tokens_estimate": 25690,
+      "active_tokens_estimate": 16384,
+      "full": {
+        "nll": 0.15641188621520996,
+        "target_tokens": 383,
+        "token_accuracy": 0.9634464751958225,
+        "context_tokens": 25937
+      },
+      "active": {
+        "nll": 0.47912833094596863,
+        "target_tokens": 383,
+        "token_accuracy": 0.8825065274151436,
+        "context_tokens": 16447
+      }
+    },
+    {
+      "history_tokens_estimate": 26448,
+      "active_tokens_estimate": 16384,
+      "full": {
+        "nll": 0.7064536809921265,
+        "target_tokens": 27,
+        "token_accuracy": 0.9259259259259259,
+        "context_tokens": 26702
+      },
+      "active": {
+        "nll": 1.7242326736450195,
+        "target_tokens": 27,
+        "token_accuracy": 0.7037037037037037,
+        "context_tokens": 16471
+      }
+    },
+    {
+      "history_tokens_estimate": 27242,
+      "active_tokens_estimate": 16374,
+      "full": {
+        "nll": 0.20059044659137726,
+        "target_tokens": 402,
+        "token_accuracy": 0.9626865671641791,
+        "context_tokens": 27503
+      },
+      "active": {
+        "nll": 0.6458553671836853,
+        "target_tokens": 402,
+        "token_accuracy": 0.8507462686567164,
+        "context_tokens": 16429
+      }
+    },
+    {
+      "history_tokens_estimate": 28026,
+      "active_tokens_estimate": 16373,
+      "full": {
+        "nll": 0.7306124567985535,
+        "target_tokens": 27,
+        "token_accuracy": 0.9259259259259259,
+        "context_tokens": 28294
+      },
+      "active": {
+        "nll": 1.8357515335083008,
+        "target_tokens": 27,
+        "token_accuracy": 0.6666666666666666,
+        "context_tokens": 16465
+      }
+    },
+    {
+      "history_tokens_estimate": 28986,
+      "active_tokens_estimate": 16373,
+      "full": {
+        "nll": 0.07311512529850006,
+        "target_tokens": 512,
+        "token_accuracy": 0.9765625,
+        "context_tokens": 29261
+      },
+      "active": {
+        "nll": 0.8028284311294556,
+        "target_tokens": 512,
+        "token_accuracy": 0.83984375,
+        "context_tokens": 16435
+      }
+    },
+    {
+      "history_tokens_estimate": 30539,
+      "active_tokens_estimate": 16372,
+      "full": {
+        "nll": 0.6933463215827942,
+        "target_tokens": 27,
+        "token_accuracy": 0.9259259259259259,
+        "context_tokens": 30821
+      },
+      "active": {
+        "nll": 1.726510763168335,
+        "target_tokens": 27,
+        "token_accuracy": 0.7037037037037037,
+        "context_tokens": 16452
+      }
+    },
+    {
+      "history_tokens_estimate": 30840,
+      "active_tokens_estimate": 16384,
+      "full": {
+        "nll": 1.1315531730651855,
+        "target_tokens": 34,
+        "token_accuracy": 0.6176470588235294,
+        "context_tokens": 31129
+      },
+      "active": {
+        "nll": 2.2985668182373047,
+        "target_tokens": 34,
+        "token_accuracy": 0.4411764705882353,
+        "context_tokens": 16446
+      }
+    },
+    {
+      "history_tokens_estimate": 30894,
+      "active_tokens_estimate": 16335,
+      "full": {
+        "nll": 1.763118863105774,
+        "target_tokens": 31,
+        "token_accuracy": 0.6451612903225806,
+        "context_tokens": 31191
+      },
+      "active": {
+        "nll": 2.1271519660949707,
+        "target_tokens": 31,
+        "token_accuracy": 0.5161290322580645,
+        "context_tokens": 16412
+      }
+    },
+    {
+      "history_tokens_estimate": 31164,
+      "active_tokens_estimate": 16365,
+      "full": {
+        "nll": 1.270747423171997,
+        "target_tokens": 221,
+        "token_accuracy": 0.6787330316742082,
+        "context_tokens": 31468
+      },
+      "active": {
+        "nll": 1.4943927526474,
+        "target_tokens": 221,
+        "token_accuracy": 0.6018099547511312,
+        "context_tokens": 16426
+      }
+    },
+    {
+      "history_tokens_estimate": 32694,
+      "active_tokens_estimate": 16381,
+      "full": {
+        "nll": 1.9743893146514893,
+        "target_tokens": 22,
+        "token_accuracy": 0.5909090909090909,
+        "context_tokens": 33005
+      },
+      "active": {
+        "nll": 2.40993070602417,
+        "target_tokens": 22,
+        "token_accuracy": 0.6363636363636364,
+        "context_tokens": 16453
+      }
+    },
+    {
+      "history_tokens_estimate": 32727,
+      "active_tokens_estimate": 16380,
+      "full": {
+        "nll": 3.585139513015747,
+        "target_tokens": 6,
+        "token_accuracy": 0.3333333333333333,
+        "context_tokens": 33045
+      },
+      "active": {
+        "nll": 4.190971851348877,
+        "target_tokens": 6,
+        "token_accuracy": 0.16666666666666666,
+        "context_tokens": 16478
+      }
+    },
+    {
+      "history_tokens_estimate": 6828,
+      "active_tokens_estimate": 6826,
+      "full": {
+        "nll": 2.5473861694335938,
+        "target_tokens": 8,
+        "token_accuracy": 0.375,
+        "context_tokens": 6856
+      },
+      "active": {
+        "nll": 2.5348095893859863,
+        "target_tokens": 8,
+        "token_accuracy": 0.375,
+        "context_tokens": 6850
+      }
+    },
+    {
+      "history_tokens_estimate": 7095,
+      "active_tokens_estimate": 7079,
+      "full": {
+        "nll": 3.7515010833740234,
+        "target_tokens": 7,
+        "token_accuracy": 0.14285714285714285,
+        "context_tokens": 7129
+      },
+      "active": {
+        "nll": 4.226150035858154,
+        "target_tokens": 7,
+        "token_accuracy": 0.42857142857142855,
+        "context_tokens": 7103
+      }
+    },
+    {
+      "history_tokens_estimate": 7331,
+      "active_tokens_estimate": 7315,
+      "full": {
+        "nll": 3.3489370346069336,
+        "target_tokens": 13,
+        "token_accuracy": 0.38461538461538464,
+        "context_tokens": 7371
+      },
+      "active": {
+        "nll": 2.9102439880371094,
+        "target_tokens": 13,
+        "token_accuracy": 0.38461538461538464,
+        "context_tokens": 7345
+      }
+    },
+    {
+      "history_tokens_estimate": 7474,
+      "active_tokens_estimate": 7466,
+      "full": {
+        "nll": 1.1675918102264404,
+        "target_tokens": 64,
+        "token_accuracy": 0.71875,
+        "context_tokens": 7520
+      },
+      "active": {
+        "nll": 1.177114725112915,
+        "target_tokens": 64,
+        "token_accuracy": 0.71875,
+        "context_tokens": 7505
+      }
+    },
+    {
+      "history_tokens_estimate": 8129,
+      "active_tokens_estimate": 8121,
+      "full": {
+        "nll": 2.1740479469299316,
+        "target_tokens": 13,
+        "token_accuracy": 0.6153846153846154,
+        "context_tokens": 8182
+      },
+      "active": {
+        "nll": 2.180701732635498,
+        "target_tokens": 13,
+        "token_accuracy": 0.6153846153846154,
+        "context_tokens": 8167
+      }
+    },
+    {
+      "history_tokens_estimate": 12310,
+      "active_tokens_estimate": 12308,
+      "full": {
+        "nll": 3.4115917682647705,
+        "target_tokens": 14,
+        "token_accuracy": 0.35714285714285715,
+        "context_tokens": 12369
+      },
+      "active": {
+        "nll": 3.372659206390381,
+        "target_tokens": 14,
+        "token_accuracy": 0.35714285714285715,
+        "context_tokens": 12363
+      }
+    },
+    {
+      "history_tokens_estimate": 12731,
+      "active_tokens_estimate": 12721,
+      "full": {
+        "nll": 3.6538314819335938,
+        "target_tokens": 11,
+        "token_accuracy": 0.2727272727272727,
+        "context_tokens": 12797
+      },
+      "active": {
+        "nll": 3.7879714965820312,
+        "target_tokens": 11,
+        "token_accuracy": 0.2727272727272727,
+        "context_tokens": 12780
+      }
+    },
+    {
+      "history_tokens_estimate": 14003,
+      "active_tokens_estimate": 13987,
+      "full": {
+        "nll": 2.2036774158477783,
+        "target_tokens": 10,
+        "token_accuracy": 0.5,
+        "context_tokens": 14075
+      },
+      "active": {
+        "nll": 2.228731155395508,
+        "target_tokens": 10,
+        "token_accuracy": 0.5,
+        "context_tokens": 14049
+      }
+    },
+    {
+      "history_tokens_estimate": 17353,
+      "active_tokens_estimate": 16376,
+      "full": {
+        "nll": 1.888249158859253,
+        "target_tokens": 37,
+        "token_accuracy": 0.5405405405405406,
+        "context_tokens": 17431
+      },
+      "active": {
+        "nll": 1.9693880081176758,
+        "target_tokens": 37,
+        "token_accuracy": 0.4864864864864865,
+        "context_tokens": 16425
+      }
+    },
+    {
+      "history_tokens_estimate": 17952,
+      "active_tokens_estimate": 16384,
+      "full": {
+        "nll": 1.1127108335494995,
+        "target_tokens": 22,
+        "token_accuracy": 0.7272727272727273,
+        "context_tokens": 18046
+      },
+      "active": {
+        "nll": 1.143566370010376,
+        "target_tokens": 22,
+        "token_accuracy": 0.7272727272727273,
+        "context_tokens": 16439
+      }
+    },
+    {
+      "history_tokens_estimate": 18471,
+      "active_tokens_estimate": 16110,
+      "full": {
+        "nll": 3.6318271160125732,
+        "target_tokens": 9,
+        "token_accuracy": 0.3333333333333333,
+        "context_tokens": 18577
+      },
+      "active": {
+        "nll": 3.4801976680755615,
+        "target_tokens": 9,
+        "token_accuracy": 0.4444444444444444,
+        "context_tokens": 16193
+      }
+    },
+    {
+      "history_tokens_estimate": 18486,
+      "active_tokens_estimate": 9584,
+      "full": {
+        "nll": 0.7161765098571777,
+        "target_tokens": 9,
+        "token_accuracy": 0.8888888888888888,
+        "context_tokens": 18598
+      },
+      "active": {
+        "nll": 2.505446195602417,
+        "target_tokens": 9,
+        "token_accuracy": 0.4444444444444444,
+        "context_tokens": 9605
+      }
+    },
+    {
+      "history_tokens_estimate": 18505,
+      "active_tokens_estimate": 15992,
+      "full": {
+        "nll": 1.4112268686294556,
+        "target_tokens": 360,
+        "token_accuracy": 0.6527777777777778,
+        "context_tokens": 18623
+      },
+      "active": {
+        "nll": 1.5018025636672974,
+        "target_tokens": 360,
+        "token_accuracy": 0.6277777777777778,
+        "context_tokens": 16052
+      }
+    },
+    {
+      "history_tokens_estimate": 19092,
+      "active_tokens_estimate": 16341,
+      "full": {
+        "nll": 1.721881628036499,
+        "target_tokens": 36,
+        "token_accuracy": 0.5,
+        "context_tokens": 19216
+      },
+      "active": {
+        "nll": 1.7167059183120728,
+        "target_tokens": 36,
+        "token_accuracy": 0.5,
+        "context_tokens": 16439
+      }
+    },
+    {
+      "history_tokens_estimate": 19447,
+      "active_tokens_estimate": 16384,
+      "full": {
+        "nll": 2.146620988845825,
+        "target_tokens": 19,
+        "token_accuracy": 0.5789473684210527,
+        "context_tokens": 19577
+      },
+      "active": {
+        "nll": 2.10288405418396,
+        "target_tokens": 19,
+        "token_accuracy": 0.5263157894736842,
+        "context_tokens": 16457
+      }
+    },
+    {
+      "history_tokens_estimate": 19536,
+      "active_tokens_estimate": 16151,
+      "full": {
+        "nll": 2.3594295978546143,
+        "target_tokens": 21,
+        "token_accuracy": 0.47619047619047616,
+        "context_tokens": 19672
+      },
+      "active": {
+        "nll": 2.2955996990203857,
+        "target_tokens": 21,
+        "token_accuracy": 0.38095238095238093,
+        "context_tokens": 16259
+      }
+    },
+    {
+      "history_tokens_estimate": 19942,
+      "active_tokens_estimate": 16384,
+      "full": {
+        "nll": 2.75478196144104,
+        "target_tokens": 41,
+        "token_accuracy": 0.34146341463414637,
+        "context_tokens": 20084
+      },
+      "active": {
+        "nll": 2.719022750854492,
+        "target_tokens": 41,
+        "token_accuracy": 0.3170731707317073,
+        "context_tokens": 16438
+      }
+    },
+    {
+      "history_tokens_estimate": 20575,
+      "active_tokens_estimate": 16383,
+      "full": {
+        "nll": 2.3507065773010254,
+        "target_tokens": 23,
+        "token_accuracy": 0.391304347826087,
+        "context_tokens": 20729
+      },
+      "active": {
+        "nll": 2.341146230697632,
+        "target_tokens": 23,
+        "token_accuracy": 0.43478260869565216,
+        "context_tokens": 16446
+      }
+    },
+    {
+      "history_tokens_estimate": 21492,
+      "active_tokens_estimate": 16378,
+      "full": {
+        "nll": 3.027559518814087,
+        "target_tokens": 24,
+        "token_accuracy": 0.5,
+        "context_tokens": 21652
+      },
+      "active": {
+        "nll": 2.730255126953125,
+        "target_tokens": 24,
+        "token_accuracy": 0.5,
+        "context_tokens": 16435
+      }
+    },
+    {
+      "history_tokens_estimate": 22883,
+      "active_tokens_estimate": 16384,
+      "full": {
+        "nll": 3.2853987216949463,
+        "target_tokens": 11,
+        "token_accuracy": 0.2727272727272727,
+        "context_tokens": 23049
+      },
+      "active": {
+        "nll": 3.610809564590454,
+        "target_tokens": 11,
+        "token_accuracy": 0.2727272727272727,
+        "context_tokens": 16456
+      }
+    },
+    {
+      "history_tokens_estimate": 23094,
+      "active_tokens_estimate": 16380,
+      "full": {
+        "nll": 2.3617563247680664,
+        "target_tokens": 29,
+        "token_accuracy": 0.41379310344827586,
+        "context_tokens": 23266
+      },
+      "active": {
+        "nll": 2.538343667984009,
+        "target_tokens": 29,
+        "token_accuracy": 0.3448275862068966,
+        "context_tokens": 16452
+      }
+    },
+    {
+      "history_tokens_estimate": 23209,
+      "active_tokens_estimate": 16381,
+      "full": {
+        "nll": 4.317421913146973,
+        "target_tokens": 14,
+        "token_accuracy": 0.35714285714285715,
+        "context_tokens": 23393
+      },
+      "active": {
+        "nll": 4.102424144744873,
+        "target_tokens": 14,
+        "token_accuracy": 0.35714285714285715,
+        "context_tokens": 16480
+      }
+    },
+    {
+      "history_tokens_estimate": 23741,
+      "active_tokens_estimate": 16383,
+      "full": {
+        "nll": 1.424090027809143,
+        "target_tokens": 24,
+        "token_accuracy": 0.7916666666666666,
+        "context_tokens": 23931
+      },
+      "active": {
+        "nll": 2.7583138942718506,
+        "target_tokens": 24,
+        "token_accuracy": 0.4583333333333333,
+        "context_tokens": 16440
+      }
+    },
+    {
+      "history_tokens_estimate": 23918,
+      "active_tokens_estimate": 16349,
+      "full": {
+        "nll": 3.7478504180908203,
+        "target_tokens": 10,
+        "token_accuracy": 0.3,
+        "context_tokens": 24119
+      },
+      "active": {
+        "nll": 3.7985291481018066,
+        "target_tokens": 10,
+        "token_accuracy": 0.4,
+        "context_tokens": 16424
+      }
+    },
+    {
+      "history_tokens_estimate": 23992,
+      "active_tokens_estimate": 16384,
+      "full": {
+        "nll": 2.330639123916626,
+        "target_tokens": 27,
+        "token_accuracy": 0.48148148148148145,
+        "context_tokens": 24199
+      },
+      "active": {
+        "nll": 2.8861234188079834,
+        "target_tokens": 27,
+        "token_accuracy": 0.3333333333333333,
+        "context_tokens": 16483
+      }
+    },
+    {
+      "history_tokens_estimate": 24544,
+      "active_tokens_estimate": 16383,
+      "full": {
+        "nll": 2.930816411972046,
+        "target_tokens": 13,
+        "token_accuracy": 0.38461538461538464,
+        "context_tokens": 24757
+      },
+      "active": {
+        "nll": 3.374660015106201,
+        "target_tokens": 13,
+        "token_accuracy": 0.3076923076923077,
+        "context_tokens": 16449
+      }
+    },
+    {
+      "history_tokens_estimate": 25078,
+      "active_tokens_estimate": 16379,
+      "full": {
+        "nll": 3.5534677505493164,
+        "target_tokens": 9,
+        "token_accuracy": 0.3333333333333333,
+        "context_tokens": 25297
+      },
+      "active": {
+        "nll": 3.58366060256958,
+        "target_tokens": 9,
+        "token_accuracy": 0.3333333333333333,
+        "context_tokens": 16451
+      }
+    },
+    {
+      "history_tokens_estimate": 25142,
+      "active_tokens_estimate": 16382,
+      "full": {
+        "nll": 4.487959861755371,
+        "target_tokens": 8,
+        "token_accuracy": 0.25,
+        "context_tokens": 25366
+      },
+      "active": {
+        "nll": 4.719099521636963,
+        "target_tokens": 8,
+        "token_accuracy": 0.25,
+        "context_tokens": 16471
+      }
+    },
+    {
+      "history_tokens_estimate": 25432,
+      "active_tokens_estimate": 16380,
+      "full": {
+        "nll": 2.4346179962158203,
+        "target_tokens": 16,
+        "token_accuracy": 0.5625,
+        "context_tokens": 25662
+      },
+      "active": {
+        "nll": 2.7203071117401123,
+        "target_tokens": 16,
+        "token_accuracy": 0.4375,
+        "context_tokens": 16465
+      }
+    },
+    {
+      "history_tokens_estimate": 25786,
+      "active_tokens_estimate": 16384,
+      "full": {
+        "nll": 1.1996814012527466,
+        "target_tokens": 417,
+        "token_accuracy": 0.7194244604316546,
+        "context_tokens": 26022
+      },
+      "active": {
+        "nll": 1.3946903944015503,
+        "target_tokens": 417,
+        "token_accuracy": 0.6786570743405276,
+        "context_tokens": 16435
+      }
+    },
+    {
+      "history_tokens_estimate": 4975,
+      "active_tokens_estimate": 4960,
+      "full": {
+        "nll": 0.9582161903381348,
+        "target_tokens": 233,
+        "token_accuracy": 0.7725321888412017,
+        "context_tokens": 5005
+      },
+      "active": {
+        "nll": 0.966353178024292,
+        "target_tokens": 233,
+        "token_accuracy": 0.7725321888412017,
+        "context_tokens": 4987
+      }
+    },
+    {
+      "history_tokens_estimate": 5225,
+      "active_tokens_estimate": 4552,
+      "full": {
+        "nll": 1.7894073724746704,
+        "target_tokens": 23,
+        "token_accuracy": 0.5217391304347826,
+        "context_tokens": 5263
+      },
+      "active": {
+        "nll": 2.1115026473999023,
+        "target_tokens": 23,
+        "token_accuracy": 0.5217391304347826,
+        "context_tokens": 4576
+      }
+    },
+    {
+      "history_tokens_estimate": 5293,
+      "active_tokens_estimate": 5132,
+      "full": {
+        "nll": 0.6863070726394653,
+        "target_tokens": 512,
+        "token_accuracy": 0.83984375,
+        "context_tokens": 5338
+      },
+      "active": {
+        "nll": 0.67833411693573,
+        "target_tokens": 512,
+        "token_accuracy": 0.837890625,
+        "context_tokens": 5158
+      }
+    },
+    {
+      "history_tokens_estimate": 6261,
+      "active_tokens_estimate": 6261,
+      "full": {
+        "nll": 1.0050009489059448,
+        "target_tokens": 24,
+        "token_accuracy": 0.7083333333333334,
+        "context_tokens": 6313
+      },
+      "active": {
+        "nll": 1.0050009489059448,
+        "target_tokens": 24,
+        "token_accuracy": 0.7083333333333334,
+        "context_tokens": 6313
+      }
+    },
+    {
+      "history_tokens_estimate": 6309,
+      "active_tokens_estimate": 6124,
+      "full": {
+        "nll": 0.922984778881073,
+        "target_tokens": 512,
+        "token_accuracy": 0.794921875,
+        "context_tokens": 6368
+      },
+      "active": {
+        "nll": 0.9162566065788269,
+        "target_tokens": 512,
+        "token_accuracy": 0.79296875,
+        "context_tokens": 6160
+      }
+    },
+    {
+      "history_tokens_estimate": 7383,
+      "active_tokens_estimate": 7383,
+      "full": {
+        "nll": 0.4036868214607239,
+        "target_tokens": 512,
+        "token_accuracy": 0.9140625,
+        "context_tokens": 7449
+      },
+      "active": {
+        "nll": 0.4036868214607239,
+        "target_tokens": 512,
+        "token_accuracy": 0.9140625,
+        "context_tokens": 7449
+      }
+    },
+    {
+      "history_tokens_estimate": 8549,
+      "active_tokens_estimate": 8549,
+      "full": {
+        "nll": 0.33538734912872314,
+        "target_tokens": 512,
+        "token_accuracy": 0.908203125,
+        "context_tokens": 8622
+      },
+      "active": {
+        "nll": 0.33538734912872314,
+        "target_tokens": 512,
+        "token_accuracy": 0.908203125,
+        "context_tokens": 8622
+      }
+    },
+    {
+      "history_tokens_estimate": 10702,
+      "active_tokens_estimate": 10702,
+      "full": {
+        "nll": 1.4476401805877686,
+        "target_tokens": 31,
+        "token_accuracy": 0.6129032258064516,
+        "context_tokens": 10782
+      },
+      "active": {
+        "nll": 1.4476401805877686,
+        "target_tokens": 31,
+        "token_accuracy": 0.6129032258064516,
+        "context_tokens": 10782
+      }
+    },
+    {
+      "history_tokens_estimate": 10778,
+      "active_tokens_estimate": 9429,
+      "full": {
+        "nll": 0.330352783203125,
+        "target_tokens": 348,
+        "token_accuracy": 0.9281609195402298,
+        "context_tokens": 10866
+      },
+      "active": {
+        "nll": 0.31913113594055176,
+        "target_tokens": 348,
+        "token_accuracy": 0.9195402298850575,
+        "context_tokens": 9487
+      }
+    },
+    {
+      "history_tokens_estimate": 11506,
+      "active_tokens_estimate": 11506,
+      "full": {
+        "nll": 0.9993354082107544,
+        "target_tokens": 21,
+        "token_accuracy": 0.8571428571428571,
+        "context_tokens": 11601
+      },
+      "active": {
+        "nll": 0.9993354082107544,
+        "target_tokens": 21,
+        "token_accuracy": 0.8571428571428571,
+        "context_tokens": 11601
+      }
+    },
+    {
+      "history_tokens_estimate": 11622,
+      "active_tokens_estimate": 11490,
+      "full": {
+        "nll": 0.31414902210235596,
+        "target_tokens": 512,
+        "token_accuracy": 0.90234375,
+        "context_tokens": 11725
+      },
+      "active": {
+        "nll": 0.31913331151008606,
+        "target_tokens": 512,
+        "token_accuracy": 0.91015625,
+        "context_tokens": 11573
+      }
+    },
+    {
+      "history_tokens_estimate": 13363,
+      "active_tokens_estimate": 13363,
+      "full": {
+        "nll": 0.4521593451499939,
+        "target_tokens": 329,
+        "token_accuracy": 0.8936170212765957,
+        "context_tokens": 13473
+      },
+      "active": {
+        "nll": 0.4521593451499939,
+        "target_tokens": 329,
+        "token_accuracy": 0.8936170212765957,
+        "context_tokens": 13473
+      }
+    },
+    {
+      "history_tokens_estimate": 14052,
+      "active_tokens_estimate": 14052,
+      "full": {
+        "nll": 0.38453203439712524,
+        "target_tokens": 367,
+        "token_accuracy": 0.9128065395095368,
+        "context_tokens": 14169
+      },
+      "active": {
+        "nll": 0.38453203439712524,
+        "target_tokens": 367,
+        "token_accuracy": 0.9128065395095368,
+        "context_tokens": 14169
+      }
+    },
+    {
+      "history_tokens_estimate": 14841,
+      "active_tokens_estimate": 14841,
+      "full": {
+        "nll": 1.0088262557983398,
+        "target_tokens": 21,
+        "token_accuracy": 0.8571428571428571,
+        "context_tokens": 14965
+      },
+      "active": {
+        "nll": 1.0088262557983398,
+        "target_tokens": 21,
+        "token_accuracy": 0.8571428571428571,
+        "context_tokens": 14965
+      }
+    },
+    {
+      "history_tokens_estimate": 14972,
+      "active_tokens_estimate": 14819,
+      "full": {
+        "nll": 0.7306239604949951,
+        "target_tokens": 512,
+        "token_accuracy": 0.810546875,
+        "context_tokens": 15104
+      },
+      "active": {
+        "nll": 0.733524739742279,
+        "target_tokens": 512,
+        "token_accuracy": 0.814453125,
+        "context_tokens": 14927
+      }
+    },
+    {
+      "history_tokens_estimate": 15510,
+      "active_tokens_estimate": 9746,
+      "full": {
+        "nll": 1.6418921947479248,
+        "target_tokens": 21,
+        "token_accuracy": 0.7142857142857143,
+        "context_tokens": 15650
+      },
+      "active": {
+        "nll": 2.6815273761749268,
+        "target_tokens": 21,
+        "token_accuracy": 0.5238095238095238,
+        "context_tokens": 9816
+      }
+    },
+    {
+      "history_tokens_estimate": 15585,
+      "active_tokens_estimate": 15543,
+      "full": {
+        "nll": 0.28031396865844727,
+        "target_tokens": 512,
+        "token_accuracy": 0.919921875,
+        "context_tokens": 15732
+      },
+      "active": {
+        "nll": 0.2796926498413086,
+        "target_tokens": 512,
+        "token_accuracy": 0.923828125,
+        "context_tokens": 15682
+      }
+    },
+    {
+      "history_tokens_estimate": 16744,
+      "active_tokens_estimate": 16226,
+      "full": {
+        "nll": 0.3125278353691101,
+        "target_tokens": 343,
+        "token_accuracy": 0.9271137026239067,
+        "context_tokens": 16898
+      },
+      "active": {
+        "nll": 0.3158934414386749,
+        "target_tokens": 343,
+        "token_accuracy": 0.9271137026239067,
+        "context_tokens": 16376
+      }
+    },
+    {
+      "history_tokens_estimate": 17481,
+      "active_tokens_estimate": 16380,
+      "full": {
+        "nll": 0.20201486349105835,
+        "target_tokens": 512,
+        "token_accuracy": 0.958984375,
+        "context_tokens": 17642
+      },
+      "active": {
+        "nll": 0.20019276440143585,
+        "target_tokens": 512,
+        "token_accuracy": 0.95703125,
+        "context_tokens": 16479
+      }
+    },
+    {
+      "history_tokens_estimate": 19034,
+      "active_tokens_estimate": 16373,
+      "full": {
+        "nll": 0.3779186010360718,
+        "target_tokens": 432,
+        "token_accuracy": 0.9004629629629629,
+        "context_tokens": 19202
+      },
+      "active": {
+        "nll": 0.3931417465209961,
+        "target_tokens": 432,
+        "token_accuracy": 0.8981481481481481,
+        "context_tokens": 16460
+      }
+    },
+    {
+      "history_tokens_estimate": 19898,
+      "active_tokens_estimate": 16376,
+      "full": {
+        "nll": 1.0122311115264893,
+        "target_tokens": 31,
+        "token_accuracy": 0.7741935483870968,
+        "context_tokens": 20073
+      },
+      "active": {
+        "nll": 2.85902738571167,
+        "target_tokens": 31,
+        "token_accuracy": 0.4838709677419355,
+        "context_tokens": 16465
+      }
+    },
+    {
+      "history_tokens_estimate": 19983,
+      "active_tokens_estimate": 16373,
+      "full": {
+        "nll": 0.5078057646751404,
+        "target_tokens": 512,
+        "token_accuracy": 0.888671875,
+        "context_tokens": 20165
+      },
+      "active": {
+        "nll": 0.5192880630493164,
+        "target_tokens": 512,
+        "token_accuracy": 0.890625,
+        "context_tokens": 16485
+      }
+    },
+    {
+      "history_tokens_estimate": 21340,
+      "active_tokens_estimate": 16370,
+      "full": {
+        "nll": 1.2646496295928955,
+        "target_tokens": 20,
+        "token_accuracy": 0.7,
+        "context_tokens": 21529
+      },
+      "active": {
+        "nll": 2.790719747543335,
+        "target_tokens": 20,
+        "token_accuracy": 0.65,
+        "context_tokens": 16473
+      }
+    },
+    {
+      "history_tokens_estimate": 21732,
+      "active_tokens_estimate": 16382,
+      "full": {
+        "nll": 0.11521066725254059,
+        "target_tokens": 512,
+        "token_accuracy": 0.970703125,
+        "context_tokens": 21928
+      },
+      "active": {
+        "nll": 0.10737413167953491,
+        "target_tokens": 512,
+        "token_accuracy": 0.970703125,
+        "context_tokens": 16493
+      }
+    },
+    {
+      "history_tokens_estimate": 24250,
+      "active_tokens_estimate": 16384,
+      "full": {
+        "nll": 0.259889155626297,
+        "target_tokens": 410,
+        "token_accuracy": 0.9317073170731708,
+        "context_tokens": 24453
+      },
+      "active": {
+        "nll": 0.23930098116397858,
+        "target_tokens": 410,
+        "token_accuracy": 0.9463414634146341,
+        "context_tokens": 16456
+      }
+    },
+    {
+      "history_tokens_estimate": 25053,
+      "active_tokens_estimate": 16375,
+      "full": {
+        "nll": 0.15157127380371094,
+        "target_tokens": 512,
+        "token_accuracy": 0.97265625,
+        "context_tokens": 25263
+      },
+      "active": {
+        "nll": 0.3632254898548126,
+        "target_tokens": 512,
+        "token_accuracy": 0.935546875,
+        "context_tokens": 16454
+      }
+    }
+  ],
+  "interpretation": "teacher-forced next-assistant continuation quality; this is a model-level G2 gate and does not substitute for end-task agent success"
+}

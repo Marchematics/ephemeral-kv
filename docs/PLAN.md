@@ -59,7 +59,35 @@ fallback.
 If either lookup cost or required selected tokens scales approximately linearly with
 history on realistic traces, the mobility abstraction collapses.
 
-**Status.** Structural harness implemented in `benchmarks/g2_trace_index.py`; a real-trace structural run is recorded. `benchmarks/g2_model_quality.py` now provides a non-QCC frozen-LM next-assistant quality gate (full history versus lexical/provenance active view). End-task agent quality remains open. The public `thoughtworks/agentic-coding-trajectories` corpus is the first target.
+**Status.** Both halves are measured on the public corpus
+(`thoughtworks/agentic-coding-trajectories`, 15,000 sessions, rebuilt from the parquet by
+`benchmarks/build_trace_sessions.py`).
+
+*Structural half* (`g2_trace_index.py`): the index selects a median 12% of a 32K-128K
+history, and the fraction falls as history grows rather than tracking it.
+
+*Model half* (`g2_model_quality.py`, frozen Llama-3.2-1B, teacher-forced next-turn target,
+both arms scored with the same truncation): the fidelity of the retrieved view is a
+**dose-response in the active budget**, measured on the same 192 examples:
+
+| active budget | 8K-32K token-accuracy delta | active fraction at 8K-32K | verdict |
+|---:|---:|---:|---|
+| 4,096 | -10.1 pp | 0.21 | kill |
+| 8,192 | -6.0 pp | 0.41 | kill |
+| 16,384 | -0.3 pp | 0.82 | advance |
+
+and on the longest sessions (median history 82,440 tokens, max 156,137, turns filtered to
+a preceding history of at least 32,768 tokens) a 4,096-token view is **5.0% of history**
+for -8.3 pp.
+
+The reading is therefore split and has to be reported that way: **the working set is
+sparse and stops tracking history, but at 4-8K tokens it does not preserve the turn**; the
+loss is flat in history (so this is not a scaling failure) and disappears only once the
+view is a large fraction of a short history. What the gate kills is the *combination*
+"small fixed budget **and** teacher-forced parity"; end-task agent quality (not
+teacher-forced continuation) remains open, and the two things that could move the
+required budget are a stronger compiler (embedding/provenance rather than lexical) and a
+workload whose turns depend on less of the transcript.
 
 ## G3 — History-free mobility on one machine
 

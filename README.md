@@ -83,3 +83,33 @@ python benchmarks/kill_gate_crossover.py \
 python benchmarks/kill_gate_mobility.py \
   --out artifacts/g3-mobility-accounting.json
 ```
+
+The measured gates need the public trace corpus and a GPU.  The trace JSONL is *not*
+committed (15,000 real transcripts are 2.3 GB); it is rebuilt from the public parquet by
+a script, so a receipt can always be regenerated:
+
+```bash
+# 1. the trace corpus (needs an interpreter with pyarrow; note that the HTTP stack
+#    needs a no_proxy value httpx can parse - a bracketed [::1] raises InvalidURL)
+no_proxy=localhost,127.0.0.1,::1 python benchmarks/build_trace_sessions.py \
+  --out data/sessions.jsonl
+
+# 2. G2 index half: active fraction and lookup cost against session age
+python benchmarks/g2_trace_index.py --jsonl data/sessions.jsonl \
+  --tokenizer cl100k_base --out artifacts/g2-thoughtworks-structural-v1.json
+
+# 3. G2 model half: does the retrieved active view preserve the next assistant turn?
+#    (full history vs lexical/provenance view, teacher-forced, model-agnostic)
+python benchmarks/g2_model_quality.py --jsonl data/sessions.jsonl \
+  --model <frozen checkpoint> --token-budget 4096 --max-length 32768 \
+  --out artifacts/g2-model-quality-<model>-v1.json
+
+# 4. G3: H2D movement and prefill primitives at each history length
+python benchmarks/g3_hardware_primitives.py --model <frozen checkpoint> \
+  --kv-bytes-per-token <bytes> --histories 32768 131072 524288 1048576 \
+  --active 2048 4096 8192 16384 --out artifacts/g3-hardware-primitives-v1.json
+```
+
+`g2_model_quality.py` reports per-history-bucket statistics and a `verdict_by_bucket`
+that encodes the G2 advance rule (`advance` / `kill` / `inconclusive`), so the gate can be
+read off a run instead of argued about afterwards.

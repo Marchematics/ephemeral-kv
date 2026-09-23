@@ -50,6 +50,7 @@ def build_examples(
     token_budget: int,
     max_spans: int = 64,
     min_history_spans: int = 8,
+    min_history_tokens: int = 0,
     token_counter=None,
 ) -> list[Example]:
     """Build assistant-target examples without consulting the target during retrieval."""
@@ -97,6 +98,12 @@ def build_examples(
         idx.append(turn=turn, role=role, text=text, token_estimate=max(1, tok_est))
         history.append(msg)
 
+    if min_history_tokens:
+        # the gate is about *long* sessions.  A session that reaches 64K tokens does so at
+        # its end, so without this filter almost every example comes from an early turn
+        # whose history is a few thousand tokens (measured: sessions with max_isl >= 64K
+        # still produced examples with 4K-16K histories, leaving the >=32K bucket empty).
+        out = [ex for ex in out if ex.history_tokens_estimate >= min_history_tokens]
     return out
 
 
@@ -112,12 +119,22 @@ def percentile(xs: list[float], q: float):
     return ys[lo] * (hi - pos) + ys[hi] * (pos - lo)
 
 
-def _encode_with_target(tokenizer, context: str, target: str, max_length: int):
-    """Return input ids and a loss mask while preserving the target suffix."""
+def _encode_with_target(tokenizer, context: str, target: str, max_length: int,
+                        max_target_tokens: int = 512):
+    """Return input ids and a loss mask while preserving the target suffix.
+
+    Both the target and the context are bounded.  A coding trajectory's assistant turn
+    can itself be tens of thousands of tokens (a whole file write), and scoring all of it
+    needs logits of `target x vocabulary` - 30K x 128K x 4B is 15 GiB, which OOMed this
+    gate on a 24 GiB card even after the head was sliced.  The scored prefix of the
+    target is the part that tests whether retrieval preserved what the turn needed, and
+    both arms get the same truncation.
+    """
     target_ids = tokenizer.encode(target, add_special_tokens=False)
     if not target_ids or max_length < 2:
         return None, None
-    target_ids = target_ids[: max_length - 1]
+    limit = max(1, min(int(max_target_tokens), max_length - 1))
+    target_ids = target_ids[:limit]
     prefix_ids = tokenizer.encode(context, add_special_tokens=False)
     room = max_length - len(target_ids)
     prefix_ids = prefix_ids[-room:]
@@ -126,29 +143,49 @@ def _encode_with_target(tokenizer, context: str, target: str, max_length: int):
     return ids, target_start
 
 
-def score_target(model, tokenizer, context: str, target: str, max_length: int, device: str):
-    import torch
+def score_target(model, tokenizer, context: str, target: str, max_length: int, device: str,
+                 max_target_tokens: int = 512):
+    """Teacher-forced loss and next-token accuracy on the target suffix.
 
-    ids, target_start = _encode_with_target(tokenizer, context, target, max_length)
+    The head is applied only to the target positions.  Asking the causal LM for `labels`
+    materialises logits for *every* context position - at 32K and a 128K vocabulary that
+    is ~17 GiB, which OOMed this gate on a 24 GiB card (measured: a single 8.21 GiB
+    cross-entropy allocation) - while the gate only needs the target's tokens.  Running
+    the backbone and slicing its last hidden state gives the same numbers for a few
+    hundred target positions (checked against the `labels=` path in
+    tests/test_g2_model_quality.py).
+    """
+    import torch
+    import torch.nn.functional as F
+
+    ids, target_start = _encode_with_target(tokenizer, context, target, max_length,
+                                            max_target_tokens)
     if ids is None or target_start <= 0 or target_start >= len(ids):
         return None
 
     input_ids = torch.tensor([ids], dtype=torch.long, device=device)
-    labels = input_ids.clone()
-    labels[:, :target_start] = -100
-
+    backbone = getattr(model, "model", None)
+    head = getattr(model, "lm_head", None)
     with torch.inference_mode():
-        out = model(input_ids=input_ids, labels=labels, use_cache=False)
-        logits = out.logits[:, :-1]
-        next_ids = input_ids[:, 1:]
-        mask = labels[:, 1:] != -100
-        pred = logits.argmax(dim=-1)
-        correct = ((pred == next_ids) & mask).sum().item()
-        count = mask.sum().item()
+        if backbone is None or head is None:                 # pragma: no cover
+            labels = input_ids.clone()
+            labels[:, :target_start] = -100
+            out = model(input_ids=input_ids, labels=labels, use_cache=False)
+            logits = out.logits[:, target_start - 1:-1]
+            loss = float(out.loss.item())
+        else:
+            hidden = backbone(input_ids=input_ids, use_cache=False).last_hidden_state
+            logits = head(hidden[:, target_start - 1:-1].to(hidden.dtype)).float()
+            labels = input_ids[:, target_start:]
+            loss = float(F.cross_entropy(
+                logits.reshape(-1, logits.shape[-1]), labels.reshape(-1)).item())
+        labels = input_ids[:, target_start:]
+        count = int(labels.numel())
+        correct = int((logits.argmax(dim=-1) == labels).sum().item())
 
     return {
-        "nll": float(out.loss.item()),
-        "target_tokens": int(count),
+        "nll": loss,
+        "target_tokens": count,
         "token_accuracy": float(correct / count) if count else None,
         "context_tokens": int(target_start),
     }
@@ -254,6 +291,12 @@ def main(argv=None):
     p.add_argument("--max-length", type=int, default=8192)
     p.add_argument("--max-sessions", type=int, default=0)
     p.add_argument("--max-examples", type=int, default=256)
+    p.add_argument("--min-history-tokens", type=int, default=0,
+                   help="only score turns whose preceding history reaches this size; "
+                        "without it examples come from the early turns of long sessions")
+    p.add_argument("--max-target-tokens", type=int, default=512,
+                   help="scored prefix of the assistant target; the logits for a whole "
+                        "long turn do not fit (see _encode_with_target)")
     p.add_argument("--device", default="cuda")
     p.add_argument("--dtype", choices=["auto", "float16", "bfloat16", "float32"], default="auto")
     args = p.parse_args(argv)
@@ -288,6 +331,7 @@ def main(argv=None):
                 messages,
                 token_budget=args.token_budget,
                 max_spans=args.max_spans,
+                min_history_tokens=args.min_history_tokens,
                 token_counter=lambda text: len(
                     tokenizer.encode(text, add_special_tokens=False)
                 ),
@@ -295,11 +339,11 @@ def main(argv=None):
             for ex in examples:
                 full = score_target(
                     model, tokenizer, ex.full_context, ex.target,
-                    args.max_length, args.device
+                    args.max_length, args.device, args.max_target_tokens
                 )
                 active = score_target(
                     model, tokenizer, ex.active_context, ex.target,
-                    args.max_length, args.device
+                    args.max_length, args.device, args.max_target_tokens
                 )
                 rows.append(
                     {
@@ -309,12 +353,30 @@ def main(argv=None):
                         "active": active,
                     }
                 )
+                if len(rows) % 16 == 0:
+                    # progress plus an incremental artifact: this runs on a shared GPU,
+                    # and a long trace pass should not lose everything to one OOM
+                    print(f"[g2] {len(rows)} examples, {sessions} sessions, "
+                          f"history {ex.history_tokens_estimate} tokens, "
+                          f"active fraction "
+                          f"{ex.active_tokens_estimate / max(1, ex.history_tokens_estimate):.3f}",
+                          flush=True)
+                    Path(args.out).write_text(json.dumps(
+                        {"schema": "ephemeral-kv-g2-model-quality-v1", "partial": True,
+                         "model": args.model, "token_budget": args.token_budget,
+                         "max_length": args.max_length, "sessions": sessions,
+                         "rows": rows}, indent=2) + "\n")
                 if args.max_examples and len(rows) >= args.max_examples:
                     break
             sessions += 1
             if (args.max_sessions and sessions >= args.max_sessions) or (
                 args.max_examples and len(rows) >= args.max_examples
             ):
+                break
+            if args.max_examples and not examples and sessions > 4000:
+                # a filter can leave whole sessions with nothing to score
+                print(f"[g2] stopping after {sessions} sessions with no scoreable turn",
+                      flush=True)
                 break
 
     payload = {

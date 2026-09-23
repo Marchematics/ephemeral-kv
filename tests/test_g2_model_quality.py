@@ -116,3 +116,64 @@ def test_verdict_is_inconclusive_with_one_readable_bucket():
     verdict = verdict_by_bucket(summarize_by_bucket(rows))
     assert verdict["verdict"] == "inconclusive"
     assert verdict["readable_buckets"] == ["<=8K"]
+
+
+def test_target_scoring_matches_the_labels_path_on_a_tiny_model():
+    """The sliced-head path must agree with the standard `labels=` computation.
+
+    The gate needs the suffix-scored form because the full-logit form OOMs at 32K on a
+    24 GiB card; this pins the two to the same numbers on a small model.
+    """
+    import torch
+    from transformers import LlamaConfig, LlamaForCausalLM
+
+    from benchmarks.g2_model_quality import score_target
+
+    torch.manual_seed(0)
+    config = LlamaConfig(vocab_size=256, hidden_size=64, intermediate_size=128,
+                         num_hidden_layers=2, num_attention_heads=4,
+                         num_key_value_heads=2, max_position_embeddings=1024)
+    model = LlamaForCausalLM(config).eval()
+
+    class Tokenizer:
+        def encode(self, text, add_special_tokens=False):
+            return [min(255, (ord(ch) % 250) + 1) for ch in text]
+
+    tokenizer = Tokenizer()
+    context = "the cache holds a bounded working set " * 6
+    target = "the answer is bounded context"
+    got = score_target(model, tokenizer, context, target, max_length=256, device="cpu")
+
+    ids, target_start = None, None
+    from benchmarks.g2_model_quality import _encode_with_target
+    ids, target_start = _encode_with_target(tokenizer, context, target, 256)
+    input_ids = torch.tensor([ids], dtype=torch.long)
+    labels = input_ids.clone()
+    labels[:, :target_start] = -100
+    with torch.inference_mode():
+        out = model(input_ids=input_ids, labels=labels, use_cache=False)
+        reference_nll = float(out.loss.item())
+        reference_acc = float((out.logits[:, target_start - 1:-1].argmax(-1)
+                               == input_ids[:, target_start:]).float().mean().item())
+
+    assert got["target_tokens"] == len(ids) - target_start
+    assert got["nll"] == pytest.approx(reference_nll, rel=1e-4, abs=1e-4)
+    assert got["token_accuracy"] == pytest.approx(reference_acc, abs=1e-6)
+
+
+def test_min_history_tokens_keeps_only_long_turns():
+    from benchmarks.g2_model_quality import build_examples
+
+    msgs = [{"role": "system", "content": "agent"}]
+    for i in range(12):
+        msgs += [
+            {"role": "user", "content": f"inspect module_{i}.py " * 40},
+            {"role": "assistant", "content": f"module_{i} looks fine " * 20},
+        ]
+    unfiltered = build_examples(msgs, token_budget=64, min_history_spans=4)
+    filtered = build_examples(msgs, token_budget=64, min_history_spans=4,
+                              min_history_tokens=600)
+    assert unfiltered and filtered
+    assert len(filtered) < len(unfiltered)
+    assert all(ex.history_tokens_estimate >= 600 for ex in filtered)
+    assert min(ex.history_tokens_estimate for ex in unfiltered) < 600
