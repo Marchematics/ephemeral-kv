@@ -50,10 +50,13 @@ def build_examples(
     token_budget: int,
     max_spans: int = 64,
     min_history_spans: int = 8,
+    token_counter=None,
 ) -> list[Example]:
     """Build assistant-target examples without consulting the target during retrieval."""
     idx = DurableSpanIndex()
     history: list[dict] = []
+    if token_counter is None:
+        token_counter = lambda text: max(1, len(text.split()))
     out: list[Example] = []
 
     for turn, msg in enumerate(messages):
@@ -90,8 +93,8 @@ def build_examples(
                 )
 
         # Index every completed transcript event after constructing the example.
-        tok_est = max(1, len(text.split()))
-        idx.append(turn=turn, role=role, text=text, token_estimate=tok_est)
+        tok_est = int(token_counter(text))
+        idx.append(turn=turn, role=role, text=text, token_estimate=max(1, tok_est))
         history.append(msg)
 
     return out
@@ -112,12 +115,13 @@ def percentile(xs: list[float], q: float):
 def _encode_with_target(tokenizer, context: str, target: str, max_length: int):
     """Return input ids and a loss mask while preserving the target suffix."""
     target_ids = tokenizer.encode(target, add_special_tokens=False)
-    if not target_ids:
+    if not target_ids or max_length < 2:
         return None, None
+    target_ids = target_ids[: max_length - 1]
     prefix_ids = tokenizer.encode(context, add_special_tokens=False)
-    room = max(1, max_length - len(target_ids))
+    room = max_length - len(target_ids)
     prefix_ids = prefix_ids[-room:]
-    ids = prefix_ids + target_ids[:max_length]
+    ids = prefix_ids + target_ids
     target_start = len(prefix_ids)
     return ids, target_start
 
@@ -221,6 +225,9 @@ def main(argv=None):
                 messages,
                 token_budget=args.token_budget,
                 max_spans=args.max_spans,
+                token_counter=lambda text: len(
+                    tokenizer.encode(text, add_special_tokens=False)
+                ),
             )
             for ex in examples:
                 full = score_target(
