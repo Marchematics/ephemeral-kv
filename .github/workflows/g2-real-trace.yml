@@ -20,14 +20,16 @@ jobs:
       - name: Install structural dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e . pyarrow
+          python -m pip install -e . pyarrow tiktoken
 
       - name: Download pinned public trajectory corpus
         run: |
-          curl --fail --location --retry 3             "https://huggingface.co/datasets/thoughtworks/agentic-coding-trajectories/resolve/cef72d1f4d0caabf85937adf8337a14b7522c782/sessions.parquet"             --output /tmp/sessions.parquet
+          curl --fail --location --retry 3 \
+            "https://huggingface.co/datasets/thoughtworks/agentic-coding-trajectories/resolve/cef72d1f4d0caabf85937adf8337a14b7522c782/sessions.parquet" \
+            --output /tmp/sessions.parquet
           ls -lh /tmp/sessions.parquet
 
-      - name: Convert only the trajectory column to JSONL
+      - name: Convert trajectory plus official length metadata to JSONL
         run: |
           python - <<'PY'
           import json
@@ -45,37 +47,64 @@ jobs:
                   f"{candidates}, got {sorted(names)}"
               )
 
+          required_meta = ["max_isl", "source_dataset", "session_id"]
+          missing = [x for x in required_meta if x not in names]
+          if missing:
+              raise SystemExit(f"missing required metadata columns: {missing}")
+
+          columns = [field, *required_meta]
           rows = 0
           with open(dst, "w") as out:
-              for batch in pf.iter_batches(batch_size=128, columns=[field]):
+              for batch in pf.iter_batches(batch_size=128, columns=columns):
                   for item in batch.to_pylist():
-                      value = item[field]
-                      out.write(json.dumps({field: value}, ensure_ascii=False) + "\n")
+                      out.write(
+                          json.dumps(
+                              {
+                                  field: item[field],
+                                  "max_isl": item["max_isl"],
+                                  "source_dataset": item["source_dataset"],
+                                  "session_id": item["session_id"],
+                              },
+                              ensure_ascii=False,
+                          )
+                          + "\n"
+                      )
                       rows += 1
 
-          print(json.dumps({
-              "parquet_rows": rows,
-              "trajectory_field": field,
-              "parquet_columns": sorted(names),
-          }, indent=2))
+          print(
+              json.dumps(
+                  {
+                      "parquet_rows": rows,
+                      "trajectory_field": field,
+                      "parquet_columns": sorted(names),
+                  },
+                  indent=2,
+              )
+          )
           if rows < 10000:
               raise SystemExit(f"unexpectedly small corpus: {rows} sessions")
           PY
 
-      - name: Run G2 structural gate
+      - name: Run G2 structural gate with calibrated tokenizer
         run: |
-          python benchmarks/g2_trace_index.py             --jsonl /tmp/sessions.jsonl             --token-budget 4096             --max-spans 64             --out artifacts/g2-thoughtworks-structural.json
+          python benchmarks/g2_trace_index.py \
+            --jsonl /tmp/sessions.jsonl \
+            --token-budget 4096 \
+            --max-spans 64 \
+            --tokenizer cl100k_base \
+            --out artifacts/g2-thoughtworks-structural-v2.json
 
       - name: Print receipt
         run: |
-          cat artifacts/g2-thoughtworks-structural.json
+          cat artifacts/g2-thoughtworks-structural-v2.json
           python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
           import json
-          p = json.load(open("artifacts/g2-thoughtworks-structural.json"))
-          print("## G2 real-trace structural gate")
+          p = json.load(open("artifacts/g2-thoughtworks-structural-v2.json"))
+          print("## G2 real-trace structural gate — v2")
           print()
           print(f"- sessions: {p['sessions']}")
           print(f"- calls: {p['summary']['calls']}")
+          print(f"- tokenizer: **{p['tokenizer']}**")
           print(f"- quality: **{p['quality_status']}**")
           print()
           print("This run is structural only; it does not establish answer/task quality.")
@@ -83,6 +112,6 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: g2-thoughtworks-structural
-          path: artifacts/g2-thoughtworks-structural.json
+          name: g2-thoughtworks-structural-v2
+          path: artifacts/g2-thoughtworks-structural-v2.json
           if-no-files-found: error
