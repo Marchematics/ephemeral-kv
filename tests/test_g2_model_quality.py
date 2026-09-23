@@ -177,3 +177,43 @@ def test_min_history_tokens_keeps_only_long_turns():
     assert len(filtered) < len(unfiltered)
     assert all(ex.history_tokens_estimate >= 600 for ex in filtered)
     assert min(ex.history_tokens_estimate for ex in unfiltered) < 600
+
+
+def test_recency_channel_keeps_the_latest_span_within_its_share():
+    """A span bigger than the budget used to be dropped, leaving no recent context."""
+    from ephemeralkv.index import DurableSpanIndex
+
+    idx = DurableSpanIndex()
+    idx.append(turn=0, role="user", text="unrelated preamble " * 5, token_estimate=50)
+    idx.append(turn=1, role="tool", text="file dump " * 400, token_estimate=2000)
+    lexical, _ = idx.compile_view("nothing matches here", token_budget=500, max_spans=8)
+    assert lexical == []                                    # lexical-only drops it
+    kept, _ = idx.compile_view("nothing matches here", token_budget=500, max_spans=8,
+                               recency_spans=1, recency_fraction=1.0)
+    assert [s.turn for s in kept] == [1]
+    assert kept[0].token_estimate <= 500
+    assert kept[0].text.startswith("file dump")
+
+
+def test_max_span_fraction_truncates_instead_of_dropping():
+    from ephemeralkv.index import DurableSpanIndex
+
+    idx = DurableSpanIndex()
+    idx.append(turn=0, role="tool", text="cache eviction " * 200, token_estimate=1000)
+    kept, _ = idx.compile_view("cache eviction", token_budget=400, max_spans=8,
+                               max_span_fraction=0.25)
+    assert len(kept) == 1
+    assert kept[0].token_estimate <= 100          # 25% of 400
+    assert kept[0].text.startswith("cache eviction")
+
+
+def test_provenance_channel_pulls_identifier_matches():
+    from ephemeralkv.index import DurableSpanIndex
+
+    idx = DurableSpanIndex()
+    idx.append(turn=0, role="tool", text="src/cache.py contains the eviction path",
+               token_estimate=20)
+    idx.append(turn=1, role="tool", text="decoy output " * 20, token_estimate=40)
+    kept, _ = idx.compile_view("what should change in src/cache.py?", token_budget=200,
+                               max_spans=8, provenance_terms=4)
+    assert any("src/cache.py" in s.text for s in kept)

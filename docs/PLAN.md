@@ -116,7 +116,37 @@ with history. The 1M/2K case should be cheaper to move than the 32K/16K case.
 If EphemeralKV's cold-route penalty still grows close to linearly with history, there is
 no new mobility regime.
 
-**Status.** Matched-cost accounting and phase-space artifacts are present; both are\nlabelled assumptions. Hardware measurement is open.
+**Status.** Hardware primitives are measured on the A10G, Qwen2.5-0.5B (12,288 B of KV
+per token, the only 1M-feasible Full-KV geometry on this card):
+
+| quantity | 32K | 128K | 512K | 1M |
+|---|---:|---:|---:|---:|
+| one-way H2D of the history's KV payload | 17.3 ms | 68.9 ms | 276.9 ms | **555.6 ms** |
+| full re-prefill (this stack) | 1.59 s (20.6K tok/s) | 14.32 s (9.2K tok/s) | **infeasible** | infeasible |
+
+H2D is linear at 23.2-23.4 GB/s; full re-prefill is superlinear (4x the history costs 9x
+the time) and does not fit at 512K. The ephemeral side is measured too - active-set
+prefill at 38.7K / 43.1K / 40.4K / 33.8K tok/s for 2K / 4K / 8K / 16K tokens (0.053 /
+0.095 / 0.203 / 0.485 s, repeats=3 after the first call's warm-up, which by itself cost
+1.075 s at 2K and is exactly the artefact a single repeat would have reported) - plus the
+structural lookup, 0.087 / 0.150 / 0.246 ms p50 for <=8K / 8K-32K / 32K-128K histories.
+
+Composed, the two statements the gate asks for are:
+
+* **the inversion holds on hardware**: 1M history with a 2K active set costs ~0.10 s
+  against 32K history with a 16K active set at ~0.49 s, a 5x separation driven by the
+  active set rather than the history;
+* **the tax stops tracking history**: the active prefill depends only on the active token
+  count, and lookup grows 2.8x while the corpus grows ~16x (sublinear), so the <=1.25x
+  band is satisfied *within the measured buckets*; a trace with genuine 1M-token
+  histories does not exist in the public corpus, so the 1M lookup row is extrapolated
+  from postings growth, not measured.
+
+The honest limit: on this *local* 23 GB/s link, moving the full 12 GiB KV costs 0.556 s,
+which still loses to a 2K ephemeral route by 5.6x but beats a 16K one - so the ephemeral
+advantage at 1M is a function of the active set, and the crossover against a full move
+sits near 120 GB/s effective bandwidth for a 2K active set. End-to-end multi-worker
+routing is G4.
 
 ## G4 — Break sticky routing at cluster level
 

@@ -1,0 +1,96 @@
+{
+  "schema": "ephemeral-kv-g3-hardware-primitives-v1",
+  "kind": "hardware_measurement",
+  "model": "/root/qcc/models/Qwen2.5-0.5B-Instruct",
+  "device": "NVIDIA A10G",
+  "config": {
+    "model": "/root/qcc/models/Qwen2.5-0.5B-Instruct",
+    "out": "artifacts/g3-active-prefill-warm-qwen05b-v1.json",
+    "histories": [
+      32768
+    ],
+    "active": [
+      2048,
+      4096,
+      8192,
+      16384
+    ],
+    "kv_bytes_per_token": 12288,
+    "device": "cuda",
+    "dtype": "bfloat16",
+    "attn_implementation": "flash_attention_2",
+    "repeats": 3,
+    "skip_full_prefill": true
+  },
+  "history_rows": [
+    {
+      "history_tokens": 32768,
+      "kv_payload_bytes": 402653184,
+      "full_kv_h2d": {
+        "status": "measured",
+        "payload_bytes": 402653184,
+        "times": {
+          "n": 3,
+          "p50_s": 0.018125804141163826,
+          "p95_s": 0.01819847021251917,
+          "min_s": 0.017798908054828644
+        },
+        "effective_GBps_p50": 22.214362511264913
+      },
+      "full_reprefill": {
+        "status": "skipped"
+      }
+    }
+  ],
+  "active_prefill_rows": [
+    {
+      "status": "measured",
+      "tokens": 2048,
+      "times": {
+        "n": 3,
+        "p50_s": 0.052968500182032585,
+        "p95_s": 0.31485265269875523,
+        "min_s": 0.047981562092900276
+      },
+      "tokens_per_s_p50": 38664.48913905062,
+      "peak_gpu_bytes_p50": 1108159488
+    },
+    {
+      "status": "measured",
+      "tokens": 4096,
+      "times": {
+        "n": 3,
+        "p50_s": 0.09496935456991196,
+        "p95_s": 0.09505330100655555,
+        "min_s": 0.09487860277295113
+      },
+      "tokens_per_s_p50": 43129.70240294429,
+      "peak_gpu_bytes_p50": 1205185536
+    },
+    {
+      "status": "measured",
+      "tokens": 8192,
+      "times": {
+        "n": 3,
+        "p50_s": 0.20267114788293839,
+        "p95_s": 0.2032403528690338,
+        "min_s": 0.20203550346195698
+      },
+      "tokens_per_s_p50": 40420.15889075464,
+      "peak_gpu_bytes_p50": 1405922304
+    },
+    {
+      "status": "measured",
+      "tokens": 16384,
+      "times": {
+        "n": 3,
+        "p50_s": 0.48538769222795963,
+        "p95_s": 0.4861293531954288,
+        "min_s": 0.4841602835804224
+      },
+      "tokens_per_s_p50": 33754.46115000655,
+      "peak_gpu_bytes_p50": 1806609408
+    }
+  ],
+  "honesty": "H2D and prefill are directly measured primitives. Indexed lookup must be measured on the real trace separately before composing end-to-end mobility tax. Infeasible/OOM rows are retained as such and are never extrapolated."
+}

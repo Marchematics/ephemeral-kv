@@ -51,6 +51,7 @@ def build_examples(
     max_spans: int = 64,
     min_history_spans: int = 8,
     min_history_tokens: int = 0,
+    compiler: dict | None = None,
     token_counter=None,
 ) -> list[Example]:
     """Build assistant-target examples without consulting the target during retrieval."""
@@ -75,7 +76,8 @@ def build_examples(
                     break
             if query:
                 view, _ = idx.compile_view(
-                    query, token_budget=token_budget, max_spans=max_spans
+                    query, token_budget=token_budget, max_spans=max_spans,
+                    **(compiler or {}),
                 )
                 active = "".join(render_span(s) for s in view)
                 full = "".join(render_message(x) for x in history)
@@ -291,6 +293,15 @@ def main(argv=None):
     p.add_argument("--max-length", type=int, default=8192)
     p.add_argument("--max-sessions", type=int, default=0)
     p.add_argument("--max-examples", type=int, default=256)
+    p.add_argument("--recency-spans", type=int, default=0,
+                   help="always keep the last N spans (a serving stack never evicts the "
+                        "current turn); 0 reproduces the lexical-only receipt")
+    p.add_argument("--recency-fraction", type=float, default=0.5)
+    p.add_argument("--max-span-fraction", type=float, default=1.0,
+                   help="truncate an oversized span to this share of the budget instead "
+                        "of dropping it")
+    p.add_argument("--provenance-terms", type=int, default=0,
+                   help="also pull spans sharing identifiers with the top lexical hits")
     p.add_argument("--min-history-tokens", type=int, default=0,
                    help="only score turns whose preceding history reaches this size; "
                         "without it examples come from the early turns of long sessions")
@@ -332,6 +343,10 @@ def main(argv=None):
                 token_budget=args.token_budget,
                 max_spans=args.max_spans,
                 min_history_tokens=args.min_history_tokens,
+                compiler={"recency_spans": args.recency_spans,
+                          "recency_fraction": args.recency_fraction,
+                          "max_span_fraction": args.max_span_fraction,
+                          "provenance_terms": args.provenance_terms},
                 token_counter=lambda text: len(
                     tokenizer.encode(text, add_special_tokens=False)
                 ),
@@ -385,6 +400,10 @@ def main(argv=None):
         "model": args.model,
         "token_budget": args.token_budget,
         "max_length": args.max_length,
+        "compiler": {"recency_spans": args.recency_spans,
+                     "recency_fraction": args.recency_fraction,
+                     "max_span_fraction": args.max_span_fraction,
+                     "provenance_terms": args.provenance_terms},
         "sessions": sessions,
         "summary": summarize(rows),
         "by_history_bucket": summarize_by_bucket(rows),
