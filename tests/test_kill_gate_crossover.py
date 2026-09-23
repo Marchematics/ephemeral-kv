@@ -43,7 +43,7 @@ def test_crossover_is_reported_only_when_recompile_wins():
     crossings = crossover(rows)
     # Under the declared cost model, recompiling beats a full re-prefill from the
     # first tested session length ...
-    assert crossings["recompute_full"] == 8 * 512
+    assert crossings["recompute_full"] == 512 * 512   # wins at the longest length too
     # ... but it does NOT beat moving a resident KV in from DRAM/NVMe by 512 turns:
     # 8.6 GB over a 25 GB/s link is cheaper than scanning a 256K-token index.  That is
     # the gate signal worth recording - the latency case for EphemeralKV is not made
