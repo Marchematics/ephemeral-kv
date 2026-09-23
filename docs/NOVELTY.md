@@ -2,7 +2,7 @@
 
 This file records claims we deliberately **will not** make after the September 2026
 overlap audit. The goal is to keep EphemeralKV from drifting into an already occupied
-KV-cache story.
+KV-cache or routing story.
 
 ## Rejected headline 1 — "text is the source; KV is a build artifact"
 
@@ -33,51 +33,71 @@ That is still a history-sized state model. Tiered caches, distributed KV stores,
 cache-aware routers already do this. It preserves session affinity as a performance
 constraint because a cold route must move a large prefix.
 
-## Surviving hypothesis — session affinity is not fundamental
+## Rejected headline 4 — "soft affinity routing"
 
-Current agent serving explicitly rewards locality:
+Soft affinity is not new either. llm-d's 2026 "sticky until saturated" routing already
+prefers the KV-warm endpoint and escapes to load-based placement after a calibrated
+saturation point; cost-aware LLM schedulers likewise trade locality against queueing.
 
-* vLLM AgentX reported session-aware sticky routing beating queue/KV-balanced routing
-  because a moved turn pays KV transfer and consumes destination cache capacity.
-* llm-d added session-affinity routing so follow-up turns return to the same backend.
-* agent-serving simulators and schedulers model a program/session-to-instance affinity.
+EphemeralKV may *use* a soft-affinity scheduler in evaluation, but the scheduler policy
+is not the core contribution.
 
-EphemeralKV targets a different operating regime:
+## Surviving hypothesis — affinity pressure should not grow with session age
 
-> **A session has an identity, not a home.** KV locality is an opportunistic hint. A
-> cold worker may rebuild only the active working set, so the migration tax is bounded
-> by current demand instead of accumulated history.
+Current agent serving has a structural reason to become increasingly sticky: the cold
+route penalty grows with the history-sized state that must be moved or recomputed.
 
-The paper is successful only if this changes the *optimal scheduling decision* in real
-measurements. Merely reducing memory is insufficient.
+Let `L` be accumulated history and `W(q)` the active state needed by the next turn.
 
-## New systems abstraction — soft affinity
-
-A strict sticky system effectively assigns one worker per session. EphemeralKV treats
-that location as a cache hint and chooses the worker minimizing:
+A conventional cold route has a cost shaped like
 
 ```text
-queue_delay(i) + (0 if warm(i) else predicted_mobility_tax(request, i))
+M_full(L) = transfer_or_reprefill(history-sized state)
 ```
 
-The research claim is that the mobility tax can be made **working-set-bounded**. If so,
-a longer history does not monotonically increase affinity, and queueing/failure can
-dominate locality.
+EphemeralKV targets
+
+```text
+M_eph(q) = indexed_lookup(q) + materialize(W(q))
+```
+
+with both terms bounded/sublinear in `L` on real agent traces.
+
+For a warm worker `a` and cold worker `b`, migration is worthwhile when
+
+```text
+queue_delay(a) - queue_delay(b) > mobility_tax
+```
+
+The potential new systems result is therefore a **phase-boundary change**: in today's
+systems the queue imbalance required to escape affinity increases with session age; in
+EphemeralKV it should depend primarily on current working-set demand.
+
+> **A session has an identity, not a home.** Local KV is an opportunistic accelerator,
+> while the cost of choosing another worker is working-set-bounded rather than
+> history-sized.
+
+The paper succeeds only if this altered cost law is measured and changes cluster-level
+p99/SLO-goodput decisions. Memory reduction alone is insufficient.
 
 ## Counterintuitive results worth pursuing
 
 1. **More history, same mobility tax.** 32K -> 1M history at fixed active state should
-   barely change the cost of moving the next turn.
+   barely change cold-route cost.
 2. **Longer can be cheaper to move.** A 1M-history / 2K-active session can have lower
    remote cost than a 32K-history / 16K-active session.
-3. **Balance can beat locality for agent sessions.** This intentionally targets the
-   opposite result from today's sticky-routing observation, after changing the cost
-   model that made stickiness optimal.
-4. **Failure does not own the session.** Killing a worker should lose an optimization,
+3. **Session age stops increasing stickiness.** A million-token session should remain
+   movable under the same queue-gap threshold as a much younger session with the same
+   active state.
+4. **Changing the miss cost can reverse the router result.** Existing sticky/cache-aware
+   policies are baselines; EphemeralKV must expand the operating region where routing
+   away from locality improves p99 or SLO goodput.
+5. **Failure does not own the session.** Killing a worker should lose an optimization,
    not durable session state; recovery should be active-set-sized.
 
 ## Independence from QCC
 
-No main EphemeralKV result may require a QCC selector. The first real prototype must
-ship with a non-QCC text/index compiler. If QCC is later plugged in, it is an additional
-backend row only.
+No main EphemeralKV result may require a QCC selector. The first prototype ships a
+model-independent durable lexical/provenance index in `ephemeralkv/index.py`. An
+embedding compiler is the next independent backend. If QCC is later plugged in, it is
+an additional backend row only.
