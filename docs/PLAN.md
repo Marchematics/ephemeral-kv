@@ -77,8 +77,7 @@ Measure the same next turn at `32K / 128K / 512K / 1M` accumulated history under
 Sweep active sets `2K / 4K / 8K / 16K`. Report TTFT, wall clock, bytes moved, GPU peak
 memory, CPU time, and index time separately.
 
-`benchmarks/kill_gate_mobility.py` is the accounting receipt that defines the expected
-scaling and routing threshold before hardware measurement.
+`benchmarks/kill_gate_mobility.py` defines the matched-cost accounting target.\n`benchmarks/g3_phase_space.py` sweeps KV bytes/token, fabric bandwidth, and active-set\nsize so the real experiment covers regimes where full-KV movement should win as well as\nregimes where rematerialization should win.
 
 **Advance rule.**
 For a fixed active set, the measured EphemeralKV mobility tax from 128K to 1M should
@@ -89,7 +88,7 @@ with history. The 1M/2K case should be cheaper to move than the 32K/16K case.
 If EphemeralKV's cold-route penalty still grows close to linearly with history, there is
 no new mobility regime.
 
-**Status.** Accounting artifact present; hardware measurement open.
+**Status.** Matched-cost accounting and phase-space artifacts are present; both are\nlabelled assumptions. Hardware measurement is open.
 
 ## G4 — Break sticky routing at cluster level
 
@@ -102,8 +101,7 @@ At 4--8 data-parallel workers, replay sessions with realistic tool gaps and skew
 * strict session-sticky routing;
 * queue/load-aware routing with full-KV migration;
 * KV-aware routing with an escape hatch;
-* **Ephemeral soft affinity**: use a warm prefix when it wins, otherwise rematerialize
-  the active set on the worker with the best predicted completion time.
+* **Ephemeral mobility-cost routing**: use the same locality-vs-queue decision, but\n  replace the history-sized cold-route penalty with the measured active-set\n  rematerialization cost.
 
 The scheduling rule is intentionally simple:
 
@@ -117,8 +115,7 @@ Report p50/p95/p99 TTFT/JCT, SLO goodput, throughput, HBM/session, bytes moved, 
 migration rate.
 
 **Best-paper gate.**
-Under at least two realistic skew/failure regimes, soft affinity should improve SLO
-goodput by >=1.5x or p99 by >=30% against the strongest sticky/cache-aware baseline,
+Under at least two realistic skew/failure regimes, changing the cold-route cost law\nshould improve SLO goodput by >=1.5x or p99 by >=30% against the strongest\nsticky/cache-aware baseline,
 while regressing balanced-load median latency by <=5%.
 
 **Kill rule.**
