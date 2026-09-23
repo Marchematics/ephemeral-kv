@@ -182,6 +182,37 @@ envelope, the core paper claim is false.
 
 **Status.** Open.
 
+**Status.** Replay simulator implemented (`benchmarks/g4_routing_replay.py`): every cost is
+read from the G3 receipts, the workload (arrivals, tool gaps, per-session history growth)
+is declared because the public corpus has no timestamps, and the plan's gate is evaluated
+in the artifact rather than in prose. Policies: `strict_sticky`, `sticky_saturated` (the
+KV-aware escape hatch production ships), `full_kv_move`, `full_reprefill`, `ephemeral`,
+over balanced load, a slow worker, and a worker that disappears and must have its sessions
+re-materialized elsewhere.
+
+**Result: 4 of 48 cells advance, and they are all forced mobility with a 2,048-token
+active set** (goodput x1.97 against the strongest baseline, p50 2.46 s against 2.48 s).
+Everything else is `not_established`, and the reason is the same tension G2 found from the
+other side:
+
+* with a **16,384-token** active set - what G2 measured as fidelity-preserving on long
+  histories - an ephemeral cold route costs 0.485 s of prefill, while moving a KV payload
+  on this 23.2-23.4 GB/s fabric costs 0.017 s (32K history) to 0.556 s (1M).  The
+  ephemeral route is therefore *worse* in every regime measured (goodput x0.16-0.75),
+  including after a worker failure;
+* lowering the fabric to 10 or 2 GB/s does not rescue it while sessions stay warm: a cold
+  route is only paid on placement, migration, or displacement, so the cost law is rarely
+  exercised (at 2 GB/s only `worker_failure` + 2K advances, balanced is still
+  `not_established` at x1.17);
+* `strict_sticky` is the only policy the law clearly beats (goodput 0.00-0.29 against
+  0.33-0.42), which is the easy version of the claim and not the gate.
+
+So G4's honest state is **conditional and open**: mobility pays when the active set is
+small *and* sessions are forced to move, and the project's binding constraint is the joint
+requirement - small active sets are what make routing cheap, large ones are what make the
+next turn faithful. Closing G4 means closing that gap (a stronger compiler, or a workload
+whose turns need less of the transcript), not tuning the router.
+
 ## G5 — Recovery without session ownership
 
 **Question.** Does worker/model replacement preserve session availability without moving
