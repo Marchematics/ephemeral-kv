@@ -59,7 +59,7 @@ fallback.
 If either lookup cost or required selected tokens scales approximately linearly with
 history on realistic traces, the mobility abstraction collapses.
 
-**Status.** Open.
+**Status.** Structural harness implemented in `benchmarks/g2_trace_index.py`; real-trace run and model/task quality remain open. The public `thoughtworks/agentic-coding-trajectories` corpus is the first target (15K multi-turn coding sessions, up to ~156K tokens per session).
 
 ## G3 — History-free mobility on one machine
 
