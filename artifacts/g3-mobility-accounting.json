@@ -3,41 +3,136 @@
   "kind": "accounting",
   "cost_model": {
     "kv_bytes_per_token": 32768,
-    "link_bandwidth_gbs": 25.0,
-    "full_prefill_tokens_per_s": 4000.0,
-    "active_prefill_tokens_per_s": 20000.0,
-    "indexed_lookup_ms": 10.0
+    "link_bandwidth_gbs": 25,
+    "prefill_tokens_per_s": 4000,
+    "indexed_lookup_ms": 10
   },
   "config": {
-    "histories": [32768, 131072, 524288, 1048576],
+    "histories": [
+      32768,
+      131072,
+      524288,
+      1048576
+    ],
     "working_set": 4096,
     "out": "artifacts/g3-mobility-accounting.json"
   },
   "rows": [
-    {"history_tokens":32768,"working_set_tokens":4096,"full_kv_transfer_s":0.04294967296,"full_reprefill_s":8.192,"ephemeral_rematerialize_s":0.21480000000000002,"queue_gap_threshold_s":{"full_kv_transfer":0.04294967296,"full_reprefill":8.192,"ephemeral":0.21480000000000002},"resident_bytes":{"full_kv":1073741824,"ephemeral_active":134217728}},
-    {"history_tokens":131072,"working_set_tokens":4096,"full_kv_transfer_s":0.17179869184,"full_reprefill_s":32.768,"ephemeral_rematerialize_s":0.21480000000000002,"queue_gap_threshold_s":{"full_kv_transfer":0.17179869184,"full_reprefill":32.768,"ephemeral":0.21480000000000002},"resident_bytes":{"full_kv":4294967296,"ephemeral_active":134217728}},
-    {"history_tokens":524288,"working_set_tokens":4096,"full_kv_transfer_s":0.68719476736,"full_reprefill_s":131.072,"ephemeral_rematerialize_s":0.21480000000000002,"queue_gap_threshold_s":{"full_kv_transfer":0.68719476736,"full_reprefill":131.072,"ephemeral":0.21480000000000002},"resident_bytes":{"full_kv":17179869184,"ephemeral_active":134217728}},
-    {"history_tokens":1048576,"working_set_tokens":4096,"full_kv_transfer_s":1.37438953472,"full_reprefill_s":262.144,"ephemeral_rematerialize_s":0.21480000000000002,"queue_gap_threshold_s":{"full_kv_transfer":1.37438953472,"full_reprefill":262.144,"ephemeral":0.21480000000000002},"resident_bytes":{"full_kv":34359738368,"ephemeral_active":134217728}}
+    {
+      "history_tokens": 32768,
+      "working_set_tokens": 4096,
+      "full_kv_transfer_s": 0.04294967296,
+      "full_reprefill_s": 8.192,
+      "ephemeral_rematerialize_s": 1.034,
+      "queue_gap_threshold_s": {
+        "full_kv_transfer": 0.04294967296,
+        "full_reprefill": 8.192,
+        "ephemeral": 1.034
+      },
+      "resident_bytes": {
+        "full_kv": 1073741824,
+        "ephemeral_active": 134217728
+      }
+    },
+    {
+      "history_tokens": 131072,
+      "working_set_tokens": 4096,
+      "full_kv_transfer_s": 0.17179869184,
+      "full_reprefill_s": 32.768,
+      "ephemeral_rematerialize_s": 1.034,
+      "queue_gap_threshold_s": {
+        "full_kv_transfer": 0.17179869184,
+        "full_reprefill": 32.768,
+        "ephemeral": 1.034
+      },
+      "resident_bytes": {
+        "full_kv": 4294967296,
+        "ephemeral_active": 134217728
+      }
+    },
+    {
+      "history_tokens": 524288,
+      "working_set_tokens": 4096,
+      "full_kv_transfer_s": 0.68719476736,
+      "full_reprefill_s": 131.072,
+      "ephemeral_rematerialize_s": 1.034,
+      "queue_gap_threshold_s": {
+        "full_kv_transfer": 0.68719476736,
+        "full_reprefill": 131.072,
+        "ephemeral": 1.034
+      },
+      "resident_bytes": {
+        "full_kv": 17179869184,
+        "ephemeral_active": 134217728
+      }
+    },
+    {
+      "history_tokens": 1048576,
+      "working_set_tokens": 4096,
+      "full_kv_transfer_s": 1.37438953472,
+      "full_reprefill_s": 262.144,
+      "ephemeral_rematerialize_s": 1.034,
+      "queue_gap_threshold_s": {
+        "full_kv_transfer": 1.37438953472,
+        "full_reprefill": 262.144,
+        "ephemeral": 1.034
+      },
+      "resident_bytes": {
+        "full_kv": 34359738368,
+        "ephemeral_active": 134217728
+      }
+    }
   ],
   "scaling": {
-    "history_growth_x": 32.0,
-    "full_kv_transfer_growth_x": 32.0,
-    "full_reprefill_growth_x": 32.0,
-    "ephemeral_rematerialize_growth_x": 1.0,
-    "full_kv_resident_growth_x": 32.0,
-    "ephemeral_resident_growth_x": 1.0
+    "history_growth_x": 32,
+    "full_kv_transfer_growth_x": 32,
+    "full_reprefill_growth_x": 32,
+    "ephemeral_rematerialize_growth_x": 1,
+    "full_kv_resident_growth_x": 32,
+    "ephemeral_resident_growth_x": 1
   },
+  "full_kv_transfer_crossover_history_tokens": 788879,
   "inversion": {
-    "long":{"history_tokens":1048576,"working_set_tokens":2048,"full_kv_transfer_s":1.37438953472,"full_reprefill_s":262.144,"ephemeral_rematerialize_s":0.1124,"queue_gap_threshold_s":{"full_kv_transfer":1.37438953472,"full_reprefill":262.144,"ephemeral":0.1124},"resident_bytes":{"full_kv":34359738368,"ephemeral_active":67108864}},
-    "short":{"history_tokens":32768,"working_set_tokens":16384,"full_kv_transfer_s":0.04294967296,"full_reprefill_s":8.192,"ephemeral_rematerialize_s":0.8292,"queue_gap_threshold_s":{"full_kv_transfer":0.04294967296,"full_reprefill":8.192,"ephemeral":0.8292},"resident_bytes":{"full_kv":1073741824,"ephemeral_active":536870912}},
-    "history_ratio_long_over_short":32.0,
-    "ephemeral_resident_ratio_long_over_short":0.125,
-    "ephemeral_route_cost_ratio_long_over_short":0.135552339604438,
-    "full_kv_route_cost_ratio_long_over_short":32.0,
-    "resident_inversion":true,
-    "route_cost_inversion":true
+    "long": {
+      "history_tokens": 1048576,
+      "working_set_tokens": 2048,
+      "full_kv_transfer_s": 1.37438953472,
+      "full_reprefill_s": 262.144,
+      "ephemeral_rematerialize_s": 0.522,
+      "queue_gap_threshold_s": {
+        "full_kv_transfer": 1.37438953472,
+        "full_reprefill": 262.144,
+        "ephemeral": 0.522
+      },
+      "resident_bytes": {
+        "full_kv": 34359738368,
+        "ephemeral_active": 67108864
+      }
+    },
+    "short": {
+      "history_tokens": 32768,
+      "working_set_tokens": 16384,
+      "full_kv_transfer_s": 0.04294967296,
+      "full_reprefill_s": 8.192,
+      "ephemeral_rematerialize_s": 4.106,
+      "queue_gap_threshold_s": {
+        "full_kv_transfer": 0.04294967296,
+        "full_reprefill": 8.192,
+        "ephemeral": 4.106
+      },
+      "resident_bytes": {
+        "full_kv": 1073741824,
+        "ephemeral_active": 536870912
+      }
+    },
+    "history_ratio_long_over_short": 32,
+    "ephemeral_resident_ratio_long_over_short": 0.125,
+    "ephemeral_route_cost_ratio_long_over_short": 0.12713102776424745,
+    "full_kv_route_cost_ratio_long_over_short": 32,
+    "resident_inversion": true,
+    "route_cost_inversion": true
   },
-  "hypothesis":"session migration should become a queueing decision instead of a history-length decision when remote materialization cost tracks the active working set rather than accumulated history",
-  "decision_rule":"advance only if measured index lookup plus active-set prefill is mostly working-set-bounded across 32K->1M histories, and a real/simulator-backed cluster trace shows that soft-affinity routing improves p99 or SLO goodput over sticky routing under realistic skew or failure without material quality loss",
-  "honesty":"indexed_lookup_ms and throughput rates are assumptions. This artifact establishes the phase-boundary arithmetic to measure; it is not evidence that the boundary is reached on hardware."
+  "hypothesis": "session migration should become a queueing decision instead of a history-length decision when remote materialization cost tracks the active working set rather than accumulated history",
+  "decision_rule": "advance only if measured index lookup plus active-set prefill is mostly working-set-bounded across 32K->1M histories, and a real/simulator-backed cluster trace shows that soft-affinity routing improves p99 or SLO goodput over sticky routing under realistic skew or failure without material quality loss",
+  "honesty": "indexed_lookup_ms and throughput rates are assumptions. This artifact establishes the phase-boundary arithmetic to measure; it is not evidence that the boundary is reached on hardware."
 }
