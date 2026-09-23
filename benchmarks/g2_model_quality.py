@@ -154,6 +154,25 @@ def score_target(model, tokenizer, context: str, target: str, max_length: int, d
     }
 
 
+# the same history buckets the structural harness reports, so the two halves of G2 can
+# be read side by side: active fraction from the index, quality from the model
+HISTORY_BUCKETS = ((0, 8192, "<=8K"), (8192, 32768, "8K-32K"),
+                   (32768, 131072, "32K-128K"), (131072, None, ">=128K"))
+
+# the plan's G2 advance rule, in the units this harness measures: at worst a two
+# percentage point loss of next-token accuracy, and an active fraction that does not
+# grow with history
+ACCURACY_TOLERANCE = -0.02
+MIN_BUCKET_EXAMPLES = 8
+
+
+def bucket_of(history_tokens: int) -> str:
+    for low, high, label in HISTORY_BUCKETS:
+        if history_tokens >= low and (high is None or history_tokens < high):
+            return label
+    return HISTORY_BUCKETS[-1][2]
+
+
 def summarize(rows: list[dict]) -> dict:
     valid = [r for r in rows if r.get("full") and r.get("active")]
     if not valid:
@@ -178,6 +197,50 @@ def summarize(rows: list[dict]) -> dict:
         "nll_delta_active_minus_full_p95": percentile(nll_delta, 0.95),
         "token_accuracy_delta_p50": median(acc_delta) if acc_delta else None,
         "token_accuracy_delta_p05": percentile(acc_delta, 0.05) if acc_delta else None,
+    }
+
+
+def summarize_by_bucket(rows: list[dict]) -> dict:
+    buckets: dict[str, list[dict]] = {}
+    for row in rows:
+        buckets.setdefault(bucket_of(int(row.get("history_tokens_estimate") or 0)),
+                           []).append(row)
+    return {label: summarize(buckets[label]) for _low, _high, label in HISTORY_BUCKETS
+            if label in buckets}
+
+
+def verdict_by_bucket(by_bucket: dict) -> dict:
+    """The checkable form of the G2 advance rule.
+
+    `advance` needs every populated bucket to be both large enough to read and inside
+    the accuracy tolerance, and the longest bucket's active fraction to be no larger
+    than the shortest bucket's - i.e. the working set must not track history.
+    """
+    usable = {label: stats for label, stats in by_bucket.items()
+              if stats.get("examples", 0) >= MIN_BUCKET_EXAMPLES}
+    if len(usable) < 2:
+        return {"verdict": "inconclusive", "reason": "fewer than two readable buckets",
+                "readable_buckets": sorted(usable)}
+
+    def order(label):
+        return [i for i, (_l, _h, name) in enumerate(HISTORY_BUCKETS) if name == label][0]
+
+    labels = sorted(usable, key=order)
+    losses = {label: usable[label]["token_accuracy_delta_p50"] for label in labels}
+    fractions = {label: usable[label]["active_fraction_p50"] for label in labels}
+    worst_loss = min((v for v in losses.values() if v is not None), default=None)
+    grows = fractions[labels[-1]] > fractions[labels[0]] + 1e-9
+    inside = worst_loss is not None and worst_loss >= ACCURACY_TOLERANCE
+    return {
+        "verdict": "advance" if (inside and not grows) else "kill",
+        "reason": ("active fraction and accuracy both hold across buckets" if inside and not grows
+                   else ("accuracy loss beyond tolerance" if not inside
+                         else "active fraction grows with history")),
+        "readable_buckets": labels,
+        "active_fraction_p50_by_bucket": fractions,
+        "token_accuracy_delta_p50_by_bucket": losses,
+        "worst_token_accuracy_delta_p50": worst_loss,
+        "accuracy_tolerance": ACCURACY_TOLERANCE,
     }
 
 
@@ -262,6 +325,14 @@ def main(argv=None):
         "max_length": args.max_length,
         "sessions": sessions,
         "summary": summarize(rows),
+        "by_history_bucket": summarize_by_bucket(rows),
+        "verdict_by_bucket": verdict_by_bucket(summarize_by_bucket(rows)),
+        "advance_rule": (
+            f"every readable history bucket keeps token-accuracy p50 >= "
+            f"{ACCURACY_TOLERANCE} and the longest bucket's active fraction does not "
+            f"exceed the shortest bucket's; buckets need >= {MIN_BUCKET_EXAMPLES} "
+            f"examples to be read"
+        ),
         "rows": rows,
         "interpretation": (
             "teacher-forced next-assistant continuation quality; this is a model-level "
@@ -272,6 +343,8 @@ def main(argv=None):
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(payload, indent=2) + "\n")
     print(json.dumps(payload["summary"], indent=2))
+    print("by bucket:", json.dumps(payload["by_history_bucket"], indent=2))
+    print("verdict:", json.dumps(payload["verdict_by_bucket"], indent=2))
     print("wrote", out)
     return 0
 
