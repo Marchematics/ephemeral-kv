@@ -16,8 +16,8 @@ Accounting and design properties are labelled separately.
 
 | # | question | required evidence | gate |
 |---|---|---|---|
-| Q1 | Is next-turn working state sparse and indexed lookup sublinear on real agent traces? | trace-level active fraction, lookup work/latency, task quality | G2 |
-| Q2 | Is the cold-route mobility tax <=1.25x from 128K to 1M at fixed active set? | real model + hardware timing | G3 |
+| Q1 | Is next-turn working state sparse and indexed lookup sublinear on real agent traces? | structural trace receipt exists; frozen-LM quality runner added; end-task quality still required | G2 |
+| Q2 | Is the cold-route mobility tax <=1.25x from 128K to 1M at fixed active set? | hardware primitive runner added; end-to-end real model timing still required | G3 |
 | Q3 | Can 1M/2K be cheaper to move than 32K/16K on hardware? | matched remote-route measurement | G3 |
 | Q4 | Does replacing history-sized cold-route cost with measured active-set cost change the best routing decision under realistic skew/failure? | multi-worker p99/SLO goodput | G4 |
 | Q5 | Can a worker/model be replaced without transferring history-sized model state? | failover/rollout experiment | G5 |
