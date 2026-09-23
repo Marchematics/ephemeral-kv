@@ -1,22 +1,20 @@
 #!/usr/bin/env python
-"""Kill gate G3: does bounded rematerialization make long sessions movable?
+"""G3 accounting: can the cost of moving a session stop growing with history?
 
-This is an *accounting* artifact, not a serving measurement.
+This file defines the *measurement target*. It is not a serving benchmark and every
+rate in DEFAULT_MODEL is an assumption.
 
-The key quantity is the cold-route penalty for moving a turn away from the worker
-that happens to hold a warm KV prefix.
+For a cold route, conventional systems pay for history-sized state:
 
-Traditional migration restores or recomputes state proportional to accumulated
-history. The EphemeralKV hypothesis is that a durable, sublinear text/index plane
-can identify a small active working set, so the remote penalty is approximately
+    transfer(full KV)  or  re-prefill(full history)
 
-    index_lookup + prefill(active_working_set)
+EphemeralKV targets:
 
-rather than a function of all prior tokens.
+    indexed lookup + prefill(active working set)
 
-A scheduler benefits from mobility whenever the queue-delay advantage of another
-worker exceeds that cold-route penalty. The script reports that threshold and
-its scaling with session age. Every rate here is declared, never measured.
+The key paper hypothesis is that the latter can stay approximately independent of
+accumulated history on real agent traces. A router can then treat locality as a hint
+instead of an increasingly hard constraint as a session ages.
 """
 
 from __future__ import annotations
@@ -28,8 +26,9 @@ from pathlib import Path
 DEFAULT_MODEL = {
     "kv_bytes_per_token": 32 * 1024,
     "link_bandwidth_gbs": 25.0,
-    "full_prefill_tokens_per_s": 4000.0,
-    "active_prefill_tokens_per_s": 20000.0,
+    # IMPORTANT: the same model prefill rate is used for both full-history and
+    # active-set materialization. We do not grant EphemeralKV a faster kernel.
+    "prefill_tokens_per_s": 4000.0,
     "indexed_lookup_ms": 10.0,
 }
 
@@ -38,6 +37,8 @@ def route_costs(history_tokens: int, working_set_tokens: int, model=None):
     """Return declared cold-route penalties, excluding common decode time."""
     m = {**DEFAULT_MODEL, **(model or {})}
     kv_bytes = history_tokens * m["kv_bytes_per_token"]
+
+    # One-way movement is the favorable baseline for full-KV migration.
     full_kv_transfer = kv_bytes / (m["link_bandwidth_gbs"] * 1e9)
     full_reprefill = history_tokens / m["prefill_tokens_per_s"]
     ephemeral = (
@@ -60,6 +61,18 @@ def route_costs(history_tokens: int, working_set_tokens: int, model=None):
             "ephemeral_active": working_set_tokens * m["kv_bytes_per_token"],
         },
     }
+
+
+def transfer_crossover_history(working_set_tokens: int, model=None) -> int:
+    """History length where one-way full-KV load equals active rematerialization."""
+    m = {**DEFAULT_MODEL, **(model or {})}
+    active_s = (
+        m["indexed_lookup_ms"] / 1000.0
+        + working_set_tokens / m["prefill_tokens_per_s"]
+    )
+    return int(
+        active_s * m["link_bandwidth_gbs"] * 1e9 / m["kv_bytes_per_token"]
+    )
 
 
 def scaling(rows):
@@ -85,8 +98,13 @@ def scaling(rows):
     }
 
 
-def inversion(long_history=1_048_576, long_working_set=2048,
-              short_history=32_768, short_working_set=16_384, model=None):
+def inversion(
+    long_history=1_048_576,
+    long_working_set=2048,
+    short_history=32_768,
+    short_working_set=16_384,
+    model=None,
+):
     long = route_costs(long_history, long_working_set, model)
     short = route_costs(short_history, short_working_set, model)
     return {
@@ -117,8 +135,12 @@ def inversion(long_history=1_048_576, long_working_set=2048,
 
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    p.add_argument("--histories", type=int, nargs="+",
-                   default=[32768, 131072, 524288, 1048576])
+    p.add_argument(
+        "--histories",
+        type=int,
+        nargs="+",
+        default=[32768, 131072, 524288, 1048576],
+    )
     p.add_argument("--working-set", type=int, default=4096)
     p.add_argument("--out", required=True)
     args = p.parse_args(argv)
@@ -131,36 +153,49 @@ def main(argv=None):
         "config": vars(args),
         "rows": rows,
         "scaling": scaling(rows),
+        "full_kv_transfer_crossover_history_tokens": transfer_crossover_history(
+            args.working_set
+        ),
         "inversion": inversion(),
         "hypothesis": (
-            "session migration should become a queueing decision instead of a "
-            "history-length decision when remote materialization cost tracks the "
-            "active working set rather than accumulated history"
+            "session affinity pressure should stop increasing with session age when "
+            "cold-route cost tracks the active working set instead of full history"
         ),
         "decision_rule": (
             "advance only if measured index lookup plus active-set prefill is mostly "
-            "working-set-bounded across 32K->1M histories, and a real/simulator-backed "
-            "cluster trace shows that soft-affinity routing improves p99 or SLO goodput "
-            "over sticky routing under realistic skew or failure without material "
-            "quality loss"
+            "working-set-bounded across 32K->1M histories, and cluster replay shows "
+            "that the changed mobility tax improves p99 or SLO goodput over strong "
+            "sticky/cache-aware routing in realistic skew or failure regimes without "
+            "material quality loss"
         ),
         "honesty": (
-            "indexed_lookup_ms and throughput rates are assumptions. This artifact "
-            "establishes the phase-boundary arithmetic to measure; it is not evidence "
-            "that the boundary is reached on hardware."
+            "bandwidth, prefill throughput, and indexed lookup latency are assumptions. "
+            "This artifact defines a phase boundary to measure; it is not evidence that "
+            "real hardware reaches that boundary."
         ),
     }
+
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(payload, indent=2))
-    print(json.dumps({
-        "kind": payload["kind"],
-        "scaling": payload["scaling"],
-        "inversion": {
-            k: v for k, v in payload["inversion"].items()
-            if k.endswith("ratio_long_over_short") or k.endswith("inversion")
-        },
-    }, indent=2))
+    out.write_text(json.dumps(payload, indent=2) + "\n")
+
+    print(
+        json.dumps(
+            {
+                "kind": payload["kind"],
+                "scaling": payload["scaling"],
+                "full_kv_transfer_crossover_history_tokens": (
+                    payload["full_kv_transfer_crossover_history_tokens"]
+                ),
+                "inversion": {
+                    k: v
+                    for k, v in payload["inversion"].items()
+                    if k.endswith("ratio_long_over_short") or k.endswith("inversion")
+                },
+            },
+            indent=2,
+        )
+    )
     print("wrote", out)
     return 0
 
