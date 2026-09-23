@@ -1,92 +1,163 @@
 # Kill gates
 
-Five experiments decide whether this project is worth building. Each has a decision
-rule written *before* it runs, and each is designed to fail cheaply on a single 24 GiB
-GPU rather than after a serving system has been written.
+EphemeralKV is now a **session-mobility** project. Five gates decide whether the
+central claim survives. Every gate has a failure condition written before its
+measurement.
 
-## G1 — Crossover exists (the core gate)
+The key systems quantity is the **mobility tax**
 
-**Question.** Past what session length does `discard + recompile a working set` beat
-`keep and restore`?
+```text
+mobility_tax = completion_time(cold remote route) - completion_time(warm local route)
+```
 
-**Design.** Simulate sessions of `T = 8, 32, 128, 512` turns with a fixed per-turn
-addition. For each `T`, measure wall-clock and peak memory for four policies on the
-same next request:
+Traditional full-KV mobility makes this tax grow with accumulated history. EphemeralKV
+only matters if a remote turn can instead materialize a small active working set from a
+durable index, making the tax primarily a function of the active set.
 
-| policy | durable state | per-turn work |
-|---|---|---|
-| `keep_hbm` | full KV in HBM | none |
-| `keep_dram` | full KV in host DRAM, moved in/out | transfer |
-| `keep_nvme` | full KV on disk, streamed | transfer |
-| `recompute_full` | transcript | full re-prefill of the history |
-| `recompile_active` | transcript + index | compile a working set for the request only |
+## G1 — Reject the easy tiered-storage story
 
-**Decision rule.** The project lives if `recompile_active` beats `keep_*` on total
-time-to-response (JCT) for some `T <= 512`, or beats `recompute_full` by a factor that
-grows with `T`. It dies if recompile's cost tracks history length (there is no
-crossover) or if the working set is not small (gates G4/G5 fail).
+**Question.** Does `discard + recompile` simply beat DRAM/NVMe KV restore on latency?
 
-**Status.** Not run. Harness: `benchmarks/kill_gate_crossover.py` (skeleton).
+**Current evidence.** `benchmarks/kill_gate_crossover.py` has an accounting layer using
+declared rates. Under that model, active recompilation beats a full re-prefill but
+does **not** beat DRAM/NVMe KV movement by 512 turns. This is an accounting signal, not
+a hardware measurement.
 
-## G2 — Working-set sparsity holds on real agent traffic
+**Decision.** Do not use "recompute is cheaper than offload" as the paper thesis.
+Hardware measurement can still quantify the crossover, but G3/G4 must carry the work.
 
-**Question.** In real multi-turn agent trajectories, how much of the history is
-actually live for the next request?
+**Status.** Accounting completed; measurement layer open.
 
-**Design.** Take public agent traces (SWE-Bench/OpenHands/BFCL-style) and, for each
-turn, measure the fraction of history tokens whose removal changes the answer
-(leave-one-out on chunks, or attention-mass attribution as a cheaper proxy).
+## G2 — A real agent turn has a bounded retrievable working set
 
-**Decision rule.** The project lives if the live fraction is small and roughly flat in
-session length (say <10% at 500K history). It dies if the live set grows with history,
-because then recompilation cannot be cheap.
+**Question.** Can a model-independent durable index find the history needed by the next
+agent turn without scanning the entire transcript or materially harming task quality?
 
-**Status.** Not run.
+**Design.**
+Use public multi-turn agent traces (SWE-Bench/OpenHands/BFCL-style plus at least one
+long-memory agent benchmark). Build an append-only span store and at least two
+non-QCC compilers:
 
-## G3 — Model-state reuse is *not* the only cheap path
+* lexical/provenance compiler (BM25, file/tool/result IDs, recency);
+* embedding compiler.
 
-**Question.** Is the restored KV actually faster than a fresh compile of a *small*
-working set, on real hardware, including transfer and scheduling?
+For each turn measure:
 
-**Design.** Same as G1 but on the serving stack (continuous batching, several concurrent
-sessions) instead of a single-request harness: measure TTFT, JCT, goodput and session
-capacity at a fixed memory ceiling.
+* history tokens and selected active tokens;
+* index nodes/postings visited and lookup latency;
+* task success / answer quality relative to a matched full-history or strongest feasible
+  baseline;
+* how active-set size and lookup time scale with session age.
 
-**Decision rule.** Lives if session capacity at a fixed HBM ceiling rises materially
-without hurting TTFT at the same SLA; dies if scheduling overhead eats the gain.
+**Advance rule.**
+At long histories, the active fraction must fall rather than track history; p95 lookup
+must be sublinear in stored tokens in practice; and the selected-view quality loss must
+stay within 2 percentage points on the primary task metric or be recovered by a
+fallback.
 
-**Status.** Not run.
+**Kill rule.**
+If either lookup cost or required selected tokens scales approximately linearly with
+history on realistic traces, the mobility abstraction collapses.
 
-## G4 — Longer request, smaller footprint (the sharpest claim)
+**Status.** Open.
 
-**Question.** Can a request with a longer history occupy *less* GPU memory than one
-with a shorter history?
+## G3 — History-free mobility on one machine
 
-**Design.** Pair requests: `history 1M / working set 2K` against
-`history 32K / working set 16K`. Measure resident HBM per request under the same engine.
+**Question.** With active work fixed, does the measured cold-route penalty stop scaling
+with session age?
 
-**Decision rule.** Lives if the inversion is reproducible; dies if the compiler's
-overhead or fragmentation keeps the footprint ordered by history length.
+**Design.**
+Measure the same next turn at `32K / 128K / 512K / 1M` accumulated history under:
 
-**Status.** Not run.
+1. warm local KV;
+2. full-KV transfer from CPU/remote tier;
+3. full re-prefill;
+4. EphemeralKV: indexed lookup + active-set prefill.
 
-## G5 — Model-agnostic durability
+Sweep active sets `2K / 4K / 8K / 16K`. Report TTFT, wall clock, bytes moved, GPU peak
+memory, CPU time, and index time separately.
 
-**Question.** Does a durable transcript survive a model change without invalidating the
-session, where a durable KV cannot?
+`benchmarks/kill_gate_mobility.py` is the accounting receipt that defines the expected
+scaling and routing threshold before hardware measurement.
 
-**Design.** Compile for checkpoint A, then serve the next turn with checkpoint B (and
-with a different adapter / precision / rope configuration). Compare quality against
-"KV compiled by the same model".
+**Advance rule.**
+For a fixed active set, the measured EphemeralKV mobility tax from 128K to 1M should
+grow by at most **1.25x**, while at least one full-history cold route grows materially
+with history. The 1M/2K case should be cheaper to move than the 32K/16K case.
 
-**Decision rule.** Lives if the transcript path shows the expected portability; this is
-mostly a design property, so the experiment is a demonstration rather than a risk.
+**Kill rule.**
+If EphemeralKV's cold-route penalty still grows close to linearly with history, there is
+no new mobility regime.
 
-**Status.** Not run.
+**Status.** Accounting artifact present; hardware measurement open.
 
-## What would kill the project outright
+## G4 — Break sticky routing at cluster level
 
-* No crossover on any `T <= 512` (G1), or
-* live history growing with session length (G2), or
-* the compile cost of a small working set being dominated by anything other than the
-  working set (G1/G3).
+**Question.** Can cheap mobility reverse the current agent-serving preference for sticky
+routing?
+
+**Design.**
+At 4--8 data-parallel workers, replay sessions with realistic tool gaps and skew. Compare:
+
+* strict session-sticky routing;
+* queue/load-aware routing with full-KV migration;
+* KV-aware routing with an escape hatch;
+* **Ephemeral soft affinity**: use a warm prefix when it wins, otherwise rematerialize
+  the active set on the worker with the best predicted completion time.
+
+The scheduling rule is intentionally simple:
+
+```text
+choose worker i minimizing:
+    queue_delay(i) + (0 if warm(i) else predicted_mobility_tax(request, i))
+```
+
+Run balanced load, hotspot bursts, one-worker slowdown, one-worker failure, and recovery.
+Report p50/p95/p99 TTFT/JCT, SLO goodput, throughput, HBM/session, bytes moved, and route
+migration rate.
+
+**Best-paper gate.**
+Under at least two realistic skew/failure regimes, soft affinity should improve SLO
+goodput by >=1.5x or p99 by >=30% against the strongest sticky/cache-aware baseline,
+while regressing balanced-load median latency by <=5%.
+
+**Kill rule.**
+If a strong sticky/cache-aware baseline remains better across the measured operating
+envelope, the core paper claim is false.
+
+**Status.** Open.
+
+## G5 — Recovery without session ownership
+
+**Question.** Does worker/model replacement preserve session availability without moving
+history-sized KV state?
+
+**Design.**
+Kill or drain the worker that served a long-running session, then resume the next turn
+on another worker. Repeat across a compatible model replica and across a model
+revision/adapter change where old KV is invalid. Compare:
+
+* sticky worker restart / cold full prefill;
+* tiered-KV restore;
+* Ephemeral rematerialization from transcript + index.
+
+The transcript/index path is expected to be model-independent; this is an enabling
+property, not the novelty by itself.
+
+**Advance rule.**
+Failover recovery cost must follow the active set, not accumulated history, and the
+session must not require a durable model-specific KV object for correctness.
+
+**Kill rule.**
+If recovery needs the history-sized KV or equivalent model-bound backing state, the
+"session has no home" abstraction is not realized.
+
+**Status.** Open.
+
+## What kills the project outright
+
+* G2: live state or index work scales roughly linearly with history on realistic agents.
+* G3: remote materialization remains history-sized.
+* G4: cheap mobility does not translate into a cluster-level p99/goodput win against
+  strong sticky/cache-aware routing.
+* Quality requires QCC-specific behavior; Paper B must stand without Paper A.
