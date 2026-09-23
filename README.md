@@ -21,9 +21,7 @@ turn may run.
 1. **History-free mobility.** With the active working set held fixed, measured remote
    materialization cost stays roughly flat as history grows from 32K toward 1M tokens,
    while full-KV movement/re-prefill grows with history.
-2. **A routing phase change.** Under realistic load skew, tool gaps, or worker failure,
-   soft-affinity routing improves p99 latency / SLO goodput over sticky routing because
-   it can escape a hot worker without paying a history-sized miss.
+2. **A routing phase change.** Under realistic load skew, tool gaps, or worker failure,\n   replacing a history-sized cold-route penalty with an active-set-sized penalty changes\n   when a scheduler should leave the warm worker. The routing heuristic itself is not\n   claimed as novel.
 3. **The inversion.** A 1M-token session with a small active set can be cheaper to move
    than a 32K-token session with a larger active set.
 4. **No hidden QCC dependency.** BM25/embedding/provenance-style compilers are
@@ -61,7 +59,7 @@ restore by 512 turns. So tiered-storage latency is not the headline.
 
 G3 now asks the sharper question: if the durable index supports bounded/sublinear
 lookup, does the **remote-route tax** stop scaling with history? The checked-in
-accounting artifact only defines the phase boundary; it is not a hardware result.
+accounting artifacts define the phase boundary across active-set size, KV bytes/token,\nand fabric bandwidth; they are not hardware results.
 
 ## Repository layout
 
