@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "ephemeral-kv"
 version = "0.0.1"
-description = "Ephemeral state for long-lived LLM sessions: the conversation is durable, the KV cache is disposable"
+description = "History-independent session mobility for long-lived LLM serving"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
@@ -18,7 +18,7 @@ dev = ["pytest>=7.4"]
 Homepage = "https://github.com/Marchematics/ephemeral-kv"
 
 [tool.setuptools]
-packages = []
+packages = ["ephemeralkv"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
