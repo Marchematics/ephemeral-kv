@@ -132,7 +132,7 @@
     "resident_inversion": true,
     "route_cost_inversion": true
   },
-  "hypothesis": "session migration should become a queueing decision instead of a history-length decision when remote materialization cost tracks the active working set rather than accumulated history",
-  "decision_rule": "advance only if measured index lookup plus active-set prefill is mostly working-set-bounded across 32K->1M histories, and a real/simulator-backed cluster trace shows that soft-affinity routing improves p99 or SLO goodput over sticky routing under realistic skew or failure without material quality loss",
-  "honesty": "indexed_lookup_ms and throughput rates are assumptions. This artifact establishes the phase-boundary arithmetic to measure; it is not evidence that the boundary is reached on hardware."
+  "hypothesis": "session affinity pressure should stop increasing with session age when cold-route cost tracks the active working set instead of full history",
+  "decision_rule": "advance only if measured index lookup plus active-set prefill is mostly working-set-bounded across 32K->1M histories, and cluster replay shows that the changed mobility tax improves p99 or SLO goodput over strong sticky/cache-aware routing in realistic skew or failure regimes without material quality loss",
+  "honesty": "bandwidth, prefill throughput, and indexed lookup latency are assumptions. This artifact defines a phase boundary to measure; it is not evidence that real hardware reaches that boundary."
 }
