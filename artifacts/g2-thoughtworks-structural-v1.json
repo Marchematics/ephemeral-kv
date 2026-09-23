@@ -1,0 +1,57 @@
+{
+  "schema": "ephemeral-kv-g2-structural-v1",
+  "kind": "structural_measurement",
+  "input": "/tmp/sessions.jsonl",
+  "sessions": 15000,
+  "token_budget": 4096,
+  "summary": {
+    "calls": 618037,
+    "overall": {
+      "calls": 618037,
+      "selected_fraction_p50": 0.6036845983787767,
+      "selected_fraction_p95": 1,
+      "postings_per_span_p50": 6.819354838709677,
+      "postings_per_span_p95": 26.169995398067147,
+      "lookup_ms_p50": 0.11188899999581281,
+      "lookup_ms_p95": 0.4841329999891286
+    },
+    "by_history_bucket": {
+      "32K-128K": {
+        "calls": 334,
+        "selected_fraction_p50": 0.11869371668537265,
+        "selected_fraction_p95": 0.126911725948463,
+        "postings_per_span_p50": 10.113537389573224,
+        "postings_per_span_p95": 41.17364770268547,
+        "lookup_ms_p50": 0.24597850000418475,
+        "lookup_ms_p95": 1.105439349979065
+      },
+      "8K-32K": {
+        "calls": 236991,
+        "selected_fraction_p50": 0.361228813559322,
+        "selected_fraction_p95": 0.49289841116995664,
+        "postings_per_span_p50": 7.103448275862069,
+        "postings_per_span_p95": 19.76923076923077,
+        "lookup_ms_p50": 0.15024000001062632,
+        "lookup_ms_p95": 0.47003699998526827
+      },
+      "<=8K": {
+        "calls": 380712,
+        "selected_fraction_p50": 0.8584621846024618,
+        "selected_fraction_p95": 1,
+        "postings_per_span_p50": 6.546666666666667,
+        "postings_per_span_p95": 31.134144144144166,
+        "lookup_ms_p50": 0.08685199999547422,
+        "lookup_ms_p95": 0.4910799500045472
+      }
+    }
+  },
+  "quality_status": "not_measured",
+  "decision_rule": "this harness can only advance the lookup-complexity half of G2; G2 remains open until real task/model quality is measured",
+  "provenance": {
+    "workflow_run_id": 35905165100,
+    "workflow_head_sha": "a05436df04af2bf7dae252968223e16afe2aade7",
+    "dataset": "thoughtworks/agentic-coding-trajectories",
+    "dataset_commit": "cef72d1f4d0caabf85937adf8337a14b7522c782",
+    "note": "copied from the successful GitHub Actions artifact; v1 uses regex word-token estimates and is retained as a baseline, not as the final length-calibrated result"
+  }
+}
