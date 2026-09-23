@@ -1,0 +1,88 @@
+name: g2-real-trace
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/g2-real-trace.yml"
+
+jobs:
+  thoughtworks-structural:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install structural dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e . pyarrow
+
+      - name: Download pinned public trajectory corpus
+        run: |
+          curl --fail --location --retry 3             "https://huggingface.co/datasets/thoughtworks/agentic-coding-trajectories/resolve/cef72d1f4d0caabf85937adf8337a14b7522c782/sessions.parquet"             --output /tmp/sessions.parquet
+          ls -lh /tmp/sessions.parquet
+
+      - name: Convert only the trajectory column to JSONL
+        run: |
+          python - <<'PY'
+          import json
+          import pyarrow.parquet as pq
+
+          src = "/tmp/sessions.parquet"
+          dst = "/tmp/sessions.jsonl"
+          pf = pq.ParquetFile(src)
+          names = set(pf.schema.names)
+          candidates = ["messages_json", "messages", "trajectory"]
+          field = next((x for x in candidates if x in names), None)
+          if field is None:
+              raise SystemExit(
+                  "unsupported dataset schema; expected one of "
+                  f"{candidates}, got {sorted(names)}"
+              )
+
+          rows = 0
+          with open(dst, "w") as out:
+              for batch in pf.iter_batches(batch_size=128, columns=[field]):
+                  for item in batch.to_pylist():
+                      value = item[field]
+                      out.write(json.dumps({field: value}, ensure_ascii=False) + "\n")
+                      rows += 1
+
+          print(json.dumps({
+              "parquet_rows": rows,
+              "trajectory_field": field,
+              "parquet_columns": sorted(names),
+          }, indent=2))
+          if rows < 10000:
+              raise SystemExit(f"unexpectedly small corpus: {rows} sessions")
+          PY
+
+      - name: Run G2 structural gate
+        run: |
+          python benchmarks/g2_trace_index.py             --jsonl /tmp/sessions.jsonl             --token-budget 4096             --max-spans 64             --out artifacts/g2-thoughtworks-structural.json
+
+      - name: Print receipt
+        run: |
+          cat artifacts/g2-thoughtworks-structural.json
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          p = json.load(open("artifacts/g2-thoughtworks-structural.json"))
+          print("## G2 real-trace structural gate")
+          print()
+          print(f"- sessions: {p['sessions']}")
+          print(f"- calls: {p['summary']['calls']}")
+          print(f"- quality: **{p['quality_status']}**")
+          print()
+          print("This run is structural only; it does not establish answer/task quality.")
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: g2-thoughtworks-structural
+          path: artifacts/g2-thoughtworks-structural.json
+          if-no-files-found: error
