@@ -2,5 +2,6 @@
 
 | page | what it covers |
 |---|---|
-| [`PLAN.md`](PLAN.md) | the five kill gates, their decision rules, and what would kill the project |
-| [`CLAIMS.md`](CLAIMS.md) | the claim ledger: what is established, by which artifact, and what is open |
+| [`PLAN.md`](PLAN.md) | session-mobility kill gates and decision rules |
+| [`CLAIMS.md`](CLAIMS.md) | measured/accounting claim ledger |
+| [`NOVELTY.md`](NOVELTY.md) | overlap audit, rejected headlines, surviving paper hypothesis |
