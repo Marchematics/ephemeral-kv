@@ -1,0 +1,366 @@
+{
+  "schema": "ephemeral-kv-g3-phase-accounting-v1",
+  "kind": "accounting",
+  "config": {
+    "kv_kib": [
+      32,
+      64,
+      128,
+      256
+    ],
+    "link_gbs": [
+      12.5,
+      25,
+      50,
+      100
+    ],
+    "active": [
+      2048,
+      4096,
+      8192
+    ],
+    "prefill_tps": 4000,
+    "lookup_ms": 10,
+    "out": "artifacts/g3-phase-space-accounting.json"
+  },
+  "rows": [
+    {
+      "kv_kib_per_token": 32,
+      "link_gbs": 12.5,
+      "active_tokens": 2048,
+      "crossover_history_tokens": 199127,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 32,
+      "link_gbs": 12.5,
+      "active_tokens": 4096,
+      "crossover_history_tokens": 394439,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 32,
+      "link_gbs": 12.5,
+      "active_tokens": 8192,
+      "crossover_history_tokens": 785064,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 32,
+      "link_gbs": 25,
+      "active_tokens": 2048,
+      "crossover_history_tokens": 398254,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 32,
+      "link_gbs": 25,
+      "active_tokens": 4096,
+      "crossover_history_tokens": 788879,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 32,
+      "link_gbs": 25,
+      "active_tokens": 8192,
+      "crossover_history_tokens": 1570129,
+      "wins_by_1m": false
+    },
+    {
+      "kv_kib_per_token": 32,
+      "link_gbs": 50,
+      "active_tokens": 2048,
+      "crossover_history_tokens": 796508,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 32,
+      "link_gbs": 50,
+      "active_tokens": 4096,
+      "crossover_history_tokens": 1577758,
+      "wins_by_1m": false
+    },
+    {
+      "kv_kib_per_token": 32,
+      "link_gbs": 50,
+      "active_tokens": 8192,
+      "crossover_history_tokens": 3140258,
+      "wins_by_1m": false
+    },
+    {
+      "kv_kib_per_token": 32,
+      "link_gbs": 100,
+      "active_tokens": 2048,
+      "crossover_history_tokens": 1593017,
+      "wins_by_1m": false
+    },
+    {
+      "kv_kib_per_token": 32,
+      "link_gbs": 100,
+      "active_tokens": 4096,
+      "crossover_history_tokens": 3155517,
+      "wins_by_1m": false
+    },
+    {
+      "kv_kib_per_token": 32,
+      "link_gbs": 100,
+      "active_tokens": 8192,
+      "crossover_history_tokens": 6280517,
+      "wins_by_1m": false
+    },
+    {
+      "kv_kib_per_token": 64,
+      "link_gbs": 12.5,
+      "active_tokens": 2048,
+      "crossover_history_tokens": 99563,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 64,
+      "link_gbs": 12.5,
+      "active_tokens": 4096,
+      "crossover_history_tokens": 197219,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 64,
+      "link_gbs": 12.5,
+      "active_tokens": 8192,
+      "crossover_history_tokens": 392532,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 64,
+      "link_gbs": 25,
+      "active_tokens": 2048,
+      "crossover_history_tokens": 199127,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 64,
+      "link_gbs": 25,
+      "active_tokens": 4096,
+      "crossover_history_tokens": 394439,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 64,
+      "link_gbs": 25,
+      "active_tokens": 8192,
+      "crossover_history_tokens": 785064,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 64,
+      "link_gbs": 50,
+      "active_tokens": 2048,
+      "crossover_history_tokens": 398254,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 64,
+      "link_gbs": 50,
+      "active_tokens": 4096,
+      "crossover_history_tokens": 788879,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 64,
+      "link_gbs": 50,
+      "active_tokens": 8192,
+      "crossover_history_tokens": 1570129,
+      "wins_by_1m": false
+    },
+    {
+      "kv_kib_per_token": 64,
+      "link_gbs": 100,
+      "active_tokens": 2048,
+      "crossover_history_tokens": 796508,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 64,
+      "link_gbs": 100,
+      "active_tokens": 4096,
+      "crossover_history_tokens": 1577758,
+      "wins_by_1m": false
+    },
+    {
+      "kv_kib_per_token": 64,
+      "link_gbs": 100,
+      "active_tokens": 8192,
+      "crossover_history_tokens": 3140258,
+      "wins_by_1m": false
+    },
+    {
+      "kv_kib_per_token": 128,
+      "link_gbs": 12.5,
+      "active_tokens": 2048,
+      "crossover_history_tokens": 49781,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 128,
+      "link_gbs": 12.5,
+      "active_tokens": 4096,
+      "crossover_history_tokens": 98609,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 128,
+      "link_gbs": 12.5,
+      "active_tokens": 8192,
+      "crossover_history_tokens": 196266,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 128,
+      "link_gbs": 25,
+      "active_tokens": 2048,
+      "crossover_history_tokens": 99563,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 128,
+      "link_gbs": 25,
+      "active_tokens": 4096,
+      "crossover_history_tokens": 197219,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 128,
+      "link_gbs": 25,
+      "active_tokens": 8192,
+      "crossover_history_tokens": 392532,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 128,
+      "link_gbs": 50,
+      "active_tokens": 2048,
+      "crossover_history_tokens": 199127,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 128,
+      "link_gbs": 50,
+      "active_tokens": 4096,
+      "crossover_history_tokens": 394439,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 128,
+      "link_gbs": 50,
+      "active_tokens": 8192,
+      "crossover_history_tokens": 785064,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 128,
+      "link_gbs": 100,
+      "active_tokens": 2048,
+      "crossover_history_tokens": 398254,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 128,
+      "link_gbs": 100,
+      "active_tokens": 4096,
+      "crossover_history_tokens": 788879,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 128,
+      "link_gbs": 100,
+      "active_tokens": 8192,
+      "crossover_history_tokens": 1570129,
+      "wins_by_1m": false
+    },
+    {
+      "kv_kib_per_token": 256,
+      "link_gbs": 12.5,
+      "active_tokens": 2048,
+      "crossover_history_tokens": 24890,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 256,
+      "link_gbs": 12.5,
+      "active_tokens": 4096,
+      "crossover_history_tokens": 49304,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 256,
+      "link_gbs": 12.5,
+      "active_tokens": 8192,
+      "crossover_history_tokens": 98133,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 256,
+      "link_gbs": 25,
+      "active_tokens": 2048,
+      "crossover_history_tokens": 49781,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 256,
+      "link_gbs": 25,
+      "active_tokens": 4096,
+      "crossover_history_tokens": 98609,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 256,
+      "link_gbs": 25,
+      "active_tokens": 8192,
+      "crossover_history_tokens": 196266,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 256,
+      "link_gbs": 50,
+      "active_tokens": 2048,
+      "crossover_history_tokens": 99563,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 256,
+      "link_gbs": 50,
+      "active_tokens": 4096,
+      "crossover_history_tokens": 197219,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 256,
+      "link_gbs": 50,
+      "active_tokens": 8192,
+      "crossover_history_tokens": 392532,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 256,
+      "link_gbs": 100,
+      "active_tokens": 2048,
+      "crossover_history_tokens": 199127,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 256,
+      "link_gbs": 100,
+      "active_tokens": 4096,
+      "crossover_history_tokens": 394439,
+      "wins_by_1m": true
+    },
+    {
+      "kv_kib_per_token": 256,
+      "link_gbs": 100,
+      "active_tokens": 8192,
+      "crossover_history_tokens": 785064,
+      "wins_by_1m": true
+    }
+  ],
+  "interpretation": "below the crossover, favorable full-KV transfer is cheaper; above it, active-state rematerialization is cheaper under the declared model",
+  "honesty": "all rates are assumptions; use this grid to select real measurements"
+}
