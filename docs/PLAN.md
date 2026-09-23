@@ -59,7 +59,7 @@ fallback.
 If either lookup cost or required selected tokens scales approximately linearly with
 history on realistic traces, the mobility abstraction collapses.
 
-**Status.** Structural harness implemented in `benchmarks/g2_trace_index.py`; real-trace run and model/task quality remain open. The public `thoughtworks/agentic-coding-trajectories` corpus is the first target (15K multi-turn coding sessions, up to ~156K tokens per session).
+**Status.** Structural harness implemented in `benchmarks/g2_trace_index.py`; a real-trace structural run is recorded. `benchmarks/g2_model_quality.py` now provides a non-QCC frozen-LM next-assistant quality gate (full history versus lexical/provenance active view). End-task agent quality remains open. The public `thoughtworks/agentic-coding-trajectories` corpus is the first target.
 
 ## G3 — History-free mobility on one machine
 
