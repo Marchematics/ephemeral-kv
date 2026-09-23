@@ -50,3 +50,17 @@ def test_cli_marks_quality_as_unmeasured(tmp_path):
     assert payload["sessions"] == 1
     assert payload["quality_status"] == "not_measured"
     assert "quality" in payload["decision_rule"]
+
+
+def test_official_session_max_isl_gets_its_own_bucket():
+    rows = evaluate_session(_session(10), token_budget=64, session_max_isl=70_000)
+    s = summarize(rows)
+    assert "64K-128K" in s["by_session_max_isl_bucket"]
+    assert s["by_session_max_isl_bucket"]["64K-128K"]["calls"] == len(rows)
+
+
+def test_regex_counter_remains_dependency_free():
+    from benchmarks.g2_trace_index import make_token_counter
+
+    counter = make_token_counter("regex")
+    assert counter("alpha beta gamma") == 3
