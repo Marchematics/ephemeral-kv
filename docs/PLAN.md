@@ -212,6 +212,30 @@ at all.  The next lever therefore has to reduce how much distinct content the tu
 a semantic/embedding compiler that summarises or compresses spans, or a workload whose turns
 depend on less of the transcript - rather than any further re-ranking of the same text.
 
+**The agent's next decision needs half the view the next-token loss does.**  The budget sweep
+from the previous section used the teacher-forced metric; the end-task metric is the one that
+decides what a router may actually use, so it was swept over the same 24 paired sessions
+(median history 32,897 tokens, dedup+snippet compiler, 96 generated tokens):
+
+| active budget | active fraction | F1 vs the patch's files | F1 vs the next turn's files |
+|---:|---:|---:|---:|
+| 4,096 | 0.125 | 0.042 | 0.111 |
+| **8,192** | 0.249 | **0.237** | **0.264** |
+| 16,384 | 0.498 | 0.142 | 0.139 |
+| full history | 1.000 | 0.045 | 0.000 |
+
+with paired bootstrap over the same sessions: 4,096 -> 8,192 is **+0.196, 95% CI [+0.024,
++0.361], 9 wins against 1 loss**, while 8,192 -> 16,384 is +0.095 with a CI that includes
+zero ([-0.026, +0.231]).  So the end-task metric **collapses at 4K, holds from 8K, and does
+not resolve above it at n=24** - and at every budget where it holds, the bounded view beats
+feeding the model the whole 33K-token transcript (0.045).
+
+That gives three requirements for the same session, measured, and they are not the same
+number: the router needs ~2K active tokens to want to move, the agent's next decision holds
+from ~8K, and teacher-forced token accuracy needs ~16K.  The honest system claim follows the
+middle one (the decision is what a user sees), and it is still four times what the routing
+side needs - so the compiler gap is halved, not closed.
+
 ## Where the gates stand together
 
 Two of them now bound the same quantity from opposite sides, and the gap between them is the

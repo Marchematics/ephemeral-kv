@@ -138,6 +138,10 @@ def main(argv=None) -> int:
     p.add_argument("--max-length", type=int, default=65536)
     p.add_argument("--max-new", type=int, default=96)
     p.add_argument("--max-examples", type=int, default=24)
+    p.add_argument("--dedup-spans", action=argparse.BooleanOptionalAction, default=False,
+                   help="collapse identical span texts in the view (keeps the newest copy)")
+    p.add_argument("--snippet-spans", action=argparse.BooleanOptionalAction, default=False,
+                   help="keep query-relevant lines of an oversized span, not its prefix")
     p.add_argument("--device", default="cuda")
     p.add_argument("--out", required=True)
     args = p.parse_args(argv)
@@ -172,7 +176,8 @@ def main(argv=None) -> int:
                 messages, token_budget=args.token_budget,
                 min_history_tokens=args.min_history_tokens,
                 compiler={"recency_spans": 3, "recency_fraction": 0.6,
-                          "max_span_fraction": 0.25, "provenance_terms": 8},
+                          "max_span_fraction": 0.25, "provenance_terms": 8,
+                          "dedup": args.dedup_spans, "snippet": args.snippet_spans},
                 token_counter=lambda text: len(tokenizer.encode(text,
                                                                 add_special_tokens=False)),
             )
