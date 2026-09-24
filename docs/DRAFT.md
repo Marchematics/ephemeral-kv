@@ -205,6 +205,7 @@ far field, on the same 48 instances:
 | 4.1K | compiled | 0.161 | 0.155 |
 | none | compiled | 0.139 | 0.213 |
 | none | plain retrieval | 0.243 at 4,096; **0.191 at 8,192** | - |
+| 3.1K | plain retrieval | 0.191 | 0.173 |
 | none | plain retrieval, 64K-96K histories | +0.011 paired (tie: 0.123 vs 0.113 full history) | - |
 
 Every arm whose far field is the compiler sits below the same-budget plain-retrieval arm, across
