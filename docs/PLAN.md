@@ -80,6 +80,18 @@ and on the longest sessions (median history 82,440 tokens, max 156,137, turns fi
 a preceding history of at least 32,768 tokens) a 4,096-token view is **5.0% of history**
 for -8.3 pp.
 
+**Next step for the end-task half (`g2b`).** Teacher-forced fidelity is a proxy; the
+corpus supports a real downstream behaviour instead.  `ground_truth_meta_json` carries
+`patch_present` and `resolved` per session, and the *patch's file set* is recoverable from
+the transcript's tool outputs and tool-call arguments (`diff --git a/<path> b/<path>` in
+`git diff` output, `Modified File:` summaries, editor commands), not from assistant prose -
+a scan of assistant `content` alone finds only a handful of the long sessions.  The metric
+to measure is therefore **patch localization**: generate the next turn under the full
+history and under the active view, extract the file paths each continuation names, and
+score precision/recall/F1 against the recorded patch's files.  That is a decision an
+evicted-history policy can actually break, and it needs no sandbox.  (The builder dropped
+`ground_truth_meta_json` until now, which is why this was not possible earlier.)
+
 The reading is therefore split and has to be reported that way: **the working set is
 sparse and stops tracking history, but at 4-8K tokens it does not preserve the turn**; the
 loss is flat in history (so this is not a scaling failure) and disappears only once the

@@ -35,7 +35,7 @@ from pathlib import Path
 # not use, and dropping it keeps the JSONL small enough to stream comfortably
 _KEEP = ("messages_json", "messages", "trajectory", "source_dataset", "source_id",
          "session_id", "agent_framework", "recorded_model", "max_isl", "n_turns",
-         "total_tokens")
+         "total_tokens", "ground_truth_meta_json")
 
 
 def read_rows(path: Path) -> list[dict]:
