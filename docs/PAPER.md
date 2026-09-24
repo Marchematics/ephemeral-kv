@@ -150,6 +150,25 @@ So the two requirements do not compete for content.  They compete for *rendering
 evidence whole, consolidate the far field, and retrieve the rest.  That is the view the system
 ships, and it is the configuration in bold above.
 
+**A stricter end task, scored offline.**  File *mention* is a weak bar, so the same receipts are
+rescored one notch higher: `action_hit` requires the generated turn to name an edit-type tool or
+command (`str_replace_editor`, `apply_patch`, `sed -i`, `cat >`, `patch`, ...) *and* to target a file
+the recorded patch touched (`g2b_action_metric.py`, `artifacts/g2b-action-metric-v1.json`):
+
+| arm | instances | full-history action rate | active action rate | paired delta |
+|---|---:|---:|---:|---:|
+| raw retrieval, 4,096 | 96 | 0.042 | 0.031 | -0.010 [-0.062, +0.042] |
+| window + compiled far field, 8,192 | 96 | 0.042 | 0.052 | +0.010 [-0.042, +0.062] |
+| evidence consolidation, 8,192 | 48 | 0.042 | 0.021 | -0.021 [-0.104, +0.042] |
+| raw retrieval, 8,192 | 48 | 0.042 | **0.125** | **+0.083 [0.000, +0.188]** |
+| plain recency, 8,192 | 24 | 0.042 | 0.042 | 0.000 [-0.125, +0.125] |
+
+On this bar the bounded state is **not worse** than the full transcript - every interval includes
+zero, and one arm is nominally ahead at the edge of significance - but **no arm is measurably
+better**, and the absolute rates are low because the metric demands both an edit intent and the
+right file.  We report it as a bound our claim must clear rather than as a result: the stronger
+metric neither confirms nor refutes the weaker one, and task success remains unmeasured.
+
 **Why 6,144 and not less.**  The budget is measured, not chosen for convenience.  Holding the window
 at 3,072 tokens and varying the total:
 

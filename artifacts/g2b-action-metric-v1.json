@@ -1,0 +1,85 @@
+{
+  "schema": "ephemeral-kv-action-metric-v1",
+  "kind": "offline_rescoring",
+  "interpretation": "action_hit = the generated turn names an edit-type tool or command and targets a file the recorded patch touched",
+  "rows": [
+    {
+      "arm": "raw-b4096-n96",
+      "instances": 96,
+      "full_action_rate": 0.042,
+      "active_action_rate": 0.031,
+      "paired_action_delta": -0.01,
+      "ci95": [
+        -0.062,
+        0.042
+      ],
+      "active_edit_intent": 5,
+      "full_edit_intent": 6
+    },
+    {
+      "arm": "windowcompiler-b8192-n96",
+      "instances": 96,
+      "full_action_rate": 0.042,
+      "active_action_rate": 0.052,
+      "paired_action_delta": 0.01,
+      "ci95": [
+        -0.042,
+        0.062
+      ],
+      "active_edit_intent": 6,
+      "full_edit_intent": 6
+    },
+    {
+      "arm": "compiled-b8192-n48",
+      "instances": 48,
+      "full_action_rate": 0.042,
+      "active_action_rate": 0.021,
+      "paired_action_delta": -0.021,
+      "ci95": [
+        -0.104,
+        0.042
+      ],
+      "active_edit_intent": 1,
+      "full_edit_intent": 3
+    },
+    {
+      "arm": "raw-b8192-n48",
+      "instances": 48,
+      "full_action_rate": 0.042,
+      "active_action_rate": 0.125,
+      "paired_action_delta": 0.083,
+      "ci95": [
+        0.0,
+        0.188
+      ],
+      "active_edit_intent": 7,
+      "full_edit_intent": 3
+    },
+    {
+      "arm": "recency-b8192-v1",
+      "instances": 24,
+      "full_action_rate": 0.042,
+      "active_action_rate": 0.042,
+      "paired_action_delta": 0.0,
+      "ci95": [
+        -0.125,
+        0.125
+      ],
+      "active_edit_intent": 2,
+      "full_edit_intent": 1
+    },
+    {
+      "arm": "deduponly-b4096-n48",
+      "instances": 48,
+      "full_action_rate": 0.042,
+      "active_action_rate": 0.042,
+      "paired_action_delta": 0.0,
+      "ci95": [
+        -0.083,
+        0.083
+      ],
+      "active_edit_intent": 3,
+      "full_edit_intent": 3
+    }
+  ]
+}
