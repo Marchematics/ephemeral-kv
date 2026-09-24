@@ -231,8 +231,21 @@ Bucketing the G2 receipts by session length (`g2_killer_table.py`), at a fixed 8
 | 82,972 | 7,133-7,899 | +0.00 pp |
 | 155,574 | 8,203 | +1.43 pp |
 
-Across a 2.4x growth in history the state grows 5% and the quality delta does not move.  Composed
-with the measured hardware primitives:
+Across a 2.4x growth in history the state grows 5% and the quality delta does not move.  On the
+axis the claim is usually stated in - session age in turns - the same table reads:
+
+| turns p50 | raw history p50 | execution state p50 | fidelity delta |
+|---:|---:|---:|---:|
+| 40 | 79,769 | 8,121 | -1.43 pp |
+| 58 | 84,617 | 7,887 | **+0.00 pp** |
+| 96 | 155,222 | 8,203 | +0.00 pp |
+
+Measured to 96 turns because that is where this corpus ends.  The corpus also holds one 22-turn
+example with 67K of history in which the arm fails badly (-46.9 pp); it is a singleton, reported
+as one rather than smoothed into the table, and the failure mode it hints at - a short session
+whose individual turns are enormous - is a limitation worth stating.
+
+Composed with the measured hardware primitives:
 
 | session | state | mobility (lookup + active prefill) | full-KV move |
 |---|---:|---:|---:|
