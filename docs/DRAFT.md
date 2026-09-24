@@ -179,7 +179,7 @@ fidelity-neutral at no measurable decision cost*, not because it wins anything.
 
 A system that renders the newest evidence whole and consolidates the rest therefore gets both at
 one budget, and that is the configuration measured here: **0.161 decision with 0.00 pp fidelity**,
-statistically tied on the decision with every other bounded arm measured - plain retrieval at
+statistically tied on the decision with every other bounded arm measured - and more budget does not help: the same arm scores 0.191 at 8,192 and 0.173 at 12,288, so above ~4K the constraint is retrieval coverage rather than budget, which is why the paper's view is 8,192 tokens - plain retrieval at
 4,096 (0.243, paired +0.081, CI [-0.016, +0.177], 13 wins / 3 losses), window plus raw retrieval
 (0.191), dedup only (0.207-0.239) - while those arms carry -25 pp to -6.94 pp of fidelity.  The honest
 requirement is therefore the smallest budget at which both hold, and that is what the
@@ -205,6 +205,7 @@ far field, on the same 48 instances:
 | 4.1K | compiled | 0.161 | 0.155 |
 | none | compiled | 0.139 | 0.213 |
 | none | plain retrieval | 0.243 at 4,096; **0.191 at 8,192** | - |
+| 3.1K | plain retrieval | 0.191 | 0.173 |
 | 3.1K | plain retrieval | 0.191 | 0.173 |
 | none | plain retrieval, 64K-96K histories | +0.011 paired (tie: 0.123 vs 0.113 full history) | - |
 
