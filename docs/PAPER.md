@@ -139,11 +139,12 @@ examples, decision n=48 paired sessions, 26 scoreable):
    8,192 and 12,288 tokens, so it is a treatment requirement, not a budget one.
 2. **The decision is set by which evidence is retrieved.**  In the end-task configuration the
    window-plus-retrieval view and plain retrieval at the same budget produce byte-identical contexts
-   on all 48 instances, and every bounded retrieval arm is statistically tied: window+raw 0.191,
-   plain retrieval 0.191 at 8,192 and 0.243 at 4,096 (paired +0.081, 95% CI [-0.016, +0.177], 13 wins
-   / 3 losses), dedup-only 0.207-0.239, window+compiled 0.161 (+0.029 against window+raw, CI
-   [-0.089, +0.146]).  More budget does not help: the same arm scores 0.191 at 8,192 and 0.173 at
-   12,288, so above ~4K the constraint is retrieval coverage, not budget.
+   on all 48 instances, and every bounded retrieval arm is statistically tied.  On **96 paired
+   sessions** the view the system ships - a verbatim window over a consolidated far field at 8,192
+   tokens - scores 0.165 against plain retrieval's 0.169 at 4,096: **paired +0.013, 95% CI
+   [-0.068, +0.092], 19 wins / 12 losses** - a tie, at fidelity parity, against an arm that is 25 pp
+   out of tolerance.  More budget does not help either: the same family scores 0.191 at 8,192 and
+   0.173 at 12,288 on the smaller set, so above ~4K the constraint is retrieval coverage, not budget.
 
 So the two requirements do not compete for content.  They compete for *rendering*: render the newest
 evidence whole, consolidate the far field, and retrieve the rest.  That is the view the system

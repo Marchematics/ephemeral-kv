@@ -178,7 +178,11 @@ def main(argv=None) -> int:
               "artifacts/g2b-patch-localization-windowcompiler-b8192-n48.json"),
              ("window + raw", 8192, "artifacts/g2b-patch-localization-windowraw-tf0.5-b8192-n48.json"),
              ("window 3K + raw", 8192,
-              "artifacts/g2b-patch-localization-window3kraw-b8192-n48.json")]
+              "artifacts/g2b-patch-localization-window3kraw-b8192-n48.json"),
+             ("window + compiler (n=96)", 8192,
+              "artifacts/g2b-patch-localization-windowcompiler-b8192-n96.json"),
+             ("raw retrieval (n=96)", 4096,
+              "artifacts/g2b-patch-localization-raw-b4096-n96.json")]
     rows = []
     for arm, budget, name in specs:
         path = Path(name)
