@@ -241,13 +241,18 @@ side needs - so the compiler gap is halved, not closed.
 Two of them now bound the same quantity from opposite sides, and the gap between them is the
 project's central open problem rather than a detail:
 
-| gate | what it fixes |
+| measurement | active budget it needs |
 |---|---|
-| G2 (quality) | the active view must hold **16,384 tokens** with dedup (-1.94 pp, fraction 0.200 at 82K histories) to preserve the next turn, and 32,768 without dedup |
-| G4 (routing) | the cold-route law changes the routing decision only at **2,048 active tokens**, and only when a worker disappears and its sessions must be re-materialized |
+| G4 (routing) | **~2,048 tokens** - the cold-route law changes the routing decision only there, and only when a worker disappears and its sessions must be re-materialized |
+| G2 end-task (what a user sees) | **~8,192 tokens** - the agent's next decision (which files to change) collapses at 4,096 and holds from 8,192 |
+| G2 teacher-forced (the proxy) | **~16,384 tokens** with dedup (-1.94 pp), 32,768 without |
 
-So the quality side needs an order of magnitude more active state than the routing side needs
-to win, and that is where the paper's remaining work is: the compiler, not the router.  Two
+So the three requirements differ by 4x from the router to the decision, and the proxy metric
+is twice as demanding as the decision itself.  The honest system claim follows the middle
+number, and the paper's remaining work is the compiler rather than the router: closing the
+last 4x means reducing how much *distinct* content a turn needs (a semantic compiler that
+summarises spans), since neither re-ranking within a span nor removing duplicates can go
+further than they already have.  Two
 levers are already measured to move it in the right direction - recency + oversized-span
 truncation + identifier provenance took the long-history loss at a fixed 4,096-token view
 from -21.98 pp to -7.17 pp, and content-identity dedup then halved the budget that holds - so
