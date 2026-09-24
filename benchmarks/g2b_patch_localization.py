@@ -141,6 +141,8 @@ def main(argv=None) -> int:
     p.add_argument("--consolidate", action=argparse.BooleanOptionalAction, default=False,
                    help="compile the retrieved evidence instead of concatenating it")
     p.add_argument("--retrieve-multiplier", type=float, default=2.0)
+    p.add_argument("--compile-mode", default="consolidate",
+                   choices=("consolidate", "materialize"))
     p.add_argument("--no-collapse-paths", action="store_true",
                    help="ablation: keep every view of a file instead of its latest state")
     p.add_argument("--dedup-spans", action=argparse.BooleanOptionalAction, default=False,
@@ -185,7 +187,8 @@ def main(argv=None) -> int:
                           "dedup": args.dedup_spans, "snippet": args.snippet_spans,
                           "consolidate": args.consolidate,
                           "retrieve_multiplier": args.retrieve_multiplier,
-                          "collapse_paths": not args.no_collapse_paths},
+                          "collapse_paths": not args.no_collapse_paths,
+                          "compile_mode": args.compile_mode},
                 token_counter=lambda text: len(tokenizer.encode(text,
                                                                 add_special_tokens=False)),
             )

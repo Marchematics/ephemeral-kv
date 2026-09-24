@@ -24,6 +24,8 @@ from statistics import median
 from typing import Iterable
 
 from ephemeralkv.consolidate import compile_units, consolidate, render
+from ephemeralkv.index import terms
+from ephemeralkv.statecompile import compile_executable_state
 from ephemeralkv.index import DurableSpanIndex, Span
 from benchmarks.g2_trace_index import _content, messages_from_row
 
@@ -80,6 +82,7 @@ def build_examples(
                 consolidate_view = bool(options.pop("consolidate", False))
                 retrieve_multiplier = float(options.pop("retrieve_multiplier", 2.0))
                 collapse_paths = bool(options.pop("collapse_paths", True))
+                compile_mode = str(options.pop("compile_mode", "consolidate"))
                 keep_earlier_verbatim = bool(options.pop("keep_earlier_verbatim", False))
                 if consolidate_view:
                     # retrieve generously, consolidate the evidence, then compile down: the
@@ -88,10 +91,17 @@ def build_examples(
                         query, token_budget=max(token_budget + 1,
                                                 int(token_budget * retrieve_multiplier)),
                         max_spans=max_spans, **options)
-                    units, _stats = compile_units(
-                        consolidate(spans, collapse_paths=collapse_paths,
-                                    keep_earlier_verbatim=keep_earlier_verbatim),
-                        token_budget, token_counter)
+                    if compile_mode == "materialize":
+                        # the executable-state compiler: replay the log's file events and keep
+                        # the materialised current state, not the latest view of it
+                        units, _stats = compile_executable_state(
+                            spans, token_budget, token_counter,
+                            query_terms=set(terms(query)))
+                    else:
+                        units, _stats = compile_units(
+                            consolidate(spans, collapse_paths=collapse_paths,
+                                        keep_earlier_verbatim=keep_earlier_verbatim),
+                            token_budget, token_counter)
                     active = render(units)
                     view = spans
                 else:
@@ -329,6 +339,10 @@ def main(argv=None):
                         "not in the ranking)")
     p.add_argument("--retrieve-multiplier", type=float, default=2.0,
                    help="how much evidence to retrieve before consolidating it down")
+    p.add_argument("--compile-mode", default="consolidate",
+                   choices=("consolidate", "materialize"),
+                   help="`consolidate` picks among the retrieved views; `materialize` replays "
+                        "the log's file events and keeps the current state")
     p.add_argument("--no-collapse-paths", action="store_true",
                    help="ablation: keep every view of a file instead of its latest state")
     p.add_argument("--keep-earlier-verbatim", action="store_true",
@@ -389,6 +403,7 @@ def main(argv=None):
                           "consolidate": args.consolidate,
                           "retrieve_multiplier": args.retrieve_multiplier,
                           "collapse_paths": not args.no_collapse_paths,
+                          "compile_mode": args.compile_mode,
                           "keep_earlier_verbatim": args.keep_earlier_verbatim},
                 token_counter=lambda text: len(
                     tokenizer.encode(text, add_special_tokens=False)

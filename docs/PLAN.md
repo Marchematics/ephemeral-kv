@@ -14,6 +14,55 @@ Traditional full-KV mobility makes this tax grow with accumulated history. Ephem
 only matters if a remote turn can instead materialize a small active working set from a
 durable index, making the tax primarily a function of the active set.
 
+## The claim this project is now built around
+
+```text
+history size  =/=>  mobility cost
+```
+
+and the causal chain that has to hold for it to be a new abstraction rather than a cache
+policy:
+
+```text
+compiler -> small executable state -> history-independent mobility -> routing phase change
+```
+
+The durable session is `history + index`; the execution state is `compile(history, q)`; local KV
+is a **disposable execution artifact**.  The compiler is not a summariser - "compress old history
+and feed it back" is already a baseline other systems compare against - it is an **executable
+state compiler**, the same shape as a database turning a log into a materialised view:
+
+| input | output |
+|---|---|
+| million-token transcript + current action | current facts, current file/tool state, unresolved constraints, the exact evidence that must stay verbatim, provenance pointers |
+
+with superseded state, repeated tool output, repeated reasoning and intermediate failed versions
+*removed* rather than shortened.
+
+**The five hard results that decide whether this is a Best-paper project**, in the order they
+have to be earned:
+
+| # | result | bar | status |
+|---|---|---|---|
+| 1 | semantic compiler shrinks the required view | **16K -> <= 8K**, ideally 4-8K | extractive family measured: **not met** (-5.44 pp at 8K against a 2 pp allowance) |
+| 2 | fidelity against full history | **<= 2 pp** | not met at 8K yet (-1.94 pp is what 16K gives) |
+| 3 | real agent task (patch localization) | no regression, ideally better than raw retrieval | **met**: 0.292 at 8K compiled against 0.237 raw and 0.045 for full history |
+| 4 | G4 winning region | clearly wider than **4/48**, no longer only the 2K extreme | open, re-measured after #1 |
+| 5 | cluster consequence | >= 1.5x SLO goodput or >= 30% p99 in several realistic regimes | open, after #4 |
+
+and one deeper result that separates "strong OSDI" from Best: a **phase diagram inversion** in
+which mobility cost is a function of the compiled state rather than the history,
+`dM/dL ~= 0`, so that an old session can be *cheaper* to move than a young one and session age
+stops meaning anything for placement:
+
+```text
+session age   raw history   executable state
+20 turns           40K             6.1K
+100 turns         210K             6.8K
+300 turns         640K             7.0K
+500 turns           1M             7.3K
+```
+
 ## G1 — Reject the easy tiered-storage story
 
 **Question.** Does `discard + recompile` simply beat DRAM/NVMe KV restore on latency?
@@ -294,10 +343,39 @@ disagreement is the finding: teacher-forced next-token accuracy penalises any co
 that alters surface realisation, while the decision the agent actually has to make is better
 served by a focused compiled view than by twice as much raw evidence.
 
-The honest next step is therefore the one the ablation points at: a **semantic** step that
-*rewrites* content - compressing a file's history into a canonical current form rather than
-selecting among its views - with the extractive receipts above as the control it must beat, and
-with the end-task metric as the one that decides whether the agent can still act.
+**The executable-state compiler was built and it does not help either - and the reason is a
+measurement, not a bug.** `ephemeralkv/statecompile.py` replays the log: full dumps *set* a
+file's content, unified diffs and `<<<<<<< SEARCH / ======= / >>>>>>> REPLACE` blocks *apply* to
+it, a command's repeated runs collapse to its latest result, repeated reasoning keeps only its
+newest occurrence, and everything keeps provenance.  At 8,192 tokens:
+
+| compiler variant | teacher delta (32K-128K) | end-task F1 (patch files) |
+|---|---:|---:|
+| raw truncation (dedup + snippet) | -6.94 pp | 0.237 |
+| consolidate, latest view per file | -13.90 pp | - |
+| **consolidate, no state collapse** | **-5.44 pp** | **0.292** |
+| consolidate + replaced views' verbatim lines | -7.38 pp | - |
+| **materialise (replay the log into current state)** | -7.21 pp | 0.231 |
+| *16,384-token view (what the gate is trying to halve)* | *-1.94 pp* | *0.142* |
+
+So the 16K -> 8K gate is **not met** by any of five variants on the teacher-forced metric (best
+-5.44 pp against a 2 pp allowance), while the *end-task* metric is comfortably viable at 8K
+(0.292 against 0.237 raw, and better than twice the raw evidence).  And the diagnostic explains
+the failed variants: over three long examples the retrieved evidence classifies as
+
+| span type | share |
+|---|---:|
+| loose text (reasoning, acknowledgements, chatter - no file, no command) | **74%** |
+| command results | 14% |
+| file events (dump, diff, edit) | **6%** |
+
+A state compiler can only consolidate the 6%.  The binding constraint is therefore **what the
+retrieval selects**, not how the selected text is compressed: the next design has to make
+selection *state-first* - prioritise spans that carry state (file events, command results,
+unresolved constraints) and down-weight repeated chatter - instead of ranking everything by
+lexical overlap with the query.  That is the next experiment, with the receipts above as its
+control, and if it also fails to move the teacher-forced metric the honest conclusion is that
+8K is out of reach for this class of compiler on this corpus.
 
 ## Where the gates stand together
 
