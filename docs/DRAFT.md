@@ -111,11 +111,22 @@ budget ranked, and the newest output can be large enough that there is no remain
 requirement is therefore the smallest budget at which both hold, and that is what the
 12,288-token arm measures (16,384 is the pre-compiler reference, already measured at -1.94 pp).
 
-Paired over the same sessions (`paired_f1.py`), the decision claims that survive are: the compiler
-against windowed views (`+0.188`, 95% CI `[+0.062, +0.326]`, 9 wins / 1 loss) and against full
-history (`+0.248` at 8,192 on 24 instances); the compiler against plain retrieval is a tie
-(`+0.055`, `[-0.107, +0.220]`) at a difference SD near 0.40, i.e. ~400 paired sessions would be
-needed to resolve it.  The paper states the established comparisons and no more.
+Paired on one set of 48 sessions, the comparisons that matter are blunt: full history scores
+0.089, plain retrieval 0.243 at 4,096 tokens and 0.149 at 2,048, and **the compiler 0.139 at 8,192
+- i.e. plain retrieval at half the budget beats the compiler at the full budget** (paired -0.104,
+95% CI [-0.208, -0.007], 6 wins / 12 losses).  The earlier, favourable comparison came from a
+different instance set (0.292 against 0.237 on the first 24 sessions) and does not replicate.
+Per-instance inspection gives the mechanism: on several instances the compiler returns 0.00 where
+plain retrieval returns 1.00 or 0.62, because supersede-by-identity and snippet selection drop the
+file the patch touches - the same effect the path-collapse ablation measured from the fidelity
+side (-13.90 pp against -5.44 pp).
+
+**So the compiler as implemented does not earn its place on either metric**, and the paper says
+so.  What the measurements support is narrower and still worth a paper: the execution state is
+*bounded* (a fixed budget holds quality flat as the session grows), the surface needs the newest
+evidence untouched, the decision needs ranked evidence, and which of the two a system prioritises
+decides how small its state can be.  The negative compiler result is part of the contribution -
+it is what rules out "compression" as the explanation for the mobility law.
 
 ## 4. The mobility law, measured
 
