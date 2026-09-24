@@ -1,0 +1,136 @@
+{
+  "schema": "ephemeral-kv-killer-table-v1",
+  "kind": "derived_table",
+  "buckets": [
+    "<=32K",
+    "32K-64K",
+    "64K-128K",
+    "128K-256K",
+    ">=256K"
+  ],
+  "fidelity": {},
+  "end_task": {
+    "g2b-patch-localization-consolidate-b8192-v1.json": {
+      "<=32K": {
+        "n": 0
+      },
+      "32K-64K": {
+        "n": 24,
+        "raw_history_p50": 32897,
+        "compiled_state_p50": 8372,
+        "paired_f1_mean": 0.248,
+        "full_f1_mean": 0.045,
+        "active_f1_mean": 0.292
+      },
+      "64K-128K": {
+        "n": 0
+      },
+      "128K-256K": {
+        "n": 0
+      },
+      ">=256K": {
+        "n": 0
+      }
+    },
+    "g2b-patch-localization-raw-b4096-n48.json": {
+      "<=32K": {
+        "n": 0
+      },
+      "32K-64K": {
+        "n": 48,
+        "raw_history_p50": 33014,
+        "compiled_state_p50": 4096,
+        "paired_f1_mean": 0.154,
+        "full_f1_mean": 0.089,
+        "active_f1_mean": 0.243
+      },
+      "64K-128K": {
+        "n": 0
+      },
+      "128K-256K": {
+        "n": 0
+      },
+      ">=256K": {
+        "n": 0
+      }
+    },
+    "g2b-patch-localization-raw-b2048-n48.json": {
+      "<=32K": {
+        "n": 0
+      },
+      "32K-64K": {
+        "n": 48,
+        "raw_history_p50": 33014,
+        "compiled_state_p50": 2048,
+        "paired_f1_mean": 0.061,
+        "full_f1_mean": 0.089,
+        "active_f1_mean": 0.149
+      },
+      "64K-128K": {
+        "n": 0
+      },
+      "128K-256K": {
+        "n": 0
+      },
+      ">=256K": {
+        "n": 0
+      }
+    },
+    "g2b-patch-localization-recency-b8192-v1.json": {
+      "<=32K": {
+        "n": 0
+      },
+      "32K-64K": {
+        "n": 24,
+        "raw_history_p50": 32897,
+        "compiled_state_p50": 8286,
+        "paired_f1_mean": 0.109,
+        "full_f1_mean": 0.045,
+        "active_f1_mean": 0.154
+      },
+      "64K-128K": {
+        "n": 0
+      },
+      "128K-256K": {
+        "n": 0
+      },
+      ">=256K": {
+        "n": 0
+      }
+    }
+  },
+  "inversion": [
+    {
+      "history": 32768,
+      "compiled_state": 16384,
+      "lookup_s": 0.00015,
+      "prefill_s": 0.4854,
+      "move_full_kv_s": 0.0173,
+      "mobility_s": 0.4855
+    },
+    {
+      "history": 1048576,
+      "compiled_state": 8192,
+      "lookup_s": 0.0004,
+      "prefill_s": 0.2027,
+      "move_full_kv_s": 0.553,
+      "mobility_s": 0.2031
+    },
+    {
+      "history": 1048576,
+      "compiled_state": 4096,
+      "lookup_s": 0.0004,
+      "prefill_s": 0.095,
+      "move_full_kv_s": 0.553,
+      "mobility_s": 0.0954
+    },
+    {
+      "history": 262144,
+      "compiled_state": 8192,
+      "lookup_s": 0.0004,
+      "prefill_s": 0.2027,
+      "move_full_kv_s": 0.1383,
+      "mobility_s": 0.2031
+    }
+  ]
+}

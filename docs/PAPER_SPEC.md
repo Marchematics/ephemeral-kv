@@ -197,10 +197,15 @@ Do not use "Best Paper candidate" internally unless all of the following are mea
 3. **G3 inversion:** measured 1M/2K is cheaper to move than 32K/16K.
 4. **G4 consequence:** in at least two realistic skew/failure regimes, the changed
    mobility cost yields >=1.5x SLO goodput or >=30% p99 improvement over the strongest
-   sticky/cache-aware baseline, with <=5% balanced-load median regression. Measured: 39 of 264
-   cells in the widened grid, including every forced-mobility cell at both a 2,048- and a
-   4,096-token active set, and 13/132 with a 1M-history mix (the 1M lookup row is extrapolated
-   and labelled).
+   sticky/cache-aware baseline, with <=5% balanced-load median regression. Measured: **118 of 576
+   cells across three grids, of which 36 sit at the 8,192-token active set where both quality
+   metrics hold, in all three regimes** (balanced 5, slow worker 6, worker loss 25). The three
+   axes the first grid lacked: active sets between 2,048 and 16,384, sessions beyond 262K, and the
+   model geometry (a 128K session is a 16 GiB transfer on an 8B-class model and 40 GiB on a
+   70B-class one, against 0.203 s to rematerialise 8,192 tokens). Scope stated with the number:
+   the balanced and slow-worker wins are the no-cluster-KV-store regime (baseline re-prefills
+   1.6-14.3 s against 0.203 s); against a KV-moving tier the wins remain worker loss plus the 1M
+   mixes, and the 4,096 column is not fidelity-admissible (-25 pp).
 5. **G5 ownership:** worker failure does not require transfer/recovery of a durable
    history-sized model-state object.
 6. Results include a region where the baseline wins; the phase boundary must be

@@ -69,6 +69,10 @@ def end_task_rows(path: Path) -> list[dict]:
         full, active = row.get("full") or {}, row.get("active") or {}
         if full.get("f1") is None or active.get("f1") is None:
             continue
+        # only instances whose recorded patch mentions files are scoreable; the harness summary
+        # reports those (12 of 24, 26 of 48) and a median over all rows would be zero
+        if "next_turn" not in (row.get("full") or {}):
+            continue
         out.append({
             "history": row["history_tokens"],
             "active": row.get("active_tokens") or 0,
@@ -97,8 +101,13 @@ def table(rows: list[dict], key: str) -> dict:
             entry["acc_delta_pp_p50"] = round(100 * median([r["acc_delta"] for r in group]), 2)
             entry["nll_delta_p50"] = round(median([r["nll_delta"] for r in group]), 3)
         else:
-            entry["full_f1_p50"] = round(median([r["full_f1"] for r in group]), 3)
-            entry["active_f1_p50"] = round(median([r["active_f1"] for r in group]), 3)
+            # the full-history baseline moves with the instance set (0.045 on the first 24 paired
+            # sessions, 0.089 on the first 48), so only the *paired* difference is comparable
+            # across receipts; it is reported first and the raw values after it
+            entry["paired_f1_mean"] = round(
+                sum(r["active_f1"] - r["full_f1"] for r in group) / len(group), 3)
+            entry["full_f1_mean"] = round(sum(r["full_f1"] for r in group) / len(group), 3)
+            entry["active_f1_mean"] = round(sum(r["active_f1"] for r in group) / len(group), 3)
         out[label] = entry
     return out
 
@@ -183,8 +192,9 @@ def main(argv=None) -> int:
             if entry.get("n"):
                 print(f"end-task  {name[:34]:<36} {label:<9} n={entry['n']:<3} "
                       f"raw p50={entry['raw_history_p50']:>7} state p50="
-                      f"{entry['compiled_state_p50']:>6} F1 full {entry['full_f1_p50']:.3f} "
-                      f"active {entry['active_f1_p50']:.3f}")
+                      f"{entry['compiled_state_p50']:>6} paired F1 "
+                      f"{entry['paired_f1_mean']:+.3f} "
+                      f"(active {entry['active_f1_mean']:.3f} vs full {entry['full_f1_mean']:.3f})")
     for row in report.get("inversion", []):
         print(f"inversion history {row['history']:>8} state {row['compiled_state']:>6} "
               f"mobility {row['mobility_s']:.4f} s   (full KV move {row['move_full_kv_s']:.4f} s)")

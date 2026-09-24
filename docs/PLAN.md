@@ -243,9 +243,24 @@ grows.  Bucketing the G2 receipts by session length (`benchmarks/g2_killer_table
 
 | raw history p50 | compiled state p50 | teacher-forced fidelity (tail_state, 8,192 budget) |
 |---:|---:|---:|
-| 64,401 | 7,829 | **+0.00 pp** (NLL +0.254) |
-| 82,972 | 7,899 | **+0.00 pp** (NLL +0.003) |
-| 155,574 | 8,203 | **+1.43 pp** (NLL -0.288) |
+| 64,401 | 7,133-7,829 | **+0.00 pp** |
+| 82,972 | 7,133-7,899 | **+0.00 pp** |
+| 155,574 | 8,203 | **+1.43 pp** |
+
+and the decision column, paired on the same instances (the full-history baseline moves with the
+instance set - 0.045 on the first 24 sessions, 0.089 on the first 48 - so only the paired
+difference is comparable across receipts):
+
+| view | instances | state | paired decision gain | active F1 vs full history |
+|---|---:|---:|---:|---:|
+| evidence consolidation, 8,192 | 24 | 8,372 | **+0.248** | 0.292 vs 0.045 |
+| raw retrieval, 4,096 | 48 | 4,096 | **+0.154** | 0.243 vs 0.089 |
+| raw retrieval, 2,048 | 48 | 2,048 | +0.061 | 0.149 vs 0.089 |
+| plain recency, 8,192 | 24 | 8,286 | +0.109 | 0.154 vs 0.045 |
+
+So the decision gain grows with ranked budget (2K +0.061, 4K +0.154, 8K +0.248 for the compiler)
+while the fidelity gain is flat in history at a fixed state - which is the two-sided form of the
+claim: **the state that must move does not grow, and neither does what it costs in quality.**
 
 so across a 2.4x growth in raw history the state that must move grows by 5% and the fidelity
 delta does not move at all - `dM/dL ~ 0` on the fidelity half of the claim, measured rather
