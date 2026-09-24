@@ -467,53 +467,117 @@ traces, while the decision the agent has to make is not.
 
 ## Where the gates stand together
 
-### The two metrics want different views, and that is the finding
+### What the compiler's stages actually buy (ablation, 8,192-token views)
 
-Every arm measured at an 8,192-token view on the same corpora, both metrics on the same
-examples:
+The paper's C2 slot is the compiler, so its contribution has to be attributed stage by stage
+rather than reported as one number.  Every row is the same corpus, the same 8,192-token budget,
+the same examples, and one change against the row above it:
 
-| view (8,192 tokens) | teacher-forced fidelity | end-task F1 (patch files) |
+| stage and its system semantics | fidelity (32K-128K) | end-task F1 |
+|---|---:|---:|
+| raw query ranking (dedup + snippet), 3 truncated recent spans | -6.94 pp | 0.237 |
+| **+ content-identity dedup** (one copy of repeated tool output and repeated reasoning) | (already applied) | |
+| **+ query-focused ranking with identifier provenance** (paths/ids shared with the query) | -6.94 pp | 0.237 |
+| **+ supersede by state identity** (newest view of a file/tool result, replaced turns kept as provenance, *no* path collapse) | -5.44 pp | **0.292** |
+| same, but collapsing each path to its latest state | **-13.90 pp** | - |
+| log replay into the materialised state (dumps SET, diffs and SEARCH/REPLACE APPLY, repeated commands collapse) | -7.21 pp | 0.231 |
+| state-first selection (all file states, latest result per command, then loose text) | -15.38 pp | 0.242 |
+| **verbatim recent window** instead of the 3 truncated spans (a *partition* change, not a compiler stage) | **0.00 pp** | 0.104 |
+| plain recency, no compiler at all | +0.29 pp | 0.154 |
+| **newest span only + compiled far field** (no contiguous window) | **-25.36 pp** | 0.083 |
+
+Read as attribution: the **verbatim recent window is worth ~7 pp of fidelity** (-6.94 -> 0.00),
+the **compiler's ranking and supersede stages are worth +0.055 F1 of decision** (0.237 -> 0.292),
+and the compiler *costs* 5.4 pp of fidelity when it replaces the window instead of following it.
+Two of the stages are actively harmful on this corpus and the ablation says why: collapsing each
+path to its latest state costs 8.5 pp against keeping the superseded views (`-13.90` against
+`-5.44`), and log replay buys nothing on the decision (0.231 against 0.237) because only **6%** of
+the retrieved spans are file events - 74% are loose text and 14% command results, so there is
+almost no state for a log to materialise.  That is the correction the measurements forced on the
+original design: the executable-state semantics that matter here are *supersede by identity* and
+*provenance*, not full log replay, and the reason is a property of the workload, not of the
+compiler.
+
+### The two metrics want different views, and the reason is mechanistic
+
+Every arm measured at an 8,192-token view on the same corpora, both metrics on the same examples
+(fidelity n=44 in the 32K-128K bucket, decision n=24 paired sessions):
+
+| view (8,192 tokens) | teacher-forced fidelity | end-task F1 |
 |---|---:|---:|
 | full history | reference | 0.045 |
 | **plain recency** (whole spans, newest first) | **+0.29 pp** (NLL -0.048) | 0.154 |
-| tail_state, 60% verbatim tail + compiled far field | 0.00 pp (NLL -0.016) | 0.104 |
-| raw lexical (dedup + snippet) | -6.94 pp | 0.237 |
-| **evidence consolidation, no state collapse** | -5.44 pp | **0.292** |
-| log replay into materialised state | -7.21 pp | 0.231 |
+| tail_state, 35% verbatim window + compiled far field | 0.00 pp (NLL +0.068) | 0.056 |
+| tail_state, 50% window | 0.00 pp (NLL +0.036) | 0.158 |
+| tail_state, 60% window | 0.00 pp (NLL +0.022) | 0.104 |
+| **evidence consolidation, no state collapse** | -5.44 pp (NLL +0.157) | **0.292** |
+| raw lexical retrieval (dedup + snippet) | -6.94 pp (NLL +0.476) | 0.237 |
 | state-first selection | -15.38 pp | 0.242 |
+| log replay into materialised state | -7.21 pp | 0.231 |
+| protected spans kept *whole* + ranked rest | -20.33 pp (NLL +1.437) | 0.211 |
+| newest span only + compiled far field | -25.36 pp (NLL +1.400) | 0.083 |
 | 16,384-token reference view | -1.94 pp | 0.142 |
 
-Read down the columns: **fidelity is bought by the newest span, the decision by query-focused
-evidence, and no view buys both.**  The fidelity column is nearly saturated by recency - which
-is why a paper whose headline is "we halve the budget at equal fidelity" would be claiming
-something a one-line truncation policy already does - while the decision column is carried by
-the compiler (0.292 against 0.154 for recency and 0.045 for full history) and *destroyed* by
-spending budget on generic recency padding (tail_state 0.104, worse than recency itself, because
-older recency spans displace the evidence the decision needs).
+Two laws read off these rows, and together they explain why no single 8K view has both columns:
 
-The proxy metric the compiler literature uses cannot see this.  On these traces it is dominated
-by the surface form of the turn being continued: keep the newest span whole and it is at parity
-even with 90% of the session gone.  The end task can see it, because the file a patch will touch
-is often named only in evidence from far back.  That is the paper's measurement contribution,
-and it also sets the design target: an 8K view that is *the current turn plus the query's
-evidence*, with no third category in the budget (`--compile-mode tail_query`, measured next).
+1. **Fidelity is set by how the newest evidence is treated, not by how much is kept.**  Kept
+   whole: parity at every window size measured (recency +0.29 pp; tail_state 0.00 pp at 35%, 50%
+   and 60%, i.e. with as little as 2.9K of verbatim window).  Prefix-truncated: -5.4 to -6.9 pp.
+   Query-line-selected inside its own room: **-20.33 pp** - worse than truncating it, because the
+   model is answering a turn whose immediately preceding output has been reordered into an
+   excerpt.  Replaced by a single span: -25.36 pp.
+2. **The decision is set by how much *ranked* evidence the budget holds.**  A fully ranked 8K
+   view scores 0.292 and 0.237 (compiler and raw); a ranked view squeezed to the remainder after
+   a window scores 0.056-0.158; full history - all the evidence, unranked - scores 0.045.
 
-### What each gate needs
+So the tension is not "compression versus fidelity"; it is that the surface needs the newest
+output *untouched and in order* while the decision needs the *rest of the budget spent on ranked
+evidence*, and at 8,192 tokens the newest output can be large enough that there is no "rest".
+This is why the proxy metric the compiler literature uses cannot see the compiler's contribution:
+on these traces that metric is dominated by surface form and is at parity as soon as the newest
+evidence is left alone.
+
+The paired statistics bound what can be claimed about the decision (24 paired sessions, same
+instances, `benchmarks/paired_f1.py`):
+
+| comparison | paired mean | 95% CI | wins/losses |
+|---|---:|---|---|
+| tail_state -> compiled | **+0.188** | [+0.062, +0.326] | 9/1 |
+| tail_state -> protect-whole | **+0.107** | [+0.014, +0.215] | 6/1 |
+| recency -> compiled | +0.139 | [-0.075, +0.343] | 10/5 |
+| raw -> compiled | +0.055 | [-0.107, +0.220] | 5/3 |
+| raw -> protect-whole | -0.026 | [-0.192, +0.125] | 5/5 |
+| 16K raw view -> protect-whole | +0.069 | [-0.081, +0.208] | 8/3 |
+
+The compiler's decision advantage is established against *windowed* views and against full
+history; against plain retrieval it is a tie at this corpus size, and the difference SD (~0.40)
+means separating +0.055 would need on the order of 400 paired sessions.  The paper states it that
+way.
+
+### What each gate needs, and the one arm that is still being measured
 
 | measurement | active budget it needs |
 |---|---|
 | G4 (routing) | **2,048-4,096 tokens** - with the widened grid, ephemeral mobility advances in every forced-mobility cell at both sizes |
-| G2 end-task (what a user sees) | **~8,192 tokens** for the best decision (0.292); recency reaches only 0.154 |
-| G2 teacher-forced (the proxy) | **8,192 tokens if the newest span is kept whole** (+0.29 pp); ~16,384 with lexical selection of the tail |
+| G2 end-task (what a user sees) | **~8,192 tokens** of ranked evidence for the best decision (0.292); a window-dominated view reaches only 0.056-0.158 |
+| G2 teacher-forced (the proxy) | **as little as 2.9K of verbatim window** (+0.00 pp at a 35% share of 8,192) |
 
-The old reading of this table - "the proxy needs twice the decision, and the compiler is the
-open problem" - was wrong in an instructive way.  The proxy needs 8K, not 16K, and the 5-15 pp
-losses that looked like a compiler failure were the tail being truncated to 2,048 tokens by
-`max_span_fraction=0.25` in every lexical arm.  What the compiler actually buys is the *decision*
-at a fixed budget, and what remains open is whether one view can hold both columns at once:
-that is what `tail_query` measures, and if it cannot, the honest system claim is the frontier
-above plus the regime G4 supports - mobility pays for recovery and capacity, not for
-steady-state routing at the fidelity the proxy demands.
+The old reading of this table - "the proxy needs 16K, the decision needs 8K, and the compiler is
+the open problem" - was wrong twice over.  The proxy does not need 16K; it needs the newest
+evidence untouched, and it is at parity with 90% of the session gone.  And the decision does not
+prefer the compiler over retrieval on this corpus: it prefers *any* fully-ranked 8K view.
+
+What is still open is narrow and now well posed.  The compiled arm spends 2,048 of its 8,192
+tokens on three recent spans truncated to 25% each; the fidelity arms spend 2.9-4.9K on a
+verbatim window and score 0.056-0.158 on the decision because their far field *dropped* oversized
+spans (`max_span_fraction=1.0`) instead of snippet-selecting them the way the compiled arm does.
+That was an inconsistency between arms, not a property of the trade-off, and it is fixed:
+`--compile-mode tail_state` now spends its window whole and gives every remaining token the
+compiled arm's own treatment.  If that arm lands at parity on fidelity and near 0.292 on the
+decision, the 16K -> 8K claim holds on both columns with one view; if it lands at 0.16-0.2, the
+honest statement is that the decision needs the whole 8K ranked and the surface needs a window,
+so ~12K is the real requirement - and the paper says 12K rather than choosing a metric to be
+quiet about.
 
 ## G4 — Break sticky routing at cluster level
 

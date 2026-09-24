@@ -181,8 +181,13 @@ def build_examples(
                         tail.sort(key=lambda sp: sp.turn)
                         far_budget = max(0, token_budget - tail_used)
                         far_options = dict(options)
+                        # only the *window* is handled separately: the far field must get the
+                        # same treatment the compiled arm gives its evidence (truncate or
+                        # snippet an oversized span rather than dropping it), otherwise this arm
+                        # is not "window + compiler" but "window + whatever survived", and the
+                        # comparison against the compiled arm was measuring the difference in
+                        # span treatment, not the difference in what the budget is spent on
                         far_options["recency_spans"] = 0
-                        far_options["max_span_fraction"] = 1.0
                         far_spans, _ = idx.compile_view(
                             query, token_budget=far_budget, max_spans=max_spans,
                             **far_options)
