@@ -168,6 +168,23 @@ plain retrieval returns 1.00 or 0.62, because supersede-by-identity and snippet 
 file the patch touches - the same effect the path-collapse ablation measured from the fidelity
 side (-13.90 pp against -5.44 pp).
 
+**The damage is systematic, not a configuration.**  Holding the design fixed and varying only the
+far field, on the same 48 instances:
+
+| window | far field | 8,192 | 12,288 |
+|---|---|---:|---:|
+| 2.9-4.1K | plain retrieval | **0.191** | (measuring) |
+| 3.1K | compiled | 0.084 | 0.133 |
+| 4.1K | compiled | 0.161 | 0.155 |
+| none | compiled | 0.139 | 0.213 |
+| none | plain retrieval | 0.243 at 4,096 | - |
+
+Every arm whose far field is the compiler sits below the same-budget plain-retrieval arm, across
+two window sizes and two budgets, and the two stages responsible are identified separately
+(path collapse 8.5 pp of fidelity, snippet re-selection 20 pp).  At this point "our compiler" is
+not a claim the paper can make; "the obvious compiler does not pay, and here is the measurement"
+is one.
+
 **What does hold both, at one budget and with no compiler.**  A view that keeps the newest
 evidence verbatim (a window) and spends every remaining token on plain retrieval scores end-task
 F1 **0.191** against **0.243** for plain retrieval at 4,096 and **0.161** for the same window with
