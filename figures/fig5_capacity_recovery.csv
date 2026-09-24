@@ -1,0 +1,23 @@
+# source: sessions per worker and the process-level failover
+# receipts: g5-capacity-planning-v1.json, g5-failover-two-workers-samemodel-v1.json
+row,value
+Qwen2.5-0.5B (measured) / history / 32768,53.3
+Qwen2.5-0.5B (measured) / history / 131072,13.3
+Qwen2.5-0.5B (measured) / history / 1048576,1.7
+Qwen2.5-0.5B (measured) / compiled state / 4096,426.7
+Qwen2.5-0.5B (measured) / compiled state / 8192,213.3
+Qwen2.5-0.5B (measured) / compiled state / 16384,106.7
+8B-class / history / 32768,5.0
+8B-class / history / 131072,1.2
+8B-class / history / 1048576,0.2
+8B-class / compiled state / 4096,40.0
+8B-class / compiled state / 8192,20.0
+8B-class / compiled state / 16384,10.0
+70B-class / history / 32768,2.0
+70B-class / history / 131072,0.5
+70B-class / history / 1048576,0.1
+70B-class / compiled state / 4096,16.0
+70B-class / compiled state / 8192,8.0
+70B-class / compiled state / 16384,4.0
+failover sessions recovered (of 6),4
+failover rebuild seconds p50,1.396

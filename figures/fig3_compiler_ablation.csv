@@ -1,0 +1,11 @@
+# source: the end-task ladder, paired on the same instances
+# receipts: g2b-patch-localization-raw-b4096-n48.json, g2b-patch-localization-deduponly-b4096-n48.json, g2b-patch-localization-deduponly-b8192-n48.json, g2b-patch-localization-compiled-b8192-n48.json, g2b-patch-localization-compiled-b12288-n48.json, g2b-patch-localization-windowcompiler-b8192-n48.json, g2b-patch-localization-windowraw-tf0.5-b8192-n48.json, g2b-patch-localization-window3kraw-b8192-n48.json
+arm,budget,full_f1,active_f1,paired_f1
+raw retrieval,4096,0.089,0.243,0.154
+dedup only,4096,0.089,0.239,0.15
+dedup only,8192,0.089,0.207,0.118
+compiler,8192,0.089,0.139,0.05
+compiler,12288,0.089,0.213,0.125
+window + compiler,8192,0.089,0.161,0.073
+window + raw,8192,0.089,0.191,0.102
+window 3K + raw,8192,0.089,0.191,0.102

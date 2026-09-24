@@ -37,12 +37,12 @@
       "active_tokens": 8192,
       "cells": 294,
       "advance": 52,
-      "arm": "verbatim window + compiled far field (tail_state tf 0.5, fidelity) / evidence consolidation (decision) - two arms at one size",
+      "arm": "verbatim window + compiled far field (tail_state tf 0.5): the only measured arm that holds both metrics at this size",
       "fidelity_pp": 0.0,
-      "decision_f1": 0.292,
+      "decision_f1": 0.161,
       "fidelity_admissible": true,
       "decision_admissible": true,
-      "decision_parity_admissible": true
+      "decision_parity_admissible": false
     },
     {
       "active_tokens": 16384,
@@ -54,7 +54,7 @@
     "advancing_cells_total": 134,
     "advancing_cells_fidelity_admissible": 52,
     "advancing_cells_decision_admissible": 132,
-    "advancing_cells_decision_parity": 52,
+    "advancing_cells_decision_parity": 0,
     "sizes_without_quality_points": [
       16384
     ]

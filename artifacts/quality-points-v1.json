@@ -33,15 +33,15 @@
     },
     {
       "active_tokens": 8192,
-      "arm": "verbatim window + compiled far field (tail_state tf 0.5, fidelity) / evidence consolidation (decision) - two arms at one size",
+      "arm": "verbatim window + compiled far field (tail_state tf 0.5): the only measured arm that holds both metrics at this size",
       "fidelity_pp": 0.0,
-      "decision_f1": 0.292,
+      "decision_f1": 0.161,
       "receipts": {
         "fidelity": "artifacts/g2-compiler-tailstate-compiledfar-tf0.5-b8192-v1.json",
-        "decision": "artifacts/g2b-patch-localization-consolidate-b8192-v1.json",
-        "decision_alt_1": "artifacts/g2b-patch-localization-protectwhole-b8192-v1.json"
+        "decision": "artifacts/g2b-patch-localization-windowcompiler-b8192-n48.json",
+        "decision_best_arm": "artifacts/g2b-patch-localization-consolidate-b8192-v1.json"
       },
-      "note": "at 8,192 the fidelity-admissible arm and the decision-best arm are different arms of the same size; the fidelity column is the windowed arm (0.00 pp) and the decision column the compiled arm (0.292). Quoting one arm for both is what the 16K->8K claim would need and does not yet have."
+      "note": "the decision-best arm at this size scores 0.292 on 24 instances but carries -5.44 pp of fidelity, so it is not admissible; the joint arm is"
     }
   ]
 }

@@ -1,0 +1,11 @@
+# source: g2_killer_table by history and by turns
+# receipts: g2-killer-table-v4.json
+bucket,raw_history_p50,state_p50,fidelity_delta_pp,n
+<=24 turns,67310,8203,-46.88,1
+24-48 turns,79769,8121,-1.43,21
+48-96 turns,84617,7887,0.0,25
+>96 turns,155222,8203,0.0,1
+<=24 turns,67310,12299,-50.0,1
+24-48 turns,79769,10064,-2.33,21
+48-96 turns,84617,9981,0.26,25
+>96 turns,155222,12299,0.0,1

@@ -1,0 +1,8 @@
+# source: fidelity against how the newest evidence is rendered
+# receipts: g2-compiler-recency-b8192-v1.json, g2-compiler-tailstate-compiledfar-tf0.5-b8192-v1.json, g2-compiler-window3kraw-b8192-v1.json, g2-compiler-protectwhole-b8192-v1.json, g2-compiler-tailquery-cap0.5-b8192-v1.json
+arm,rendering,fidelity_pp,n
+plain recency,"newest spans whole, nothing else",0.29,44
+window 50% + compiled far,3-4K window whole + consolidated far field,0,44
+3K window + raw far,3K window whole + raw far field,-6.94,44
+protected spans whole,"protected spans whole, ranked rest",-20.33,44
+newest span only,newest span only + compiled far field,-25.36,44
