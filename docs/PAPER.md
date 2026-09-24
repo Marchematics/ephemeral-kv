@@ -247,7 +247,7 @@ at 2K/4K/8K/16K, lookup by history bucket), with declared arrival models and geo
 |---|---:|
 | 2,048 | 17/66 |
 | 4,096 | 63/198 |
-| **8,192 (quality-admissible)** | **52/306** |
+| **8,192 (quality-admissible)** | **52/294** |
 | 16,384 | 2/66 |
 
 134 of 624 cells advance; the 8,192 column covers balanced, hotspot (a worker at a tenth of the
