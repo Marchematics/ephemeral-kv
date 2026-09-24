@@ -30,6 +30,23 @@ The claim is not that the transcript can be shortened.  It is that the object a 
 decision depends on - the execution state - is a *function of the current action and the query*,
 not of the session's age, and therefore that session age should stop predicting mobility cost.
 
+**Why the conflation is so expensive here.**  A long coding-agent session is not a long
+transcript.  Measuring the token share held by the largest spans of each long session
+(`g2_dead_state.py`, receipt `artifacts/g2-dead-state-v1.json`):
+
+| session tokens | spans | largest span | top-2 share | top-5 share | the rest |
+|---:|---:|---:|---:|---:|---:|
+| 156,207 | 45 | 45,051 | 58% | 93% | 7% |
+| 155,997 | 61 | 45,416 | 58% | 94% | 6% |
+| 123,210 | 29 | 55,320 | 90% | 96% | 4% |
+| 141,168 | 65 | 56,514 | 80% | 92% | 8% |
+| 127,126 | 83 | 28,261 | 44% | 73% | 27% |
+
+Five blocks hold 73-96% of the tokens, and the turn-by-turn content a view actually walks is
+4-27% (median 8%) of the footprint.  A system whose cost is the footprint is therefore paying to
+retain and to move state that was needed once - which is the cheapest thing for a compiler to
+drop and the most expensive thing for a cache to keep.
+
 ## 2. The compiler, and what its stages actually buy
 
 `ephemeralkv/` implements the split: `DurableSpanIndex` is the append-only model-independent

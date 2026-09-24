@@ -1,0 +1,71 @@
+{
+  "schema": "ephemeral-kv-dead-state-v1",
+  "kind": "structural_measurement",
+  "interpretation": "the share of a session's tokens held by its largest spans; the tail is what a turn-by-turn view actually walks",
+  "rows": [
+    {
+      "history_tokens": 156207,
+      "spans": 45,
+      "largest_span": 45051,
+      "top2_share": 0.577,
+      "top5_share": 0.926,
+      "tail_share": 0.074
+    },
+    {
+      "history_tokens": 155997,
+      "spans": 61,
+      "largest_span": 45416,
+      "top2_share": 0.582,
+      "top5_share": 0.938,
+      "tail_share": 0.062
+    },
+    {
+      "history_tokens": 155292,
+      "spans": 97,
+      "largest_span": 45347,
+      "top2_share": 0.584,
+      "top5_share": 0.914,
+      "tail_share": 0.086
+    },
+    {
+      "history_tokens": 123210,
+      "spans": 29,
+      "largest_span": 55320,
+      "top2_share": 0.898,
+      "top5_share": 0.962,
+      "tail_share": 0.038
+    },
+    {
+      "history_tokens": 141168,
+      "spans": 65,
+      "largest_span": 56514,
+      "top2_share": 0.8,
+      "top5_share": 0.923,
+      "tail_share": 0.077
+    },
+    {
+      "history_tokens": 141239,
+      "spans": 55,
+      "largest_span": 38724,
+      "top2_share": 0.548,
+      "top5_share": 0.89,
+      "tail_share": 0.11
+    },
+    {
+      "history_tokens": 127126,
+      "spans": 83,
+      "largest_span": 28261,
+      "top2_share": 0.445,
+      "top5_share": 0.729,
+      "tail_share": 0.271
+    },
+    {
+      "history_tokens": 124995,
+      "spans": 61,
+      "largest_span": 30332,
+      "top2_share": 0.485,
+      "top5_share": 0.751,
+      "tail_share": 0.249
+    }
+  ]
+}
