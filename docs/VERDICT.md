@@ -122,3 +122,38 @@ nothing extra - which is the property that makes rollout and failover the same o
    keeps the decision; what remains is a two-worker failover with a killed owner and a scheduler
    that re-places the session;
 4. the paper: abstraction, law, phase change, negative compiler result, and the metric lesson.
+
+## 7. The one-page ledger
+
+Paper-ready claims, each with its receipt and its limit.  A claim without a receipt does not go in
+the paper; a claim whose limit is not stated here does not go in the abstract.
+
+| # | claim | receipt | limit |
+|---|---|---|---|
+| C1 | the execution state is bounded and flat in session age | killer table: state 7.1-8.2K at raw histories 64K / 83K / 156K, fidelity delta +0.00 / +0.00 / +1.43 pp | 44 long-history examples; the corpus reaches 156K, the 1M row is composed from primitives |
+| C2 | fidelity parity needs only ~3K of verbatim newest evidence | window sweep 2.9K-6.1K -> 0.00 pp at both 8,192 and 12,288 budgets | teacher-forced metric, whose recency saturation is itself C6 |
+| C3 | one 8,192-token view holds both qualities | window + plain retrieval: 0.191 decision against 0.243 for plain retrieval at 4,096 (paired -0.052, CI [-0.154, +0.047]) with 0.00 pp fidelity against -25 pp | a *tie* on the decision, not a win; 48 paired sessions, 26 scoreable |
+| C4 | the obvious compiler does not pay, and two of its stages hurt | same-instance arms across two window sizes and two budgets; path collapse -8.5 pp of fidelity; snippet re-selection -20 pp; log replay neutral because only 6% of retrieved spans are file events | corpus-specific: coding-agent traces with few file events |
+| C5 | mobility law and inversion | 1M with a 4,096 state: 0.0954 s; with 8,192: 0.2031 s; against 0.4855 s for 32K carrying the 16,384-token pre-compiler view; flat 0.2028-0.2031 s from 32K to 1M | composed from G3 measured primitives; the 1M lookup row is extrapolated |
+| C6 | session age ranks placement cost backwards | 1M/4K ranks cheapest (0.0954 s) and 32K/16K most expensive (0.4855 s); the footprint estimate ranks them 5.899 s against 0.184 s | arithmetic over the same primitives |
+| C7 | the cost law moves routing at a quality-admissible state | 118/576 replay cells advance; 36 at the 8,192 state where both metrics hold, in balanced, slow-worker and worker-loss regimes | balanced and slow-worker wins are the no-cluster-KV-store regime |
+| C8 | capacity: the same worker holds far more sessions | 213 / 20 / 8 states against 13.3 / 1.2 / 0.5 histories per 20 GiB, at 128K, on 0.5B / 8B / 70B geometries | 8B and 70B geometries are declared, not measured |
+| C9 | recovery and rollout without moving KV | on two models that never saw the sessions: end-task 0.137 / 0.145 against 0.017 / 0.042; ~33 KiB of state text against 12-128 GiB of KV; 0.55-1.04 s against 6.31 s of re-prefill | the model-rollout half; a two-worker failover with a killed owner is not measured |
+| C10 | the field's proxy metric cannot compare these systems | teacher-forced fidelity is at parity with 8,192 tokens of recency and with a 2.9K window, and falls 5-25 pp only when the newest evidence is truncated, reordered or replaced | the end task is the metric we gate on; both are reported for every arm |
+
+Measured false, and therefore not claimed anywhere: a semantic compiler beating retrieval; a
+compiler being required for the bound; teacher-forced fidelity separating systems on this corpus;
+collapsing a file to its latest state; log replay paying; one 8,192-token view holding both metrics
+*through compilation*.
+
+## 8. Status of the decision
+
+**Paper B is Best-targeted on C1-C10 and has dropped the compiler claim, which the measurements
+falsified rather than left unproven.**  What the Best case rests on is the identity (three
+different objects, not one), the law (flat state, flat quality), the inversion (age ranks cost
+backwards), the capacity consequence, the routing phase change at the admissible size, and
+recovery that never moves KV - with the compiler ablation as the negative result that rules out
+the explanation everyone reaches for first.  Remaining before writing: the window-size isolation
+runs (3,072-token window with plain retrieval at 8,192 and 12,288), the equal-budget retrieval
+reference at 8,192, the dedup-only compiler arm, and the 64K-128K decision column of the killer
+table.
