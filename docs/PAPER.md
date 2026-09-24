@@ -366,6 +366,10 @@ carries quality is the window and retrieval, and what carries mobility is the bo
   (-0.104, CI [-0.208, -0.007]) or at equal budget (raw 0.191 against compiled 0.139 at 8,192).
 * **We do not claim fidelity and the decision prefer the same *rendering*.**  They prefer the same
   *content*; the rendering that satisfies both is a whole newest window over a consolidated far field.
+* **We do not measure an end-to-end agent-success metric.**  Our end task is file-level
+  localisation of the next turn; the closest published comparison - KVMem's DeepSWE success
+  improving from 43.8% under compaction to 48.4% with KV virtualisation - is not reproduced here,
+  and a task-success benchmark is the metric a deployed claim should carry.
 * **A fleet-level scheduler is modelled, not deployed.**  The G4 replay uses measured primitives and
   declared workloads; the process-level failover is real, the cluster is not.
 * **A singleton counterexample is reported as one** (the 22-turn/67K example above) rather than
