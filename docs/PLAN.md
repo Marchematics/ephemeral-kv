@@ -236,6 +236,50 @@ from ~8K, and teacher-forced token accuracy needs ~16K.  The honest system claim
 middle one (the decision is what a user sees), and it is still four times what the routing
 side needs - so the compiler gap is halved, not closed.
 
+## The semantic compiler, first iteration: what the ablation says
+
+The routing gate and the fidelity gate together said the remaining work is the *compiler*: the
+agent's next decision holds from 8,192 active tokens, teacher-forced fidelity needs 16,384, and
+re-ranking the same text does not move either.  This iteration built the compiler the plan
+called for - retrieve evidence, consolidate it, keep what must be verbatim - and measured it
+against the same 48 examples and the same receipts.
+
+`ephemeralkv/consolidate.py` implements the two stages: :func:`consolidate` groups the retrieved
+spans by the state they describe (file path, content identity), keeps the newest, and records
+the turns it replaced as provenance; :func:`select_verbatim` cuts a unit that does not fit by
+dropping prose before anything executable (code, tracebacks, diffs, paths, numbers stay
+byte-for-byte), and marks every omission so a compiled view never looks complete when it is not.
+The compiled arm retrieves twice its budget and compiles down, so the comparison is exactly
+"16K of raw evidence into 8K of compiled state".
+
+At a **8,192-token budget**, 48 examples, 32K-128K histories:
+
+| compiler variant | token-accuracy delta | NLL delta |
+|---|---:|---:|
+| raw truncation (the previous receipt) | -6.94 pp | +0.476 |
+| evidence consolidation, latest state per file | **-13.90 pp** | +0.640 |
+| **evidence consolidation without collapsing file states** | **-5.44 pp** | +0.550 |
+| consolidation keeping the replaced views' verbatim lines | -7.38 pp | +0.320 |
+| *16,384-token view, for reference (the current requirement)* | *-1.94 pp* | *+0.151* |
+
+Three things follow, and the first is a correction to the design rather than to the numbers:
+
+1. **Collapsing a file to its latest state is actively harmful** (-13.90 pp, twice the loss of
+   plain truncation): earlier views of the same file carry content the next turn needs - a
+   region the later view no longer shows, the context of a change - so "latest state wins" is
+   the wrong rule.  The plan's example (four views of `cache.py` becoming one state plus
+   provenance) is the intuition that the measurement rejects.
+2. **The best extractive variant is only ~1.5 pp better than raw truncation** (-5.44 against
+   -6.94) and nowhere near the 2 pp gate, so the gate is **not met**: the extractive family -
+   retrieval, duplicate collapse, state collapse, verbatim-priority truncation - does not get
+   8,192 tokens to fidelity parity on this corpus.
+3. Keeping the replaced views' verbatim lines does not rescue it either (-7.38 pp), which says
+   the missing information is not only "executable lines".
+
+The honest next step is therefore the one the ablation points at: a **semantic** step that
+*rewrites* content - compressing a file's history into a canonical current form rather than
+selecting among its views - with the extractive receipts above as the control it must beat.
+
 ## Where the gates stand together
 
 Two of them now bound the same quantity from opposite sides, and the gap between them is the

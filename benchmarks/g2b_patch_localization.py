@@ -138,6 +138,9 @@ def main(argv=None) -> int:
     p.add_argument("--max-length", type=int, default=65536)
     p.add_argument("--max-new", type=int, default=96)
     p.add_argument("--max-examples", type=int, default=24)
+    p.add_argument("--consolidate", action=argparse.BooleanOptionalAction, default=False,
+                   help="compile the retrieved evidence instead of concatenating it")
+    p.add_argument("--retrieve-multiplier", type=float, default=2.0)
     p.add_argument("--dedup-spans", action=argparse.BooleanOptionalAction, default=False,
                    help="collapse identical span texts in the view (keeps the newest copy)")
     p.add_argument("--snippet-spans", action=argparse.BooleanOptionalAction, default=False,
@@ -177,7 +180,9 @@ def main(argv=None) -> int:
                 min_history_tokens=args.min_history_tokens,
                 compiler={"recency_spans": 3, "recency_fraction": 0.6,
                           "max_span_fraction": 0.25, "provenance_terms": 8,
-                          "dedup": args.dedup_spans, "snippet": args.snippet_spans},
+                          "dedup": args.dedup_spans, "snippet": args.snippet_spans,
+                          "consolidate": args.consolidate,
+                          "retrieve_multiplier": args.retrieve_multiplier},
                 token_counter=lambda text: len(tokenizer.encode(text,
                                                                 add_special_tokens=False)),
             )

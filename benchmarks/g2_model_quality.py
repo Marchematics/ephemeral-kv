@@ -23,6 +23,7 @@ from pathlib import Path
 from statistics import median
 from typing import Iterable
 
+from ephemeralkv.consolidate import compile_units, consolidate, render
 from ephemeralkv.index import DurableSpanIndex, Span
 from benchmarks.g2_trace_index import _content, messages_from_row
 
@@ -75,11 +76,28 @@ def build_examples(
                     query = _content(prev)
                     break
             if query:
-                view, _ = idx.compile_view(
-                    query, token_budget=token_budget, max_spans=max_spans,
-                    **(compiler or {}),
-                )
-                active = "".join(render_span(s) for s in view)
+                options = dict(compiler or {})
+                consolidate_view = bool(options.pop("consolidate", False))
+                retrieve_multiplier = float(options.pop("retrieve_multiplier", 2.0))
+                collapse_paths = bool(options.pop("collapse_paths", True))
+                keep_earlier_verbatim = bool(options.pop("keep_earlier_verbatim", False))
+                if consolidate_view:
+                    # retrieve generously, consolidate the evidence, then compile down: the
+                    # point is that the *representation* changes, not that the ranking does
+                    spans, _ = idx.compile_view(
+                        query, token_budget=max(token_budget + 1,
+                                                int(token_budget * retrieve_multiplier)),
+                        max_spans=max_spans, **options)
+                    units, _stats = compile_units(
+                        consolidate(spans, collapse_paths=collapse_paths,
+                                    keep_earlier_verbatim=keep_earlier_verbatim),
+                        token_budget, token_counter)
+                    active = render(units)
+                    view = spans
+                else:
+                    view, _ = idx.compile_view(
+                        query, token_budget=token_budget, max_spans=max_spans, **options)
+                    active = "".join(render_span(s) for s in view)
                 full = "".join(render_message(x) for x in history)
                 out.append(
                     Example(
@@ -89,8 +107,9 @@ def build_examples(
                         history_tokens_estimate=sum(
                             max(1, s.token_estimate) for s in idx.spans
                         ),
-                        active_tokens_estimate=sum(
-                            max(1, s.token_estimate) for s in view
+                        active_tokens_estimate=(
+                            max(1, int(token_counter(active))) if consolidate_view
+                            else sum(max(1, s.token_estimate) for s in view)
                         ),
                     )
                 )
@@ -303,6 +322,18 @@ def main(argv=None):
     p.add_argument("--snippet-spans", action=argparse.BooleanOptionalAction, default=False,
                    help="keep query-relevant lines of an oversized span instead of its "
                         "prefix (tool outputs are mostly whole-file dumps)")
+    p.add_argument("--consolidate", action=argparse.BooleanOptionalAction, default=False,
+                   help="compile the retrieved evidence instead of concatenating it: "
+                        "collapse superseded file states and repeated output, then keep "
+                        "executable lines verbatim (the G2 gap is in the representation, "
+                        "not in the ranking)")
+    p.add_argument("--retrieve-multiplier", type=float, default=2.0,
+                   help="how much evidence to retrieve before consolidating it down")
+    p.add_argument("--no-collapse-paths", action="store_true",
+                   help="ablation: keep every view of a file instead of its latest state")
+    p.add_argument("--keep-earlier-verbatim", action="store_true",
+                   help="union of evidence: latest state plus the verbatim lines of the "
+                        "views it replaced")
     p.add_argument("--dedup-spans", action=argparse.BooleanOptionalAction, default=False,
                    help="collapse identical span texts in the compiled view, keeping the "
                         "most recent copy (measured: 17.5%% of view spans are duplicates)")
@@ -354,7 +385,11 @@ def main(argv=None):
                           "max_span_fraction": args.max_span_fraction,
                           "provenance_terms": args.provenance_terms,
                           "dedup": args.dedup_spans,
-                          "snippet": args.snippet_spans},
+                          "snippet": args.snippet_spans,
+                          "consolidate": args.consolidate,
+                          "retrieve_multiplier": args.retrieve_multiplier,
+                          "collapse_paths": not args.no_collapse_paths,
+                          "keep_earlier_verbatim": args.keep_earlier_verbatim},
                 token_counter=lambda text: len(
                     tokenizer.encode(text, add_special_tokens=False)
                 ),
