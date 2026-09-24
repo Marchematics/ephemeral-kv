@@ -132,6 +132,10 @@ examples, decision n=48 paired sessions, 26 scoreable):
 | protected spans kept whole + ranked rest | -20.33 pp | 0.211 |
 | newest span only + compiled far field | -25.36 pp | 0.083 |
 
+*Figure 2 (`figures/fig2_two_metrics.svg`) plots these two columns against each other for every
+arm, and Figure 6 (`figures/fig6_metric_lesson.svg`) plots the fidelity column against how the
+newest evidence was rendered.*
+
 1. **Fidelity is set by how the newest evidence is rendered.**  Kept whole it is at parity with as
    little as 3K of window; prefix-truncated it costs 5-7 pp; reordered into a query-selected excerpt
    20 pp; replaced by a single span 25 pp.  The *far field* must also be consolidated rather than
@@ -228,6 +232,8 @@ receipt:
 | log replay into materialised state | dumps set content, diffs and SEARCH/REPLACE apply, repeated commands collapse | 0.231 against 0.237 on the decision; neutral, because only **6%** of retrieved spans are file events |
 | identifier provenance | pull spans sharing paths/ids with the query | part of the 4K -> 2K improvement |
 
+*Figure 3 (`figures/fig3_compiler_ablation.svg`) draws the end-task ladder these stages sit on.*
+
 Two of these are negative results the paper keeps, because they bound what "executable state" can
 mean on this workload: the stages that *compile state* are the ones that hurt, and the reason is a
 property of coding-agent traces (most retrieved evidence is not file events) rather than of the
@@ -297,8 +303,6 @@ A 22-turn example with 67K of history fails badly (-46.9 pp); it is a singleton,
 it points at a limitation: a short session whose individual turns are enormous.
 
 ### 4.2 The mobility law and the inversion
-
-*Figure 2 (`figures/fig2_two_metrics.svg`) plots the two metrics against each other for every arm.*
 
 | session | state | mobility (lookup + active prefill) | full-KV move |
 |---|---:|---:|---:|
