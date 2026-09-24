@@ -240,6 +240,28 @@ If recovery needs the history-sized KV or equivalent model-bound backing state, 
 
 **Status.** Open.
 
+**Status. Measured, first receipt** (`benchmarks/g5_rollout_resume.py`, 24 examples from
+the longest sessions, median history **130,131 tokens**, active budget 16,384):
+
+| route after a model rollout | cost |
+|---|---|
+| durable transcript + index: lookup | 0.25 ms |
+| ephemeral resume: active-set prefill on the **new** model | **0.55 s** (Qwen2.5-0.5B), **1.04 s** (Llama-3.2-1B) |
+| full-KV resume: re-prefill the history on the new model | **6.31 s** (optimistic linear scaling of a superlinear measured curve; **infeasible** at 512K+) |
+
+and the durable view is model-independent in the way the claim needs: the *same* index and
+the *same* active view, scored with a model that never saw the session, keeps the next
+turn's fidelity (**Llama-3.2-1B: token-accuracy delta +0.48 pp, NLL -0.010**), while the
+model that built the view scores +7.25 pp - the active view beating its own full-history
+baseline at 130K tokens, where the full context is past what that checkpoint handles.
+
+So a rollout costs a bounded prefill of the active set rather than a history-sized
+transfer or recompute, and worker failure loses an optimisation rather than a session.
+The caveats are in the artifact: the budget is applied with the primary model's tokenizer,
+the re-prefill figure is a flagged optimistic scaling, and this is teacher-forced fidelity
+rather than end-task success.
+
+
 ## What kills the project outright
 
 * G2: live state or index work scales roughly linearly with history on realistic agents.
