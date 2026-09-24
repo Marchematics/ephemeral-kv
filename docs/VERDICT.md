@@ -58,6 +58,21 @@ old session, small state  <  young session, large state
   (a routing trace with per-session age and state size, comparing a size-blind policy against a
   size-aware one) and it is the cleanest remaining Best-shaped result.
 
+## 4b. What recovery actually moves (derived, labelled as derived)
+
+The state sizes are measured and the KV geometry is measured, so the data-movement comparison is
+arithmetic rather than a new experiment:
+
+| recovery of a 1M-token session | bytes moved | time |
+|---|---:|---:|
+| move the KV cache (Qwen2.5-0.5B geometry, 12,288 B/token) | 12.00 GiB | 0.5530 s at the measured 23.3 GB/s |
+| move the KV cache (8B-class geometry, 131,072 B/token) | 128 GiB | 5.9 s |
+| rebuild from the durable index: 8,192 tokens of state text (~4 B/token) + one lookup | ~33 KiB | 0.2031 s prefill + 0.4 ms lookup |
+
+Five orders of magnitude less data, and the direction is the point: the transfer term disappears
+from the recovery path entirely, so a model or adapter revision that invalidates all old KV costs
+nothing extra - which is the property that makes rollout and failover the same operation.
+
 ## 5. Decision
 
 * **Do not ship "we built a semantic compiler".**  The compiler's stages are measured not to pay,
