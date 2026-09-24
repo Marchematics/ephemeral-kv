@@ -1,0 +1,75 @@
+{
+  "schema": "ephemeral-kv-placement-inversion-v1",
+  "kind": "derived_analysis",
+  "kv_bytes_per_token": 131072,
+  "cold_budget_s": 1.0,
+  "rows": [
+    {
+      "session": "young, large state (pre-compiler requirement)",
+      "history": 32768,
+      "state": 16384,
+      "true_cost_s": 0.4855,
+      "footprint_estimate_s": 0.1843,
+      "rank_by_truth": 5,
+      "rank_by_footprint": 0,
+      "served_by_truth": 2.1,
+      "served_by_footprint_estimate": 5.4
+    },
+    {
+      "session": "young, bounded state",
+      "history": 32768,
+      "state": 8192,
+      "true_cost_s": 0.2028,
+      "footprint_estimate_s": 0.1843,
+      "rank_by_truth": 1,
+      "rank_by_footprint": 1,
+      "served_by_truth": 4.9,
+      "served_by_footprint_estimate": 5.4
+    },
+    {
+      "session": "mid, bounded state",
+      "history": 131072,
+      "state": 8192,
+      "true_cost_s": 0.2029,
+      "footprint_estimate_s": 0.7373,
+      "rank_by_truth": 2,
+      "rank_by_footprint": 2,
+      "served_by_truth": 4.9,
+      "served_by_footprint_estimate": 1.4
+    },
+    {
+      "session": "old, bounded state",
+      "history": 262144,
+      "state": 8192,
+      "true_cost_s": 0.2031,
+      "footprint_estimate_s": 1.4747,
+      "rank_by_truth": 3,
+      "rank_by_footprint": 3,
+      "served_by_truth": 4.9,
+      "served_by_footprint_estimate": 0.7
+    },
+    {
+      "session": "1M, bounded state",
+      "history": 1048576,
+      "state": 8192,
+      "true_cost_s": 0.2031,
+      "footprint_estimate_s": 5.8987,
+      "rank_by_truth": 4,
+      "rank_by_footprint": 4,
+      "served_by_truth": 4.9,
+      "served_by_footprint_estimate": 0.2
+    },
+    {
+      "session": "1M, small state",
+      "history": 1048576,
+      "state": 4096,
+      "true_cost_s": 0.0954,
+      "footprint_estimate_s": 5.8987,
+      "rank_by_truth": 0,
+      "rank_by_footprint": 5,
+      "served_by_truth": 10.5,
+      "served_by_footprint_estimate": 0.2
+    }
+  ],
+  "ranking_reversed": "the oldest session with a bounded state is cheaper to place cold than the youngest one carrying a 16K state"
+}

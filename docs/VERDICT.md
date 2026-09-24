@@ -52,11 +52,14 @@ old session, small state  <  young session, large state
 * `dM/dL ~ 0` **is measured** on the state side: the compiled state is flat (7.1-8.2K) while the
   raw history grows 2.4x, and the fidelity delta does not move with it.
 * the inversion **is measured** in cost: 1M/8K = 0.2031 s against 32K/16K = 0.4855 s.
-* what is *not* measured is the scheduler consequence of the inversion as a separate experiment:
-  the G4 replay uses the cost law, so the inversion is inside it, but no artifact yet shows a
-  policy choosing to move an old session *because* it is old.  That is a small, honest experiment
-  (a routing trace with per-session age and state size, comparing a size-blind policy against a
-  size-aware one) and it is the cleanest remaining Best-shaped result.
+* the ranking consequence is now measured as arithmetic over the same primitives
+  (`g6_placement_inversion.py`, `artifacts/g6-placement-inversion-v1.json`).  With a 4,096-token
+  state the oldest session in the set (1M history) is the **cheapest** to place cold at 0.0954 s,
+  while the youngest carrying the 16,384-token state that fidelity needed before the bound costs
+  **0.4855 s** - and the footprint estimate ranks them exactly backwards (5.899 s against
+  0.184 s).  Across bounded-state sessions the true cost is flat at 0.2028-0.2031 s for histories
+  from 32K to 1M, so a scheduler ranking by history is ranking by a quantity uncorrelated with
+  what it pays.
 
 ## 4a. The capacity consequence (derived from measured state sizes and KV geometry)
 
