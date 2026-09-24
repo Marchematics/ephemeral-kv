@@ -141,3 +141,31 @@ def test_recency_mode_keeps_the_newest_spans_whole():
     assert NEWEST in ex.active_context
     assert ex.active_context.rstrip().endswith(NEWEST.rstrip())
     assert ex.active_tokens_estimate <= 400 * 1.1       # whole spans, within budget
+
+
+def test_truncating_the_newest_span_does_not_corrupt_the_target_or_the_index():
+    """A compile branch must not rebind the loop's message text.
+
+    `text` becomes both the example target and the next span appended to the durable index, so
+    a branch that rebinds it (as the first version of the oversized-span truncation did) scores
+    the model against a truncated dump and grows every later history by the size of that dump.
+    """
+    huge = "HUGE NEWEST OUTPUT " + " ".join(f"w{i}" for i in range(4000))
+    msgs = _trajectory()[:-2] + [
+        {"role": "user", "content": "what should we change in src/cache.py?"},
+        {"role": "tool", "content": huge},
+        {"role": "assistant", "content": "change the LRU eviction path in src/cache.py"},
+        {"role": "user", "content": "and what about the metrics?"},
+        {"role": "assistant", "content": "the metrics stay in src/cache.py"},
+    ]
+    examples = build_examples(msgs, token_budget=300, min_history_spans=8,
+                              compiler={"compile_mode": "tail_state", "tail_fraction": 0.6,
+                                        "consolidate": True, "dedup": True})
+    targets = [ex.target for ex in examples]
+    assert "the metrics stay in src/cache.py" in targets
+    assert "change the LRU eviction path in src/cache.py" in targets
+    assert not any(t.startswith("HUGE NEWEST OUTPUT") for t in targets)
+    # the index must keep the whole tool result, not the truncated view of it: a rebind costs
+    # every later history the size of that span
+    assert examples[-1].history_tokens_estimate >= 4000
+    assert examples[-1].history_tokens_estimate > examples[-2].history_tokens_estimate

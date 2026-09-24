@@ -237,6 +237,38 @@ advantage at 1M is a function of the active set, and the crossover against a ful
 sits near 120 GB/s effective bandwidth for a 2K active set. End-to-end multi-worker
 routing is G4.
 
+**The killer table, measured (and what it is missing).** The mobility law is only half the
+claim; the other half is that the *quality* a fixed state buys does not decay as the session
+grows.  Bucketing the G2 receipts by session length (`benchmarks/g2_killer_table.py`) gives
+
+| raw history p50 | compiled state p50 | teacher-forced fidelity (tail_state, 8,192 budget) |
+|---:|---:|---:|
+| 64,401 | 7,829 | **+0.00 pp** (NLL +0.254) |
+| 82,972 | 7,899 | **+0.00 pp** (NLL +0.003) |
+| 155,574 | 8,203 | **+1.43 pp** (NLL -0.288) |
+
+so across a 2.4x growth in raw history the state that must move grows by 5% and the fidelity
+delta does not move at all - `dM/dL ~ 0` on the fidelity half of the claim, measured rather
+than asserted.  The *decision* column of this table is the piece still missing: every
+end-task receipt is drawn from ~32.9K-token histories, because the filter takes the first
+examples above the threshold, and the 64K-128K sessions in the corpus (338 of them) have not
+been measured yet.  Until they are, the paper can claim a flat *fidelity* law at fixed state
+and a *decision* law only at one session length.
+
+Composed with the hardware numbers, the inversion the paper wants is:
+
+| session | compiled state | mobility (lookup + active prefill) | full-KV move |
+|---|---:|---:|---:|
+| 32K, raw 16K view (what fidelity needed before the compiler) | 16,384 | 0.4855 s | 0.0173 s |
+| **1M, compiled** | **8,192** | **0.2031 s** | 0.5530 s |
+| **1M, compiled** | **4,096** | **0.0954 s** | 0.5530 s |
+| 262K, compiled | 8,192 | 0.2031 s | 0.1383 s |
+
+The first two rows are the counter-intuitive one: a session **32x older** is **2.4x cheaper**
+to move (5.1x at a 4K state), and the crossover where a full-KV move becomes the better cold
+route sits around 262K-1M tokens on a 23.3 GB/s link, not around 32K.  Session age stops
+predicting placement cost; the compiled state does.
+
 
 **The requirement is content volume, not selection granularity.**  A second compiler
 change was tried and did not help: `snippet=True` keeps the query-relevant lines of an

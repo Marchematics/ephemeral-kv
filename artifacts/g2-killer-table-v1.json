@@ -1,0 +1,199 @@
+{
+  "schema": "ephemeral-kv-killer-table-v1",
+  "kind": "derived_table",
+  "buckets": [
+    "<=32K",
+    "32K-64K",
+    "64K-128K",
+    "128K-256K",
+    ">=256K"
+  ],
+  "fidelity": {
+    "g2-compiler-tailstate-tf0.6-b8192-v3.json": {
+      "<=32K": {
+        "n": 0
+      },
+      "32K-64K": {
+        "n": 9,
+        "raw_history_p50": 64401,
+        "compiled_state_p50": 7829,
+        "acc_delta_pp_p50": 0.0,
+        "nll_delta_p50": 0.254
+      },
+      "64K-128K": {
+        "n": 35,
+        "raw_history_p50": 82972,
+        "compiled_state_p50": 7899,
+        "acc_delta_pp_p50": 0.0,
+        "nll_delta_p50": 0.003
+      },
+      "128K-256K": {
+        "n": 4,
+        "raw_history_p50": 155574,
+        "compiled_state_p50": 8203,
+        "acc_delta_pp_p50": 1.43,
+        "nll_delta_p50": -0.288
+      },
+      ">=256K": {
+        "n": 0
+      }
+    },
+    "g2-compiler-tailquery-cap0.5-b8192-v1.json": {
+      "<=32K": {
+        "n": 0
+      },
+      "32K-64K": {
+        "n": 9,
+        "raw_history_p50": 64401,
+        "compiled_state_p50": 4497,
+        "acc_delta_pp_p50": -17.39,
+        "nll_delta_p50": 1.39
+      },
+      "64K-128K": {
+        "n": 35,
+        "raw_history_p50": 82972,
+        "compiled_state_p50": 7450,
+        "acc_delta_pp_p50": -26.86,
+        "nll_delta_p50": 1.41
+      },
+      "128K-256K": {
+        "n": 4,
+        "raw_history_p50": 155574,
+        "compiled_state_p50": 4107,
+        "acc_delta_pp_p50": 0.71,
+        "nll_delta_p50": -0.256
+      },
+      ">=256K": {
+        "n": 0
+      }
+    },
+    "g2-compiler-dedup-b8192-v1.json": {
+      "<=32K": {
+        "n": 0
+      },
+      "32K-64K": {
+        "n": 9,
+        "raw_history_p50": 64401,
+        "compiled_state_p50": 8192,
+        "acc_delta_pp_p50": -5.0,
+        "nll_delta_p50": 0.152
+      },
+      "64K-128K": {
+        "n": 35,
+        "raw_history_p50": 82972,
+        "compiled_state_p50": 8192,
+        "acc_delta_pp_p50": -7.14,
+        "nll_delta_p50": 0.558
+      },
+      "128K-256K": {
+        "n": 4,
+        "raw_history_p50": 155574,
+        "compiled_state_p50": 8192,
+        "acc_delta_pp_p50": 0.0,
+        "nll_delta_p50": -0.166
+      },
+      ">=256K": {
+        "n": 0
+      }
+    }
+  },
+  "end_task": {
+    "g2b-patch-localization-consolidate-b8192-v1.json": {
+      "<=32K": {
+        "n": 0
+      },
+      "32K-64K": {
+        "n": 24,
+        "raw_history_p50": 32897,
+        "compiled_state_p50": 8372,
+        "full_f1_p50": 0.0,
+        "active_f1_p50": 0.143
+      },
+      "64K-128K": {
+        "n": 0
+      },
+      "128K-256K": {
+        "n": 0
+      },
+      ">=256K": {
+        "n": 0
+      }
+    },
+    "g2b-patch-localization-tailquery-cap0.9-b2048-v1.json": {
+      "<=32K": {
+        "n": 0
+      },
+      "32K-64K": {
+        "n": 24,
+        "raw_history_p50": 32897,
+        "compiled_state_p50": 2183,
+        "full_f1_p50": 0.0,
+        "active_f1_p50": 0.0
+      },
+      "64K-128K": {
+        "n": 0
+      },
+      "128K-256K": {
+        "n": 0
+      },
+      ">=256K": {
+        "n": 0
+      }
+    },
+    "g2b-patch-localization-recency-b8192-v1.json": {
+      "<=32K": {
+        "n": 0
+      },
+      "32K-64K": {
+        "n": 24,
+        "raw_history_p50": 32897,
+        "compiled_state_p50": 8286,
+        "full_f1_p50": 0.0,
+        "active_f1_p50": 0.0
+      },
+      "64K-128K": {
+        "n": 0
+      },
+      "128K-256K": {
+        "n": 0
+      },
+      ">=256K": {
+        "n": 0
+      }
+    }
+  },
+  "inversion": [
+    {
+      "history": 32768,
+      "compiled_state": 16384,
+      "lookup_s": 0.00015,
+      "prefill_s": 0.4854,
+      "move_full_kv_s": 0.0173,
+      "mobility_s": 0.4855
+    },
+    {
+      "history": 1048576,
+      "compiled_state": 8192,
+      "lookup_s": 0.0004,
+      "prefill_s": 0.2027,
+      "move_full_kv_s": 0.553,
+      "mobility_s": 0.2031
+    },
+    {
+      "history": 1048576,
+      "compiled_state": 4096,
+      "lookup_s": 0.0004,
+      "prefill_s": 0.095,
+      "move_full_kv_s": 0.553,
+      "mobility_s": 0.0954
+    },
+    {
+      "history": 262144,
+      "compiled_state": 8192,
+      "lookup_s": 0.0004,
+      "prefill_s": 0.2027,
+      "move_full_kv_s": 0.1383,
+      "mobility_s": 0.2031
+    }
+  ]
+}

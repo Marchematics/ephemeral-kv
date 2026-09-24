@@ -161,8 +161,13 @@ def build_examples(
                                 # turn has.
                                 limit = max(tail_budget, cost)
                                 if cost > token_budget:
-                                    text = suffix_within(span.text, token_budget, token_counter)
-                                    tail.append(replace(span, text=text,
+                                    # never rebind `text`: it is the loop's message text and it
+                                    # becomes both the example target and the next indexed span,
+                                    # so shadowing it here corrupts the target and the durable
+                                    # index for every later turn (measured: histories grew by
+                                    # 8,087 tokens per corrupted span)
+                                    cut = suffix_within(span.text, token_budget, token_counter)
+                                    tail.append(replace(span, text=cut,
                                                         token_estimate=token_budget))
                                     tail_ids.add(span.span_id)
                                     tail_used = token_budget
@@ -208,8 +213,8 @@ def build_examples(
                                 # a newest span larger than its share is kept from the end: the
                                 # alternative is dropping the turn the model is answering or
                                 # leaving no budget for the evidence the decision needs
-                                text = suffix_within(newest.text, share, token_counter)
-                                tail.append(replace(newest, text=text,
+                                cut = suffix_within(newest.text, share, token_counter)
+                                tail.append(replace(newest, text=cut,
                                                     token_estimate=share))
                                 tail_used = share
                             else:
