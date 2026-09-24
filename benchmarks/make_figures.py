@@ -21,19 +21,42 @@ FIGURES = {
         "source": "g2_killer_table by history and by turns",
     },
     "fig2_two_metrics": {
-        "receipts": [
-            "artifacts/g2-compiler-recency-b8192-v1.json",
-            "artifacts/g2-compiler-tailstate-tf0.6-b8192-v3.json",
-            "artifacts/g2-compiler-tailstate-compiledfar-tf0.5-b8192-v1.json",
-            "artifacts/g2-compiler-consolidate-b8192-nopath-v1.json",
-            "artifacts/g2-compiler-dedup-b8192-v1.json",
-            "artifacts/g2-compiler-materialize-b8192-v1.json",
-            "artifacts/g2-compiler-statefirst-b8192-v1.json",
-            "artifacts/g2-compiler-protectwhole-b8192-v1.json",
-            "artifacts/g2-compiler-tailquery-cap0.5-b8192-v1.json",
+        # each arm needs *both* metrics, so each row names the two receipts it comes from; the
+        # instance counts differ between halves and are carried in the CSV rather than averaged away
+        "arms": [
+            ("plain recency (8,192)",
+             "artifacts/g2-compiler-recency-b8192-v1.json",
+             "artifacts/g2b-patch-localization-recency-b8192-v1.json"),
+            ("window 60% + compiled far (8,192)",
+             "artifacts/g2-compiler-tailstate-tf0.6-b8192-v3.json",
+             "artifacts/g2b-patch-localization-tailstate-tf0.6-b8192-v3.json"),
+            ("window 50% + compiled far (8,192, n=96)",
+             "artifacts/g2-compiler-tailstate-compiledfar-tf0.5-b8192-v1.json",
+             "artifacts/g2b-patch-localization-windowcompiler-b8192-n96.json"),
+            ("evidence consolidation (8,192, n=96)",
+             "artifacts/g2-compiler-consolidate-b8192-nopath-v1.json",
+             "artifacts/g2b-patch-localization-consolidate-b8192-v1.json"),
+            ("raw retrieval (4,096, n=96)",
+             "artifacts/g2-compiler-tailquery-cap0.75-b4096-v1.json",
+             "artifacts/g2b-patch-localization-raw-b4096-n96.json"),
+            ("raw retrieval (8,192, n=48)",
+             "artifacts/g2-compiler-dedup-b8192-v1.json",
+             "artifacts/g2b-patch-localization-raw-b8192-n48.json"),
+            ("log replay into state (8,192)",
+             "artifacts/g2-compiler-materialize-b8192-v1.json",
+             "artifacts/g2b-patch-localization-materialize-b8192-v1.json"),
+            ("state-first selection (8,192)",
+             "artifacts/g2-compiler-statefirst-b8192-v1.json",
+             "artifacts/g2b-patch-localization-statefirst-b8192-v1.json"),
+            ("protected spans whole (8,192)",
+             "artifacts/g2-compiler-protectwhole-b8192-v1.json",
+             "artifacts/g2b-patch-localization-protectwhole-b8192-v1.json"),
+            ("newest span only (8,192)",
+             "artifacts/g2-compiler-tailquery-cap0.5-b8192-v1.json",
+             "artifacts/g2b-patch-localization-tailquery-cap0.5-b8192-v1.json"),
         ],
-        "columns": ["arm", "fidelity_pp", "nll_delta", "active_fraction_p50", "n"],
-        "source": "the compiler ladder at 8,192 tokens",
+        "columns": ["arm", "fidelity_pp", "decision_f1", "n_fidelity", "n_decision"],
+        "source": "the compiler ladder with each arm's two receipts named",
     },
     "fig3_compiler_ablation": {
         "receipts": [
@@ -160,14 +183,20 @@ def main(argv=None) -> int:
         missing.append(str(killer))
 
     rows = []
-    for name in FIGURES["fig2_two_metrics"]["receipts"]:
-        path = Path(name)
-        if path.exists():
-            rows.append(bucket_stats(path, ARMS.get(name, path.stem)))
-        else:
-            missing.append(name)
+    for arm, fidelity_receipt, decision_receipt in FIGURES["fig2_two_metrics"]["arms"]:
+        fpath, dpath = Path(fidelity_receipt), Path(decision_receipt)
+        if not fpath.exists() or not dpath.exists():
+            missing.append(fidelity_receipt if not fpath.exists() else decision_receipt)
+            continue
+        stats = bucket_stats(fpath, arm)
+        decision = json.loads(dpath.read_text())["summary"]
+        rows.append({"arm": arm, "fidelity_pp": stats["fidelity_pp"],
+                     "decision_f1": round(decision["active"]["f1"], 3),
+                     "n_fidelity": stats["n"],
+                     "n_decision": decision["examples_with_next_turn_files"]})
     emit("fig2_two_metrics", rows, FIGURES["fig2_two_metrics"]["columns"],
-         FIGURES["fig2_two_metrics"]["source"], FIGURES["fig2_two_metrics"]["receipts"])
+         FIGURES["fig2_two_metrics"]["source"],
+         [r for _a, f, d in FIGURES["fig2_two_metrics"]["arms"] for r in (f, d)])
 
     specs = [("raw retrieval", 4096, "artifacts/g2b-patch-localization-raw-b4096-n48.json"),
              ("dedup only", 4096, "artifacts/g2b-patch-localization-deduponly-b4096-n48.json"),

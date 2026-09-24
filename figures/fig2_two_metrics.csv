@@ -1,12 +1,13 @@
-# source: the compiler ladder at 8,192 tokens
-# receipts: g2-compiler-recency-b8192-v1.json, g2-compiler-tailstate-tf0.6-b8192-v3.json, g2-compiler-tailstate-compiledfar-tf0.5-b8192-v1.json, g2-compiler-consolidate-b8192-nopath-v1.json, g2-compiler-dedup-b8192-v1.json, g2-compiler-materialize-b8192-v1.json, g2-compiler-statefirst-b8192-v1.json, g2-compiler-protectwhole-b8192-v1.json, g2-compiler-tailquery-cap0.5-b8192-v1.json
-arm,fidelity_pp,nll_delta,active_fraction_p50,n
-plain recency,0.29,-0.048,0.097,44
-window 60% + compiled far,0,0.022,0.091,44
-window 50% + compiled far,0,0.027,0.085,44
-evidence consolidation,-5.44,0.157,0.1,44
-raw retrieval (dedup + snippet),-6.94,0.476,0.1,44
-log replay into state,-7.21,0.48,0.102,44
-state-first selection,-15.38,0.936,0.102,44
-protected spans whole,-20.33,1.437,0.099,44
-newest span only,-25.36,1.4,0.076,44
+# source: the compiler ladder with each arm's two receipts named
+# receipts: g2-compiler-recency-b8192-v1.json, g2b-patch-localization-recency-b8192-v1.json, g2-compiler-tailstate-tf0.6-b8192-v3.json, g2b-patch-localization-tailstate-tf0.6-b8192-v3.json, g2-compiler-tailstate-compiledfar-tf0.5-b8192-v1.json, g2b-patch-localization-windowcompiler-b8192-n96.json, g2-compiler-consolidate-b8192-nopath-v1.json, g2b-patch-localization-consolidate-b8192-v1.json, g2-compiler-tailquery-cap0.75-b4096-v1.json, g2b-patch-localization-raw-b4096-n96.json, g2-compiler-dedup-b8192-v1.json, g2b-patch-localization-raw-b8192-n48.json, g2-compiler-materialize-b8192-v1.json, g2b-patch-localization-materialize-b8192-v1.json, g2-compiler-statefirst-b8192-v1.json, g2b-patch-localization-statefirst-b8192-v1.json, g2-compiler-protectwhole-b8192-v1.json, g2b-patch-localization-protectwhole-b8192-v1.json, g2-compiler-tailquery-cap0.5-b8192-v1.json, g2b-patch-localization-tailquery-cap0.5-b8192-v1.json
+arm,fidelity_pp,decision_f1,n_fidelity,n_decision
+"plain recency (8,192)",0.29,0.154,44,12
+"window 60% + compiled far (8,192)",0,0.104,44,12
+"window 50% + compiled far (8,192, n=96)",0,0.165,44,60
+"evidence consolidation (8,192, n=96)",-5.44,0.292,44,12
+"raw retrieval (4,096, n=96)",-25.0,0.169,44,60
+"raw retrieval (8,192, n=48)",-6.94,0.191,44,26
+"log replay into state (8,192)",-7.21,0.231,44,12
+"state-first selection (8,192)",-15.38,0.242,44,12
+"protected spans whole (8,192)",-20.33,0.211,44,12
+"newest span only (8,192)",-25.36,0.083,44,12

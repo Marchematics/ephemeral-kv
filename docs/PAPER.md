@@ -332,7 +332,17 @@ execution view* bounded by the model's native context window - 1M tokens of work
 consumer GPU for a 27B model, with DeepSWE task success improving from 43.8% under compaction-only
 context management to 48.4%.  Two things are shared and we do not claim them: the idea of a
 query-dependent view, and the observation that compaction is lossy.  Two things differ, and they are
-the paper's subject.
+the paper's subject:
+
+| | KVMem | this paper |
+|---|---|---|
+| what the view is assembled from | paged **KV blocks**, with raw keys re-rotated at new positions | **text** compiled from a model-independent index |
+| what a cold route moves | KV blocks from host or NVMe | ~32 KB of state text; no model-specific state |
+| what bounds the view | the model's native context window (256K for the model it evaluates) | the query and the current turn: **6-8K, measured** (4,096 scores -2.40 pp) |
+| model change | RoPE re-application keeps the blocks usable by the same model | the same durable object resumes on a **different** model (0.137/0.145 against 0.017/0.042) |
+| reported end task | DeepSWE task success 43.8% -> 48.4% over compaction | next-turn file localisation and an offline action-level rescoring; task success unmeasured |
+| reported cost | KV restoration under one second for a 1M workspace | 0.0954-0.2031 s to rebuild a 4-8K state, 0.55-1.04 s of active-set prefill for rollout |
+
 
 * **The object.**  KVMem's view is assembled from *KV blocks*, and its cold path is a transfer with
   RoPE re-application at the new positions.  Our state is *text* compiled from a model-independent
