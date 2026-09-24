@@ -14,7 +14,7 @@ sentence around them carry the scope.
 A long-lived LLM session is served today as if its KV cache *were* the session: the resident object
 grows with the transcript, so placement, recovery and capacity planning all inherit the session's
 age.  We measure what a turn actually needs and find that the object those decisions depend on is
-bounded and independent of age.  On real coding-agent traces, an 8,192-token execution state holds
+bounded and independent of age.  On real coding-agent traces, a 6-8K execution state holds
 the next turn at a teacher-forced fidelity delta of **0.00 pp** against the full transcript, and its
 end-task score is statistically indistinguishable from the best retrieval baseline we can build,
 while the state stays at **7-8K tokens** as the raw history grows from 64K to 156K (and, on the turn
@@ -149,20 +149,22 @@ So the two requirements do not compete for content.  They compete for *rendering
 evidence whole, consolidate the far field, and retrieve the rest.  That is the view the system
 ships, and it is the configuration in bold above.
 
-**Why 8,192 and not less.**  The budget is measured, not chosen for convenience.  Holding the
-window at 3,072 tokens and varying the total:
+**Why 6,144 and not less.**  The budget is measured, not chosen for convenience.  Holding the window
+at 3,072 tokens and varying the total:
 
 | total budget | fidelity (window + consolidated far field) | end-task F1 |
 |---:|---:|---:|
-| 4,096 | -2.40 pp (outside the 2 pp allowance) | 0.117 |
-| **8,192** | **0.00 pp** | **0.161** (window ~4.1K) |
+| 4,096 | **-2.40 pp** (outside the 2 pp allowance) | 0.117 |
+| **6,144** | **0.00 pp** | **0.150** (tied with retrieval at 4,096: +0.093, CI [-0.030, +0.217], 13W/9L) |
+| 8,192 | 0.00 pp | 0.161 (window ~4.1K) |
 | 12,288 | 0.00 pp | 0.155 |
 
 At 4,096 the window consumes three quarters of the budget: the surface is 2.4 pp out of tolerance and
-the far field has too little room, so the decision drops to 0.117 against 0.243 for plain retrieval
-at the same total.  The joint requirement therefore has a measured floor at 8,192 - and above it
-neither metric improves, which is why the paper's state is 8,192 rather than as large as the machine
-will hold.
+the far field has too little room, so the decision falls to 0.117 against 0.243 for plain retrieval at
+the same total.  The joint requirement therefore has a **measured floor at 6,144 tokens** - the
+smallest budget at which fidelity is within tolerance *and* the decision is tied with the best
+retrieval arm - and above it neither metric improves, which is why the paper's state is 6-8K rather
+than as large as the machine will hold.
 
 ### 2.3 The metric cannot see the difference
 
