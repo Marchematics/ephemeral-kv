@@ -80,56 +80,60 @@ old KV is invalid.
 
 Model-agnostic durability is an enabling property, not a novelty claim by itself.
 
-## Main figures to earn
+## Main figures to earn, and the receipts that already populate them
 
-### Figure 1 — Session age versus mobility tax
+### Figure 1 - The session grows, the state that must move does not
 
-Log x-axis: 32K -> 1M history.
+The paper's identity figure.  x: raw history (32K -> 1M, log).  Two families: history-sized state
+(full KV, full re-prefill) rising with age, and the measured execution state flat at 7-8K.
+Inset: the fidelity delta by history bucket (+0.00 / +0.00 / +1.43 pp at 64K / 83K / 156K).
+Receipts: `g2-killer-table-v3.json`, `g3-*`.
 
-Curves/dots:
-* full KV one-way movement;
-* full re-prefill;
-* Ephemeral 2K / 4K / 8K / 16K active views.
+### Figure 2 - Two metrics, two views (the frontier)
 
-The result we want to test is a family of nearly horizontal Ephemeral curves and
-history-growing full-state curves, with honest crossovers.
+One scatter at 8,192 tokens: fidelity delta (x) against end-task F1 (y) for every arm measured -
+recency, the window fractions, plain retrieval, the compiler, log replay, state-first, the
+protected-whole variants.  It shows the trade-off is structural, and it is the figure that
+explains why the compiler is not in the story:
+`recency +0.29 pp / 0.154`, `window+compiler 0.00 pp / 0.161`, `compiled -5.44 pp / 0.292 (n=24)`
+and `0.139 (n=48)`, `raw -6.94 pp / 0.243`, `protected-whole -20.33 pp / 0.211`,
+`newest-only -25.36 pp / 0.083`.
+Receipts: every `g2-compiler-*` and `g2b-patch-localization-*` artifact.
 
-### Figure 2 — Mobility phase diagram
+### Figure 3 - The compiler ablation, including what does not pay
 
-Axes:
-* KV bytes/token or model family;
-* fabric bandwidth;
-* active working-set size.
+Fidelity and decision per compiler stage, with the negative results kept: supersede-by-identity
+pays 8.5 pp of fidelity over path collapse, snippet selection costs 20 pp, log replay buys nothing
+because only 6% of retrieved spans are file events, and plain retrieval beats the whole pipeline
+(0.243 against 0.139 paired on 48 sessions).
+Receipts: `g2-compiler-consolidate-*`, `-materialize-*`, `-statefirst-*`, `-protectwhole-*`,
+`g2b-patch-localization-raw-b4096-n48.json`, `-compiled-b8192-n48.json`.
 
-Color/region:
-* keep sticky;
-* migrate full KV;
-* rematerialize active state.
+### Figure 4 - The phase diagram with quality attached
 
-This prevents the paper from degenerating into a single favorable configuration.
+Advancing cells by active set, with the quality criteria shown rather than assumed: 17/66 at
+2,048, 63/198 at 4,096, **36/246 at the fidelity-admissible 8,192**, 2/66 at 16,384; and the same
+cells annotated by which criterion they clear (fidelity within 2 pp, decision at least full
+history, decision at least raw retrieval).
+Receipts: `g4-quality-join-v1.json`.
 
-### Figure 3 — The inversion
+### Figure 5 - Capacity and recovery
 
-Matched requests:
-* older session, smaller active set;
-* younger session, larger active set.
+Sessions per worker under the two resource models (13.3 / 1.2 / 0.5 histories against 213 / 20 / 8
+states at 128K on the 0.5B / 8B / 70B geometries), and recovery after a worker loss or a model
+revision: index rebuild 0.55-1.04 s against 6.31 s of re-prefill, ~33 KiB of state text against
+12-128 GiB of KV, end-task F1 0.137/0.145 against 0.017/0.042 on two models that never saw the
+sessions.
+Receipts: `g5-capacity-planning-v1.json`, `g5-failover-*.json`, `g3-*`.
 
-Show that session age alone can rank migration cost in the wrong order.
+### Figure 6 - The metric lesson
 
-### Figure 4 — Cluster consequence
-
-p99 / SLO goodput versus load skew and session age for:
-* strict sticky;
-* sticky-until-saturated/cache-aware;
-* full-KV migration;
-* mobility-cost routing with active rematerialization.
-
-The paper's systems result is visible only if the best policy region changes.
-
-### Figure 5 — Worker failure / rollout
-
-Recovery time and data moved after worker loss, plus the model-revision case where old
-KV cannot be reused.
+Teacher-forced next-token fidelity against the amount of the newest evidence kept verbatim: at
+parity (+0.29 pp) with 8,192 tokens of recency, at parity with 2.9K of window inside an 8K view,
+and 5-25 pp down when the newest evidence is truncated, reordered or replaced.  This is the figure
+that says why the field's proxy metric cannot compare systems here, and it is a contribution in
+its own right.
+Receipts: `g2-compiler-recency-*`, `-tailstate-*`, `-tailquery-*`, `-windowcompiler-*`.
 
 ## Baselines that cannot be omitted
 
