@@ -1,0 +1,38 @@
+{
+  "schema": "ephemeral-kv-evidence-mass-v1",
+  "kind": "structural_measurement",
+  "interpretation": "tokens of the history that share terms with the query; if this is flat in session length, the evidence a turn needs is a property of the query rather than of the session's age",
+  "rows": 240,
+  "by_history_bucket": {
+    "<=32K": {
+      "n": 0
+    },
+    "32K-64K": {
+      "n": 81,
+      "turns_p50": 81,
+      "history_p50": 45170,
+      "relevant_tokens_p50": 42558,
+      "strongly_relevant_tokens_p50": 41904,
+      "best_span_tokens_p50": 7230
+    },
+    "64K-128K": {
+      "n": 154,
+      "turns_p50": 102,
+      "history_p50": 95439,
+      "relevant_tokens_p50": 90504,
+      "strongly_relevant_tokens_p50": 87482,
+      "best_span_tokens_p50": 17931
+    },
+    "128K-256K": {
+      "n": 5,
+      "turns_p50": 61,
+      "history_p50": 155292,
+      "relevant_tokens_p50": 155271,
+      "strongly_relevant_tokens_p50": 154981,
+      "best_span_tokens_p50": 45347
+    },
+    ">=256K": {
+      "n": 0
+    }
+  }
+}

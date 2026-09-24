@@ -60,7 +60,8 @@ turns: **five spans hold 73-96% of a long session's tokens**, and the turn-by-tu
 actually walks is 4-27% (median 8%) - so a system whose cost is the footprint is retaining and moving
 state that was needed once.  Second, what a turn needs is bounded: across raw histories of 64K, 83K
 and 156K tokens the compiled state sits at 7.1-8.2K and the fidelity delta does not move
-(+0.00 / +0.00 / +1.43 pp).  Third, because of that bound the cold-route cost stops tracking age: a
+(+0.00 / +0.00 / +1.43 pp).  Third - and this is a design choice rather than an intrinsic property of the traces, as we show by
+measurement - because of that bound the cold-route cost stops tracking age: a
 1M-token session with a 4,096-token state costs 0.0954 s to place while a 32K session carrying the
 16,384-token view that fidelity needed before this bound costs 0.4855 s - the *older* session is
 cheaper, and a footprint-based estimate ranks the two exactly backwards (5.899 s against 0.184 s).
@@ -77,8 +78,11 @@ and the paper's contributions are its measured consequences:
 
 1. **A bounded execution state holds the turn.**  8,192 tokens, fidelity at parity with the full
    transcript, end-task score statistically tied with the best retrieval baseline measured.
-2. **The state does not grow with the session.**  `dM/dL ~ 0` on both the fidelity and the state-size
-   axes, measured across a 2.4x growth in history and on the turn axis.
+2. **The state does not grow with the session, at a budget whose validity is measured.**  `dM/dL ~ 0`
+   on the fidelity and state-size axes across a 2.4x growth in history and on the turn axis - and,
+   separately, the *evidence mass* that shares rare query terms does grow with age (22K tokens at
+   45K histories, 46K at 95K), so what makes the bound safe is the measured quality flatness at the
+   fixed budget, not an intrinsic ceiling on what a query needs.
 3. **Session age stops predicting placement cost.**  The inversion, and the ranking reversal that
    makes a footprint-based scheduler prefer exactly the wrong session.
 4. **The consequences are systemic**: 16x sessions per worker, lossless recovery on a fresh process
@@ -312,6 +316,9 @@ bound, not the compression.
 * **The 1M lookup row is extrapolation.**  No public trace is that long; the receipt says so.
 * **The 8B and 70B geometries are declared, not measured.**  The fabric, prefill and 0.5B KV numbers
   are measured on this card.
+* **We do not claim `|E_q|` is intrinsically bounded.**  Lexical evidence mass grows with session
+  length on these traces; the bound is chosen, and its validity is the measured quality flatness at
+  that budget.
 * **We do not claim a semantic compiler beats retrieval.**  It does not, on 48 paired sessions
   (-0.104, CI [-0.208, -0.007]) or at equal budget (raw 0.191 against compiled 0.139 at 8,192).
 * **We do not claim fidelity and the decision prefer the same *rendering*.**  They prefer the same

@@ -51,6 +51,15 @@ old session, small state  <  young session, large state
 
 * `dM/dL ~ 0` **is measured** on the state side: the compiled state is flat (7.1-8.2K) while the
   raw history grows 2.4x, and the fidelity delta does not move with it.
+* **but `|E_q|` is not intrinsically bounded, and the measurement says so.**  Counting the history
+  tokens that share a *rare* query term (document frequency below 10% of the session's spans,
+  `g2_evidence_mass.py`), the relevant mass grows with the session: 22,447 tokens at 45K histories,
+  46,362 at 95K, and about half the history shares at least one rare term in the 32K-128K range.
+  These traces are topically coherent - a session is about one task - so lexical relevance does not
+  isolate a fixed-size evidence set.  The bounded state is therefore a *design choice*, and what
+  validates it is the measured quality flatness at a fixed budget (+0.00 / +0.00 / +1.43 pp across
+  64K / 83K / 156K), not an intrinsic property of the queries.  The honest form of the law is:
+  `M(q, L) ~= f(budget)` with the budget chosen so that quality does not move with `L`.
 * the inversion **is measured** in cost: 1M/8K = 0.2031 s against 32K/16K = 0.4855 s.
 * the ranking consequence is now measured as arithmetic over the same primitives
   (`g6_placement_inversion.py`, `artifacts/g6-placement-inversion-v1.json`).  With a 4,096-token
