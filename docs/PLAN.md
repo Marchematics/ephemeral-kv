@@ -276,9 +276,28 @@ Three things follow, and the first is a correction to the design rather than to 
 3. Keeping the replaced views' verbatim lines does not rescue it either (-7.38 pp), which says
    the missing information is not only "executable lines".
 
+**The gate splits, and the split is informative.** With the same 8,192-token compiled view, the
+*end-task* metric does not just hold, it improves - and the improvement is large enough to beat
+the larger raw views:
+
+| view | F1 vs the patch's files | F1 vs the next turn's files |
+|---|---:|---:|
+| 8,192 raw (dedup + snippet) | 0.237 | 0.264 |
+| **8,192 compiled, no state collapse** | **0.292** | **0.278** |
+| 16,384 raw | 0.142 | 0.139 |
+| full history | 0.045 | 0.000 |
+
+So against the gate's three conditions: the view *is* 8,192 tokens (mechanically), the agent's
+next decision **improves** (0.292 against 0.237), and teacher-forced fidelity **fails**
+(-5.44 pp against the 2 pp allowance).  The two metrics disagree about the same view, and the
+disagreement is the finding: teacher-forced next-token accuracy penalises any context change
+that alters surface realisation, while the decision the agent actually has to make is better
+served by a focused compiled view than by twice as much raw evidence.
+
 The honest next step is therefore the one the ablation points at: a **semantic** step that
 *rewrites* content - compressing a file's history into a canonical current form rather than
-selecting among its views - with the extractive receipts above as the control it must beat.
+selecting among its views - with the extractive receipts above as the control it must beat, and
+with the end-task metric as the one that decides whether the agent can still act.
 
 ## Where the gates stand together
 

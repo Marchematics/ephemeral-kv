@@ -141,6 +141,8 @@ def main(argv=None) -> int:
     p.add_argument("--consolidate", action=argparse.BooleanOptionalAction, default=False,
                    help="compile the retrieved evidence instead of concatenating it")
     p.add_argument("--retrieve-multiplier", type=float, default=2.0)
+    p.add_argument("--no-collapse-paths", action="store_true",
+                   help="ablation: keep every view of a file instead of its latest state")
     p.add_argument("--dedup-spans", action=argparse.BooleanOptionalAction, default=False,
                    help="collapse identical span texts in the view (keeps the newest copy)")
     p.add_argument("--snippet-spans", action=argparse.BooleanOptionalAction, default=False,
@@ -182,7 +184,8 @@ def main(argv=None) -> int:
                           "max_span_fraction": 0.25, "provenance_terms": 8,
                           "dedup": args.dedup_spans, "snippet": args.snippet_spans,
                           "consolidate": args.consolidate,
-                          "retrieve_multiplier": args.retrieve_multiplier},
+                          "retrieve_multiplier": args.retrieve_multiplier,
+                          "collapse_paths": not args.no_collapse_paths},
                 token_counter=lambda text: len(tokenizer.encode(text,
                                                                 add_special_tokens=False)),
             )
