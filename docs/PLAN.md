@@ -80,7 +80,35 @@ and on the longest sessions (median history 82,440 tokens, max 156,137, turns fi
 a preceding history of at least 32,768 tokens) a 4,096-token view is **5.0% of history**
 for -8.3 pp.
 
-**Next step for the end-task half (`g2b`).** Teacher-forced fidelity is a proxy; the
+**End-task half, first receipt (`benchmarks/g2b_patch_localization.py`).** 2,736 sessions
+of the public corpus qualify (`patch_present`, `max_isl >= 32,768`, and a recoverable patch
+file set), and the metric is file-level localization of the *generated* next turn against
+the recorded patch's files - a decision an evicted history can actually break.  On 24
+sessions (median history 32,897 tokens, 16,384-token view at an active fraction of 0.498),
+generating 96 greedy tokens per arm:
+
+| reference | arm | precision | recall | F1 |
+|---|---|---:|---:|---:|
+| recorded patch files | full history | 0.104 | 0.029 | 0.045 |
+| recorded patch files | **active view** | 0.313 | 0.218 | **0.219** |
+| recorded next turn's files | full history | 0.000 | 0.000 | 0.000 |
+| recorded next turn's files | **active view** | 0.250 | 0.236 | **0.222** |
+
+So bounded retrieval does not cost the end-task decision here - it improves it, in the same
+direction as the fidelity receipt but larger, which is what a focused view should do to a
+model that is otherwise diluted by 33K tokens of raw transcript.  The absolute level is low
+for both arms (a 96-token continuation names few of the recorded files), so this is a
+direction, not a headline: more generated tokens, or a plan-style prompt, would sharpen it.
+
+Two harness bugs had to be fixed to make the metric possible at all, and both affected the
+earlier quality receipts:
+
+* `_content` rendered only a message's `content`, dropping `tool_calls_json` - so a view
+  contained a command's *output* but not the command, and the recorded next turn's own file
+  mentions were invisible (every example scored null against them);
+* the trace builder dropped `ground_truth_meta_json`, the corpus's only end-task signal.
+
+**Previous next step for the end-task half (`g2b`).** Teacher-forced fidelity is a proxy; the
 corpus supports a real downstream behaviour instead.  `ground_truth_meta_json` carries
 `patch_present` and `resolved` per session, and the *patch's file set* is recoverable from
 the transcript's tool outputs and tool-call arguments (`diff --git a/<path> b/<path>` in
@@ -281,3 +309,36 @@ rather than end-task success.
 * G4: cheap mobility does not translate into a cluster-level p99/goodput win against
   strong sticky/cache-aware routing.
 * Quality requires QCC-specific behavior; Paper B must stand without Paper A.
+
+**Correction (same round, after fixing the renderer).**  Every fidelity number above was
+produced by a harness whose `_content` rendered only a message's `content` and dropped
+`tool_calls_json` - so neither arm saw the agent's own commands, only their outputs.  With
+the renderer fixed and everything else identical (long slice, recency+provenance compiler,
+48 examples, 131,072-token ceiling), the 16,384-token view loses **3.46 pp** of token
+accuracy in the 32K-128K bucket (NLL +0.164) instead of the 1.08 pp the earlier receipt
+showed, i.e. above the 2 pp tolerance:
+
+| receipt | overall accuracy delta | 32K-128K bucket | NLL delta |
+|---|---:|---:|---:|
+| before the renderer fix | 0.00 pp | -1.08 pp | +0.063 |
+| after the renderer fix | -2.00 pp | **-3.46 pp** | +0.131 |
+| after the fix, 32,768-token view | 0.00 pp | **-0.49 pp** | -0.005 |
+
+So the fidelity-preserving active budget is **32,768 tokens on this corpus with this
+compiler** (active fraction 0.372 at 82K-token histories, against 0.82 for the same fidelity
+in the 8K-32K range), and the earlier "16K holds" statement is superseded rather than
+deleted: it was measured on a harness that made the full-history arm weaker than it is.  The
+corrected dose-response is:
+
+| active budget | 32K-128K accuracy delta | active fraction | renderer |
+|---:|---:|---:|---|
+| 4,096 | -10.1 pp | 0.21 | before the fix |
+| 8,192 | -6.0 pp | 0.41 | before the fix |
+| 16,384 | -3.46 pp | 0.200 | corrected |
+| **32,768** | **-0.49 pp** | **0.372** | corrected |
+
+and the end-task metric is the *more* forgiving of the two at 16,384 (localization F1 0.219
+for the active view against 0.045 for full history), which is worth stating plainly: token
+accuracy is the harsher gate, and the downstream file decision survives a smaller view.  The direction the mobility claim
+needs - the active *fraction* falling as history grows (0.200 at 82K-token histories against
+0.82 in the 8K-32K range) - is unchanged, because it does not depend on the renderer.

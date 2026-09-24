@@ -38,11 +38,20 @@ TokenCounter = Callable[[str], int]
 
 
 def _content(msg) -> str:
+    """Everything the message carries: its content *and* its tool calls.
+
+    The agent's own actions live in `tool_calls_json` (a `str_replace_editor` call names
+    the file it edits; an `execute_bash` call carries the command).  Rendering only
+    `content` dropped them from both the history and the next-turn target, so a view could
+    contain a command's *output* but not the command, and the end-task metric could not see
+    the recorded next turn's own file mentions at all (measured: every example scored
+    null against them).
+    """
+    parts: list[str] = []
     value = msg.get("content", "") if isinstance(msg, dict) else ""
     if isinstance(value, str):
-        return value
-    if isinstance(value, list):
-        parts = []
+        parts.append(value)
+    elif isinstance(value, list):
         for x in value:
             if isinstance(x, str):
                 parts.append(x)
@@ -50,8 +59,13 @@ def _content(msg) -> str:
                 text = x.get("text") or x.get("content") or ""
                 if isinstance(text, str):
                     parts.append(text)
-        return "\n".join(parts)
-    return str(value)
+    elif value:
+        parts.append(str(value))
+    if isinstance(msg, dict):
+        calls = msg.get("tool_calls_json") or msg.get("tool_calls")
+        if calls:
+            parts.append(calls if isinstance(calls, str) else json.dumps(calls))
+    return "\n".join(part for part in parts if part)
 
 
 def messages_from_row(row: dict) -> list[dict]:
