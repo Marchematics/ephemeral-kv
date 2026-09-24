@@ -54,3 +54,32 @@ def test_query_cost_is_postings_based_not_span_count():
     assert stats.total_spans == 200
     assert stats.postings_visited == 1
     assert stats.candidate_spans == 1
+
+
+def test_dedup_keeps_the_most_recent_copy_and_frees_budget():
+    """Trajectories repeat themselves; the view should hold each distinct text once."""
+    from ephemeralkv.index import DurableSpanIndex
+
+    idx = DurableSpanIndex()
+    idx.append(turn=0, role="tool", text="cache eviction path " * 30, token_estimate=90)
+    idx.append(turn=1, role="user", text="what should change in the cache?", token_estimate=8)
+    idx.append(turn=2, role="tool", text="cache eviction path " * 30, token_estimate=90)
+    query = "what should change in the cache?"
+
+    plain, _ = idx.compile_view(query, token_budget=400, max_spans=8)
+    deduped, _ = idx.compile_view(query, token_budget=400, max_spans=8, dedup=True)
+    assert sum(s.token_estimate for s in deduped) < sum(s.token_estimate for s in plain)
+    copies = [s for s in deduped if "cache eviction path" in s.text]
+    assert len(copies) == 1
+    assert copies[0].turn == 2                      # the newer revision, not the older one
+
+
+def test_dedup_distinguishes_genuinely_different_text():
+    from ephemeralkv.index import DurableSpanIndex
+
+    idx = DurableSpanIndex()
+    idx.append(turn=0, role="tool", text="module alpha uses an LRU cache", token_estimate=8)
+    idx.append(turn=1, role="tool", text="module beta uses a FIFO queue", token_estimate=8)
+    kept, _ = idx.compile_view("module cache queue", token_budget=100, max_spans=8,
+                               dedup=True)
+    assert len(kept) == 2

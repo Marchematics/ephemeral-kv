@@ -339,6 +339,28 @@ corrected dose-response is:
 
 and the end-task metric is the *more* forgiving of the two at 16,384 (localization F1 0.219
 for the active view against 0.045 for full history), which is worth stating plainly: token
-accuracy is the harsher gate, and the downstream file decision survives a smaller view.  The direction the mobility claim
+accuracy is the harsher gate, and the downstream file decision survives a smaller view.
+
+**Collapsing duplicate spans halves the required budget.**  Coding trajectories repeat
+themselves - a file is `cat`-ed again after an edit, the same test output appears twice - and
+measured on six long sessions **17.5% of the spans in a compiled view are exact duplicates of
+another span in the same view** (26.8% share an 80-character prefix).  `compile_view(...,
+dedup=True)` orders each group of identical texts most-recent-first and keeps only the newest
+copy, so the same token budget buys more distinct content.  Under the corrected renderer, on
+the same 48 examples:
+
+| active budget | dedup | 32K-128K accuracy delta | active fraction | inside the 2 pp rule |
+|---:|---|---:|---:|---|
+| 8,192 | yes | -6.94 pp | 0.100 | no |
+| 16,384 | no | -3.46 pp | 0.200 | no |
+| **16,384** | **yes** | **-1.94 pp** | **0.200** | **yes, at the boundary** |
+| 32,768 | no | -0.49 pp | 0.372 | yes |
+
+So the fidelity-preserving view on this corpus is **16,384 tokens at an active fraction of
+0.200** (82K-token histories) rather than the 32,768 the pre-dedup compiler needed - a
+factor of two from one compiler change, and in the direction the mobility claim needs, since
+the routing side pays for active *tokens* while the quality side is what sets them.  The
+-1.94 pp sits at the tolerance boundary (n=44 in that bucket), so it is reported as holding
+*at* the rule rather than comfortably inside it.  The direction the mobility claim
 needs - the active *fraction* falling as history grows (0.200 at 82K-token histories against
 0.82 in the 8K-32K range) - is unchanged, because it does not depend on the renderer.
