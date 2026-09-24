@@ -200,10 +200,21 @@ level localisation of the next turn against the recorded patch) and report fidel
 
 ### 3.1 The durable object
 
-The transcript and a model-independent lexical/identifier index over it (`DurableSpanIndex`):
-append-only, ~0.09-0.25 ms p50 per lookup for histories up to 128K, with kind postings for
-structural selection and content fingerprints for identity.  Nothing in it is model-specific, which
-is what makes a model revision a recovery operation rather than a migration.
+The transcript and a model-independent index over it.  Each completed turn becomes a *span*
+(text, role, turn index, token estimate, kind), the index keeps a posting list per term, a posting
+list per kind, and a whitespace-insensitive content fingerprint per span; lookup is a scored
+intersection of the query's terms with those postings (~0.09-0.25 ms p50 for histories up to 128K,
+sublinear in history because the postings are).  Three properties are load-bearing and each has a
+receipt:
+
+* **model independence.**  Nothing in the span, the postings or a compiled view depends on the
+  model that built them, so the same durable object resumes on a model that never saw the session
+  (end-task 0.137/0.145 against full history's 0.017/0.042 on two such models).
+* **append-only.**  A worker never rewrites the durable object; compaction, if any, is a property
+  of a *view*, not of the record.
+* **provenance.**  Every compiled unit carries the turns it came from and the views it replaced, so
+  a view can always be traced back - and the paper's negative result (collapsing a file to its
+  latest view) is measurable precisely because the replaced turns are still addressable.
 
 ### 3.2 The compiler, and what its stages are worth
 
@@ -222,23 +233,53 @@ mean on this workload: the stages that *compile state* are the ones that hurt, a
 property of coding-agent traces (most retrieved evidence is not file events) rather than of the
 compiler.
 
-### 3.3 What the runtime does
+### 3.3 The compile contract
+
+`compile(history, q) -> view` is the only interface between the durable record and a worker, and it
+is specified by what it must guarantee rather than by how it selects:
+
+```text
+in:   spans (append-only, model-independent), the current turn, the query, a budget B
+out:  a view whose token estimate is <= B, with provenance on every unit
+must: render the newest evidence whole and in order                     (the surface)
+      spend every remaining token on retrieved evidence, consolidated   (the decision)
+may:  drop superseded views, duplicate content and stale tool output, so long as
+      what it drops stays addressable through provenance
+```
+
+The budget B is chosen by the fidelity floor rather than by preference: at 4,096 the same window
+scores -2.40 pp, at 6,144 it is at 0.00 pp with the decision tied, and above that neither metric
+improves.  Two of the three "may" clauses are measured *not* to pay on this workload - collapsing a
+file to its latest view costs 8.5 pp of fidelity, re-selecting the newest output's lines 20 pp - so
+the deployed configuration keeps the window whole and consolidates only the far field.
+
+### 3.4 What the runtime does
 
 A cold route is: look up the query in the durable index (sub-millisecond), compile a bounded view
 (window + consolidated far field), prefill it on the destination, serve.  Nothing history-sized is
 transferred and no worker owns the session; the KV a worker holds is a cache of a computation it can
-repeat.
+repeat.  Recovery is the same code path on a different process or a different model: measured at
+0.91-1.42 s to rebuild an 8,192-token state after the owner was killed, with teacher-forced token
+accuracy identical to the killed owner's, and 0.55-1.04 s for a model rollout against 6.31 s of
+re-prefill.
 
 ---
 
 ## 4. Evaluation
 
-Setup: a single shared 24 GiB A10G; real agent traces (SWE-smith / SWE-rebench style trajectories,
-2,736 long sessions, histories to 156K tokens); Llama-3.2-1B-Instruct for quality, Qwen2.5-0.5B/1.5B
-for primitives and cross-model checks.  All comparisons are paired on the same instances; intervals
-are paired bootstrap (20k resamples).
+Setup: a single shared 24 GiB A10G; real agent traces (SWE-smith / SWE-rebench style trajectories;
+2,736 sessions with histories to 156K tokens for the end task, 338 of them above 64K; a 1,010-session
+subset for the fidelity sweeps); Llama-3.2-1B-Instruct for quality, Qwen2.5-0.5B/1.5B for hardware
+primitives and cross-model recovery.  All comparisons are paired on the same instances and intervals
+are paired bootstrap (20k resamples); receipts whose instance counts differ state both counts rather
+than averaging them away.  The fidelity metric is teacher-forced next-token accuracy on the recorded
+next turn, scored as a suffix (target capped at 512 tokens) so a 32K context does not materialise
+logits for the whole sequence; the end task is file-level localisation of a generated turn against
+the recorded patch, with an offline action-level rescoring as a stricter variant.
 
 ### 4.1 The state is bounded, and quality does not decay with age
+
+*Figure 1 (`figures/fig1_state_vs_age.svg`).*
 
 | raw history p50 | execution state p50 | fidelity delta |
 |---:|---:|---:|
@@ -256,6 +297,8 @@ A 22-turn example with 67K of history fails badly (-46.9 pp); it is a singleton,
 it points at a limitation: a short session whose individual turns are enormous.
 
 ### 4.2 The mobility law and the inversion
+
+*Figure 2 (`figures/fig2_two_metrics.svg`) plots the two metrics against each other for every arm.*
 
 | session | state | mobility (lookup + active prefill) | full-KV move |
 |---|---:|---:|---:|
@@ -280,6 +323,8 @@ model, declared for 8B/70B classes):
 | 70B-class (327,680 B/token) | 0.5 | 0.1 | **8** |
 
 ### 4.4 Routing
+
+*Figure 4 (`figures/fig4_phase_diagram.svg`).*
 
 Replay over measured G3 primitives (H2D 23.2-23.4 GB/s, active-set prefill 0.053/0.095/0.203/0.485 s
 at 2K/4K/8K/16K, lookup by history bucket), with declared arrival models and geometries:
