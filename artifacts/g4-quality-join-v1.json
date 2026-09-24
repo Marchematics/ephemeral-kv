@@ -1,0 +1,62 @@
+{
+  "schema": "ephemeral-kv-g4-quality-join-v1",
+  "kind": "derived_join",
+  "criteria": {
+    "fidelity_tolerance_pp": 2.0,
+    "decision_slack": 0.0,
+    "floors": {
+      "full_history_f1": 0.045,
+      "raw_retrieval_f1": 0.237,
+      "floors_note": "full history = feeding the whole transcript (0.045 on the 24 paired sessions); raw retrieval = dedup + snippet at 8,192 (0.237)."
+    }
+  },
+  "rows": [
+    {
+      "active_tokens": 2048,
+      "cells": 66,
+      "advance": 17,
+      "arm": "newest span + compiled far field (tail_query cap 0.9)",
+      "fidelity_pp": -27.92,
+      "decision_f1": 0.179,
+      "fidelity_admissible": false,
+      "decision_admissible": true,
+      "decision_parity_admissible": false
+    },
+    {
+      "active_tokens": 4096,
+      "cells": 198,
+      "advance": 63,
+      "arm": "newest span + compiled far field (tail_query cap 0.75); decision best of tail_query 0.125 / protect-whole 0.121",
+      "fidelity_pp": -25.0,
+      "decision_f1": 0.125,
+      "fidelity_admissible": false,
+      "decision_admissible": true,
+      "decision_parity_admissible": false
+    },
+    {
+      "active_tokens": 8192,
+      "cells": 246,
+      "advance": 36,
+      "arm": "verbatim window + compiled far field (tail_state tf 0.5, fidelity) / evidence consolidation (decision) - two arms at one size",
+      "fidelity_pp": 0.0,
+      "decision_f1": 0.292,
+      "fidelity_admissible": true,
+      "decision_admissible": true,
+      "decision_parity_admissible": true
+    },
+    {
+      "active_tokens": 16384,
+      "cells": 66,
+      "advance": 2
+    }
+  ],
+  "summary": {
+    "advancing_cells_total": 118,
+    "advancing_cells_fidelity_admissible": 36,
+    "advancing_cells_decision_admissible": 116,
+    "advancing_cells_decision_parity": 36,
+    "sizes_without_quality_points": [
+      16384
+    ]
+  }
+}

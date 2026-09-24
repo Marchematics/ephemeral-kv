@@ -1,0 +1,47 @@
+{
+  "schema": "ephemeral-kv-quality-points-v1",
+  "kind": "measured_quality_points",
+  "note": "One measured point per active size, each naming the best arm at that size for each metric. Read from the receipts named in the point; no interpolation between sizes.",
+  "fidelity_tolerance_pp": 2.0,
+  "decision_slack": 0.0,
+  "floors": {
+    "full_history_f1": 0.045,
+    "raw_retrieval_f1": 0.237,
+    "floors_note": "full history = feeding the whole transcript (0.045 on the 24 paired sessions); raw retrieval = dedup + snippet at 8,192 (0.237)."
+  },
+  "points": [
+    {
+      "active_tokens": 2048,
+      "arm": "newest span + compiled far field (tail_query cap 0.9)",
+      "fidelity_pp": -27.92,
+      "decision_f1": 0.179,
+      "receipts": {
+        "fidelity": "artifacts/g2-compiler-tailquery-cap0.9-b2048-v1.json",
+        "decision": "artifacts/g2b-patch-localization-tailquery-cap0.9-b2048-v1.json"
+      }
+    },
+    {
+      "active_tokens": 4096,
+      "arm": "newest span + compiled far field (tail_query cap 0.75); decision best of tail_query 0.125 / protect-whole 0.121",
+      "fidelity_pp": -25.0,
+      "decision_f1": 0.125,
+      "receipts": {
+        "fidelity": "artifacts/g2-compiler-tailquery-cap0.75-b4096-v1.json",
+        "decision": "artifacts/g2b-patch-localization-tailquery-cap0.75-b4096-v1.json",
+        "decision_alt": "artifacts/g2b-patch-localization-protectwhole-b4096-v1.json"
+      }
+    },
+    {
+      "active_tokens": 8192,
+      "arm": "verbatim window + compiled far field (tail_state tf 0.5, fidelity) / evidence consolidation (decision) - two arms at one size",
+      "fidelity_pp": 0.0,
+      "decision_f1": 0.292,
+      "receipts": {
+        "fidelity": "artifacts/g2-compiler-tailstate-compiledfar-tf0.5-b8192-v1.json",
+        "decision": "artifacts/g2b-patch-localization-consolidate-b8192-v1.json",
+        "decision_alt_1": "artifacts/g2b-patch-localization-protectwhole-b8192-v1.json"
+      },
+      "note": "at 8,192 the fidelity-admissible arm and the decision-best arm are different arms of the same size; the fidelity column is the windowed arm (0.00 pp) and the decision column the compiled arm (0.292). Quoting one arm for both is what the 16K->8K claim would need and does not yet have."
+    }
+  ]
+}

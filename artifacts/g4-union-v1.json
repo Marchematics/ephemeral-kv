@@ -1,0 +1,55 @@
+{
+  "schema": "ephemeral-kv-g4-union-v1",
+  "cells": 576,
+  "advances": 118,
+  "by_active_regime": {
+    "2048|balanced": [
+      2,
+      22
+    ],
+    "2048|slow_worker": [
+      2,
+      22
+    ],
+    "2048|worker_failure": [
+      13,
+      22
+    ],
+    "4096|balanced": [
+      8,
+      66
+    ],
+    "4096|slow_worker": [
+      11,
+      66
+    ],
+    "4096|worker_failure": [
+      44,
+      66
+    ],
+    "8192|balanced": [
+      5,
+      82
+    ],
+    "8192|slow_worker": [
+      6,
+      82
+    ],
+    "8192|worker_failure": [
+      25,
+      82
+    ],
+    "16384|balanced": [
+      0,
+      22
+    ],
+    "16384|slow_worker": [
+      0,
+      22
+    ],
+    "16384|worker_failure": [
+      2,
+      22
+    ]
+  }
+}
