@@ -39,11 +39,49 @@ def median(xs: list[float]):
     return ys[mid] if len(ys) % 2 else 0.5 * (ys[mid - 1] + ys[mid])
 
 
+TURN_BUCKETS = ((0, 24, "<=24 turns"), (24, 48, "24-48 turns"),
+                (48, 96, "48-96 turns"), (96, 1 << 30, ">96 turns"))
+
+
 def bucket_of(history: int) -> str:
     for low, high, label in BUCKETS:
         if low <= history < high:
             return label
     return BUCKETS[-1][2]
+
+
+def turn_bucket_of(turns: int) -> str:
+    for low, high, label in TURN_BUCKETS:
+        if low <= turns < high:
+            return label
+    return TURN_BUCKETS[-1][2]
+
+
+def table_by_turns(rows: list[dict]) -> dict:
+    """The same statement on the axis the paper quotes: session age in turns.
+
+    A bucket with no rows is reported empty rather than skipped, because the corpus reaches ~96
+    turns and the paper must not imply it measured further.
+    """
+    by: dict[str, list[dict]] = {}
+    for row in rows:
+        if "turns" not in row:
+            continue
+        by.setdefault(turn_bucket_of(int(row["turns"])), []).append(row)
+    out = {}
+    for _low, _high, label in TURN_BUCKETS:
+        group = by.get(label)
+        if not group:
+            out[label] = {"n": 0}
+            continue
+        entry = {"n": len(group),
+                 "turns_p50": int(median([r["turns"] for r in group])),
+                 "raw_history_p50": int(median([r["history"] for r in group])),
+                 "state_p50": int(median([r["active"] for r in group])),
+                 "acc_delta_pp_p50": round(100 * median([r["acc_delta"] for r in group]), 2),
+                 "nll_delta_p50": round(median([r["nll_delta"] for r in group]), 3)}
+        out[label] = entry
+    return out
 
 
 def fidelity_rows(path: Path) -> list[dict]:
@@ -55,6 +93,7 @@ def fidelity_rows(path: Path) -> list[dict]:
             continue
         out.append({
             "history": row["history_tokens_estimate"],
+            "turns": row.get("turns") or 0,
             "active": row.get("active_tokens_estimate") or 0,
             "acc_delta": active["token_accuracy"] - full["token_accuracy"],
             "nll_delta": active["nll"] - full["nll"],
@@ -163,7 +202,9 @@ def main(argv=None) -> int:
         path = Path(name)
         if not path.exists():
             continue
-        report["fidelity"][path.name] = table(fidelity_rows(path), "fidelity")
+        rows = fidelity_rows(path)
+        report["fidelity"][path.name] = table(rows, "fidelity")
+        report.setdefault("fidelity_by_turns", {})[path.name] = table_by_turns(rows)
     for name in args.end_task:
         path = Path(name)
         if not path.exists():
@@ -195,6 +236,13 @@ def main(argv=None) -> int:
                       f"{entry['compiled_state_p50']:>6} paired F1 "
                       f"{entry['paired_f1_mean']:+.3f} "
                       f"(active {entry['active_f1_mean']:.3f} vs full {entry['full_f1_mean']:.3f})")
+    for name, buckets in report.get("fidelity_by_turns", {}).items():
+        for label, entry in buckets.items():
+            if entry.get("n"):
+                print(f"by turns  {name[:34]:<36} {label:<12} n={entry['n']:<3} "
+                      f"turns p50={entry['turns_p50']:>3} raw p50={entry['raw_history_p50']:>7} "
+                      f"state p50={entry['state_p50']:>6} acc "
+                      f"{entry['acc_delta_pp_p50']:+.2f} pp")
     for row in report.get("inversion", []):
         print(f"inversion history {row['history']:>8} state {row['compiled_state']:>6} "
               f"mobility {row['mobility_s']:.4f} s   (full KV move {row['move_full_kv_s']:.4f} s)")
