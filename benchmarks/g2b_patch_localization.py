@@ -140,10 +140,21 @@ def main(argv=None) -> int:
     p.add_argument("--max-examples", type=int, default=24)
     p.add_argument("--consolidate", action=argparse.BooleanOptionalAction, default=False,
                    help="compile the retrieved evidence instead of concatenating it")
+    p.add_argument("--recency-spans", type=int, default=3,
+                   help="always keep the last N spans (a serving stack never evicts the "
+                        "current turn); the end-task receipts were measured at 3")
+    p.add_argument("--recency-fraction", type=float, default=0.6)
+    p.add_argument("--max-span-fraction", type=float, default=0.25,
+                   help="truncate an oversized span to this share of the budget instead of "
+                        "dropping it; 1.0 keeps protected spans whole")
+    p.add_argument("--provenance-terms", type=int, default=8)
     p.add_argument("--retrieve-multiplier", type=float, default=2.0)
     p.add_argument("--tail-fraction", type=float, default=0.6,
                    help="share of the budget kept as an untruncated verbatim tail "
                         "(tail_state mode)")
+    p.add_argument("--far-compiler", default="consolidate",
+                   choices=("consolidate", "materialize"),
+                   help="how the far field of tail_state is compiled (see g2_model_quality)")
     p.add_argument("--tail-cap", type=float, default=0.5,
                    help="share of the budget the newest span may take before it is kept from "
                         "the end instead (tail_query mode)")
@@ -189,15 +200,18 @@ def main(argv=None) -> int:
             examples = build_examples(
                 messages, token_budget=args.token_budget,
                 min_history_tokens=args.min_history_tokens,
-                compiler={"recency_spans": 3, "recency_fraction": 0.6,
-                          "max_span_fraction": 0.25, "provenance_terms": 8,
+                compiler={"recency_spans": args.recency_spans,
+                          "recency_fraction": args.recency_fraction,
+                          "max_span_fraction": args.max_span_fraction,
+                          "provenance_terms": args.provenance_terms,
                           "dedup": args.dedup_spans, "snippet": args.snippet_spans,
                           "consolidate": args.consolidate,
                           "retrieve_multiplier": args.retrieve_multiplier,
                           "collapse_paths": not args.no_collapse_paths,
                           "compile_mode": args.compile_mode,
                           "tail_fraction": args.tail_fraction,
-                          "tail_cap": args.tail_cap},
+                          "tail_cap": args.tail_cap,
+                          "far_compiler": args.far_compiler},
                 token_counter=lambda text: len(tokenizer.encode(text,
                                                                 add_special_tokens=False)),
             )

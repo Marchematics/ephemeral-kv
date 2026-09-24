@@ -110,6 +110,7 @@ def build_examples(
                 keep_earlier_verbatim = bool(options.pop("keep_earlier_verbatim", False))
                 tail_fraction = float(options.pop("tail_fraction", 0.6))
                 tail_cap = float(options.pop("tail_cap", 0.5))
+                far_compiler = str(options.pop("far_compiler", "consolidate"))
                 if compile_mode == "recency":
                     # feasibility control: the last N tokens of history, with no selection and
                     # no compilation.  If 8K of plain recency is far from full history while
@@ -186,10 +187,20 @@ def build_examples(
                             query, token_budget=far_budget, max_spans=max_spans,
                             **far_options)
                         far_spans = [sp for sp in far_spans if sp.span_id not in tail_ids]
-                        far_units, _ = compile_units(
-                            consolidate(far_spans, collapse_paths=collapse_paths,
-                                        keep_earlier_verbatim=keep_earlier_verbatim),
-                            far_budget, token_counter)
+                        if far_compiler == "materialize":
+                            # the far field is the *executable state* (replay the log: dumps set a
+                            # file's content, diffs and search/replace blocks apply to it, repeated
+                            # commands collapse to their latest result), not a shortened transcript.
+                            # The recent window stays verbatim because the surface needs it; the
+                            # far field is state because the decision needs it.
+                            far_units, far_stats = compile_executable_state(
+                                far_spans, far_budget, token_counter,
+                                query_terms=set(terms(query)))
+                        else:
+                            far_units, far_stats = compile_units(
+                                consolidate(far_spans, collapse_paths=collapse_paths,
+                                            keep_earlier_verbatim=keep_earlier_verbatim),
+                                far_budget, token_counter)
                         active = render(far_units) + "".join(render_span(sp) for sp in tail)
                         view = far_spans + tail
                     elif compile_mode == "tail_query":
@@ -495,6 +506,11 @@ def main(argv=None):
     p.add_argument("--tail-fraction", type=float, default=0.6,
                    help="share of the budget kept as an untruncated verbatim tail "
                         "(tail_state mode)")
+    p.add_argument("--far-compiler", default="consolidate",
+                   choices=("consolidate", "materialize"),
+                   help="how the far field of tail_state is compiled: `consolidate` keeps the "
+                        "newest view of each piece of state, `materialize` replays the log into "
+                        "the current executable state")
     p.add_argument("--tail-cap", type=float, default=0.5,
                    help="share of the budget the newest span may take before it is kept from "
                         "the end instead (tail_query mode)")
@@ -566,6 +582,7 @@ def main(argv=None):
                           "compile_mode": args.compile_mode,
                           "tail_fraction": args.tail_fraction,
                           "tail_cap": args.tail_cap,
+                          "far_compiler": args.far_compiler,
                           "keep_earlier_verbatim": args.keep_earlier_verbatim},
                 token_counter=lambda text: len(
                     tokenizer.encode(text, add_special_tokens=False)

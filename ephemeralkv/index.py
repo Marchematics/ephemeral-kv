@@ -45,11 +45,28 @@ def _snippet_text(text: str, keep_fraction: float, query_terms: set[str],
         for neighbour in range(max(0, index - context_lines),
                                min(len(lines), index + context_lines + 1)):
             chosen.add(neighbour)
-    out, previous = [], None
+    # The line count is not a size budget: a kept line can be a whole minified file, and five
+    # kept lines (each with two neighbours of context) can be larger than the span's room.  The
+    # character budget is what the caller's `room` was derived from, so the assembly stops there
+    # - otherwise the view quietly exceeds the token budget it reports (measured: a 27,199-token
+    # view claiming 8,192 before this bound existed).
+    char_budget = max(1, int(len(text) * max(0.0, min(1.0, keep_fraction))))
+    marker = "... [truncated] ..."
+    out, previous, used = [], None, 0
     for index in sorted(chosen):
-        if previous is not None and index > previous + 1:
-            out.append("... [truncated] ...")
-        out.append(lines[index])
+        line = lines[index]
+        gap = previous is not None and index > previous + 1
+        extra = len(line) + (1 if out else 0) + (len(marker) if gap else 0)
+        if used and used + extra > char_budget:
+            # stopping early must still be visible: the elision marker is what tells the model
+            # that the span it is reading is not the whole output
+            if previous is not None and previous < len(lines) - 1:
+                out.append(marker)
+            break
+        if gap:
+            out.append(marker)
+        out.append(line)
+        used += extra
         previous = index
     return "\n".join(out)
 

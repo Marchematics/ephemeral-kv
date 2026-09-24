@@ -113,3 +113,25 @@ def test_snippet_leaves_small_spans_alone():
     idx.append(turn=0, role="tool", text="short output about cache.py", token_estimate=8)
     kept, _ = idx.compile_view("cache.py", token_budget=100, max_spans=4, snippet=True)
     assert kept[0].text == "short output about cache.py"
+
+
+def test_snippet_selection_never_exceeds_the_room_it_was_given():
+    """A line budget is not a size budget.
+
+    `_snippet_text` keeps the query-relevant lines plus two neighbours of context each, so the
+    selected text can be several times the room the caller derived from the token budget - and
+    because the caller records `room` as the span's size, the view then exceeds the budget it
+    reports (measured: a 27,199-token view claiming 8,192 before this bound existed).
+    """
+    from ephemeralkv.index import DurableSpanIndex
+
+    idx = DurableSpanIndex()
+    # one oversized tool output whose lines all match the query, so every kept line is "relevant"
+    body = "\n".join(f"src/cache.py line {i} eviction path" for i in range(4000))
+    idx.append(turn=0, role="tool", text=body, token_estimate=4000)
+    kept, _ = idx.compile_view("cache eviction", token_budget=1000, max_spans=8,
+                               max_span_fraction=0.25, snippet=True)
+    assert kept
+    selected = sum(len(s.text) for s in kept)
+    assert selected <= 0.30 * len(body)          # 25% of the characters, plus the markers
+    assert all(s.token_estimate <= 1000 for s in kept)
