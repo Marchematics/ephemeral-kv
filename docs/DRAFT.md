@@ -1,5 +1,52 @@
 # Draft — what the system state of a long-lived session is
 
+## Abstract (draft)
+
+A long-lived LLM session is served today as if its KV cache *were* the session: the resident
+object grows with the transcript, so placement, recovery and capacity planning all inherit the
+session's age.  We measure what a turn actually needs and find that the object these decisions
+depend on is bounded and independent of age.  On real coding-agent traces, an 8,192-token
+execution state holds the next turn with a teacher-forced fidelity delta of 0.00 pp against the
+full transcript and an end-task score statistically indistinguishable from the best measured
+retrieval baseline, while the compiled state stays at 7-8K as the raw history grows from 64K to
+156K tokens.  The consequence is a phase change rather than a speedup: a session 32x older costs
+2.4x less to move (5.1x at a 4K state) because the transfer term leaves the cold path, one worker
+holds 16x more sessions, recovery and a model revision rebuild the state from a durable index
+instead of moving 12-128 GiB of KV, and a replay against measured hardware primitives advances
+routing in every workload regime at the quality-admissible state size, where the original grid
+advanced only in a 2K corner.
+
+We also report what does *not* work, because it is the hypothesis this space would reach for
+first.  A semantic compiler - content dedup, supersede-by-identity, snippet re-selection, log
+replay into materialised file state - does not beat plain retrieval on the real task, and two of
+its stages measurably hurt: collapsing a file to its latest state costs 8.5 pp of fidelity
+against keeping the superseded views, and re-selecting the newest output's lines costs 20 pp.
+What carries quality is weaker and more useful: keep the newest evidence verbatim (a ~3K window
+is enough) and spend the rest of the budget on retrieval.  The metric the field uses to compare
+long-context systems, teacher-forced next-token fidelity, cannot see any of this: on these traces
+it is saturated by keeping the newest spans whole, which is why we report the end task alongside
+it and say which one a system should be judged by.
+
+## Introduction skeleton (draft)
+
+1. **The problem is an identity, not a cost.**  Serving stacks treat history, execution state and
+   local KV as one object; the resource model is `session cost ~ history footprint`.  Tiered
+   context caches, retention policies and workspace virtualisation all optimise within that
+   identity.
+2. **The measurement that breaks it.**  A turn needs a bounded amount of state, and most of the
+   durable footprint is state that was needed once: five spans hold 73-96% of a long session's
+   tokens, while the turn-by-turn content a view walks is 4-27% (median 8%).  Compiling to a fixed
+   budget therefore does not lose quality as the session grows, which is a different claim from
+   "compression works".
+3. **The consequence for systems.**  `dM/dL ~ 0`; the inversion (old/small cheaper than
+   young/large); 16x capacity; recovery and rollout on foreign models; a routing phase change at
+   the admissible state size.  Each is a receipt.
+4. **The negative result.**  The obvious way to shrink the state is a semantic compiler, and it
+   does not pay here - it is measured against plain retrieval on the same instances, with the
+   per-stage ablation that says why.  The window plus retrieval is what pays.
+5. **The metric lesson.**  Fidelity cannot compare these systems; the end task can.  Report both,
+   and say which one a deployment should gate on.
+
 This is the paper's central section in draft form.  Every number is a receipt in `artifacts/`;
 the ledger (`CLAIMS.md`) carries the per-claim provenance and `PLAN.md` the gate structure.
 Nothing here is a projection except where it is labelled one.
