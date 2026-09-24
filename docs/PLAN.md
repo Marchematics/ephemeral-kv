@@ -188,6 +188,27 @@ advantage at 1M is a function of the active set, and the crossover against a ful
 sits near 120 GB/s effective bandwidth for a 2K active set. End-to-end multi-worker
 routing is G4.
 
+
+## Where the gates stand together
+
+Two of them now bound the same quantity from opposite sides, and the gap between them is the
+project's central open problem rather than a detail:
+
+| gate | what it fixes |
+|---|---|
+| G2 (quality) | the active view must hold **16,384 tokens** with dedup (-1.94 pp, fraction 0.200 at 82K histories) to preserve the next turn, and 32,768 without dedup |
+| G4 (routing) | the cold-route law changes the routing decision only at **2,048 active tokens**, and only when a worker disappears and its sessions must be re-materialized |
+
+So the quality side needs an order of magnitude more active state than the routing side needs
+to win, and that is where the paper's remaining work is: the compiler, not the router.  Two
+levers are already measured to move it in the right direction - recency + oversized-span
+truncation + identifier provenance took the long-history loss at a fixed 4,096-token view
+from -21.98 pp to -7.17 pp, and content-identity dedup then halved the budget that holds - so
+the question is whether a *snippet-level* or embedding compiler can reach 2-4K without losing
+the turn.  If it cannot, the honest system claim is the one G4 already supports: session
+mobility pays for recovery (worker loss) and for capacity, not for steady-state routing on
+coding-agent traces with their current compilers.
+
 ## G4 — Break sticky routing at cluster level
 
 **Question.** Can cheap mobility reverse the current agent-serving preference for sticky
