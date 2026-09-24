@@ -121,6 +121,16 @@ plain retrieval returns 1.00 or 0.62, because supersede-by-identity and snippet 
 file the patch touches - the same effect the path-collapse ablation measured from the fidelity
 side (-13.90 pp against -5.44 pp).
 
+**What does hold both, at one budget and with no compiler.**  A view that keeps the newest
+evidence verbatim (a window) and spends every remaining token on plain retrieval scores end-task
+F1 **0.191** against **0.243** for plain retrieval at 4,096 and **0.161** for the same window with
+the compiler - and those three arms are statistically indistinguishable on the decision (paired
+-0.052, 95% CI [-0.154, +0.047], 5 wins / 7 losses on 48 sessions), while their fidelity separates
+them sharply: 0.00 pp for the windowed arms, -25 pp for plain retrieval at 4,096, -5.44 pp for the
+compiler at 8,192.  The honest statement is therefore not that the windowed view wins - it is that
+it **ties the best decision measured while removing the fidelity loss entirely**, at the same
+8,192-token budget, with no semantic compiler in it.
+
 **So the compiler as implemented does not earn its place on either metric**, and the paper says
 so.  What the measurements support is narrower and still worth a paper: the execution state is
 *bounded* (a fixed budget holds quality flat as the session grows), the surface needs the newest
