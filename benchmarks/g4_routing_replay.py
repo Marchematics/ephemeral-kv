@@ -42,6 +42,12 @@ from pathlib import Path
 # G2 measured as fidelity-preserving on long histories; 2K is the small-working-set
 # version the mobility thesis would prefer.
 HISTORY_CHOICES = (32768, 131072, 262144)
+# A million-token session is the regime the durability argument is about: the KV payload to move
+# grows with the *session* (12.00 GiB at 1M on this model, 555.6 ms on the measured local link)
+# while rematerialisation grows with the *active set* (0.053 s at 2,048), so where the crossover
+# sits has to be located rather than assumed.  The lookup row for a 1M history is postings-growth
+# extrapolation - no trace in the public corpus is that long - and the receipt says so.
+HISTORY_CHOICES_LONG = (32768, 131072, 262144, 1048576)
 SLO_SECONDS = 2.0
 
 
@@ -180,7 +186,8 @@ class KvTier:
 
 
 def build_turns(sessions: int, turns_per_session: int, *, seed: int, gap_model: str,
-                active_tokens: int) -> list[Turn]:
+                active_tokens: int,
+                history_choices: tuple[int, ...] = HISTORY_CHOICES) -> list[Turn]:
     """A declared arrival/gap model: the public corpus has no timestamps.
 
     `bursty` alternates a short tool gap (the agent is iterating) with a long think gap,
@@ -189,7 +196,7 @@ def build_turns(sessions: int, turns_per_session: int, *, seed: int, gap_model: 
     rng = random.Random(seed)
     turns: list[Turn] = []
     for session in range(sessions):
-        target = rng.choice(HISTORY_CHOICES)
+        target = rng.choice(history_choices)
         # a session's history grows with its own turns: turn 0 is a short prompt, not the
         # whole eventual transcript.  Charging every first turn a full-history recompute
         # made placement cost dominate every policy that can migrate (measured: p50 57 s
@@ -364,13 +371,19 @@ def main(argv=None) -> int:
                         "with a cheap cold route never queues")
     p.add_argument("--gap-model", choices=["poisson", "bursty"], default="bursty")
     p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--history-choices", default="32768,131072,262144",
+                   help="comma-separated session-history sizes the workload samples (the "
+                        "measured corpus reaches 32K-262K; `1048576` adds the scale the "
+                        "durability argument is about, with an extrapolated lookup row)")
     args = p.parse_args(argv)
 
     costs = load_costs(Path(args.g3), Path(args.g3_warm), Path(args.g3_prefill))
     if args.bandwidth_gbs:
         costs.bandwidth_gbs = float(args.bandwidth_gbs)
+    history_choices = tuple(int(x) for x in str(args.history_choices).split(",") if x.strip())
     turns = build_turns(args.sessions, args.turns_per_session, seed=args.seed,
-                        gap_model=args.gap_model, active_tokens=args.active_tokens)
+                        gap_model=args.gap_model, active_tokens=args.active_tokens,
+                        history_choices=history_choices)
     policies = ["strict_sticky", "sticky_saturated", "full_kv_move",
                 "full_reprefill", "ephemeral"]
     rows = {}
@@ -429,7 +442,7 @@ def main(argv=None) -> int:
         "schema": "ephemeral-kv-g4-routing-replay-v1",
         "verdict": verdicts,
         "kind": "replay_simulation",
-        "config": vars(args),
+        "config": {**vars(args), "history_choices": list(history_choices)},
         "costs": {
             "kv_bytes_per_token": costs.kv_bytes_per_token,
             "bandwidth_gbs": costs.bandwidth_gbs,

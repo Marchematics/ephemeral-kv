@@ -370,37 +370,118 @@ the failed variants: over three long examples the retrieved evidence classifies 
 | file events (dump, diff, edit) | **6%** |
 
 A state compiler can only consolidate the 6%.  The binding constraint is therefore **what the
-retrieval selects**, not how the selected text is compressed: the next design has to make
-selection *state-first* - prioritise spans that carry state (file events, command results,
-unresolved constraints) and down-weight repeated chatter - instead of ranking everything by
-lexical overlap with the query.  That is the next experiment, with the receipts above as its
-control, and if it also fails to move the teacher-forced metric the honest conclusion is that
-8K is out of reach for this class of compiler on this corpus.
+retrieval selects**, not how the selected text is compressed, and that diagnosis predicted that
+selection *state-first* - every materialised file state, the latest result of each command, and
+only then loose text - should recover the loss.  It was built (`state_first_units` in
+`ephemeralkv/statecompile.py`) and it does the opposite:
+
+| compiler variant | teacher delta (32K-128K) | end-task F1 (patch files) |
+|---|---:|---:|
+| raw truncation (dedup + snippet) | -6.94 pp | 0.237 |
+| consolidate, no state collapse | -5.44 pp | 0.292 |
+| materialise (replay the log into current state) | -7.21 pp | 0.231 |
+| **state-first selection** | **-15.38 pp** | 0.242 |
+
+State-first is the **worst** variant measured - worse than raw truncation by 8.4 pp, with NLL
++0.936 against raw's +0.476 - and the reason is the same 6% that motivated it.  A state-first
+view spends its budget on *whole file dumps*: they are large (one dump can exceed the entire
+budget, which is why the control below had to skip rather than stop on the newest span) and
+mostly irrelevant to the query, and promoting them evicts the query-relevant spans the lexical
+ranking had found.  The view becomes query-agnostic.  The diagnosis was right that retrieval
+selects mostly chatter and wrong that promoting state would help: the chatter is what the next
+turn's surface form is conditioned on, and state is a small, expensive minority of the evidence.
+Note also that the end-task metric stays flat across all of these (0.231-0.292): which files to
+touch survives an 8K view built almost any way, while next-token fidelity does not.
+
+Seven extractive variants have now been measured at 8,192 tokens - raw truncation, snippet
+selection, three consolidation rules, log replay, and state-first selection - and the best of
+them is -5.44 pp against the 2 pp allowance.  The family's ceiling is therefore not a tuning
+question, and the remaining question is *why*: is the gate about which text is kept, or about
+how many tokens of text are kept at all?  `--compile-mode recency` answers it directly by
+removing selection entirely and keeping the last N tokens of history.
+
+### The control that reframes the gate: 8,192 tokens of plain recency
+
+Plain recency - no retrieval, no ranking, no consolidation, whole spans in their original order
+- does what no compiler variant managed:
+
+| active budget | 32K-128K (n=44) | >=128K (n=4) | active fraction p50 |
+|---|---:|---:|---:|
+| **8,192** | **+0.29 pp** | 0.00 pp | 0.097 |
+| 16,384 | 0.00 pp | +0.71 pp | 0.174 |
+| 32,768 | +0.66 pp | +0.71 pp | 0.295 |
+| full history | reference | reference | 1.000 |
+
+At 8,192 tokens - 9.7% of the median history - recency is indistinguishable from full history
+(+0.29 pp, NLL -0.048), and the 16K and 32K rows are the same within noise.  So the fidelity
+half of the gate *is* reachable at 8K, and it is reached by an arm with no compiler at all.
+Two things follow, and the first is a correction.
+
+**The earlier verdict was wrong, and the reason is specific.** In the lexical arm only
+`recency_spans=3` spans were protected, and each was capped at `max_span_fraction=0.25` of the
+budget, so the two or three most recent tool results - the evidence the next turn's surface form
+directly continues - were truncated to 2,048 tokens or dropped outright.  Every compiler variant
+inherited that, and the consolidation and state stages then rewrote what survived.  The 5-15 pp
+losses were never about the far field; they were about the tail.  `tail_state` below tests that
+causally by keeping the tail whole and spending the remainder on compiled far-field state.
+
+**And teacher-forced next-turn fidelity cannot tell a compiler from truncation.**  8,192 tokens
+of recency is already at parity, so "we halve the budget at equal fidelity" is not a defensible
+headline: the trivial policy does it.  The claim has to be about what recency *cannot* do, which
+is whatever needs evidence from far back in the session - and that is exactly what the end-task
+metric measures.  This is the sharpest form of the metric disagreement first seen in the ladder:
+the proxy metric that the compiler literature uses is nearly saturated by recency on these
+traces, while the decision the agent has to make is not.
 
 ## Where the gates stand together
 
-Two of them now bound the same quantity from opposite sides, and the gap between them is the
-project's central open problem rather than a detail:
+### The two metrics want different views, and that is the finding
+
+Every arm measured at an 8,192-token view on the same corpora, both metrics on the same
+examples:
+
+| view (8,192 tokens) | teacher-forced fidelity | end-task F1 (patch files) |
+|---|---:|---:|
+| full history | reference | 0.045 |
+| **plain recency** (whole spans, newest first) | **+0.29 pp** (NLL -0.048) | 0.154 |
+| tail_state, 60% verbatim tail + compiled far field | 0.00 pp (NLL -0.016) | 0.104 |
+| raw lexical (dedup + snippet) | -6.94 pp | 0.237 |
+| **evidence consolidation, no state collapse** | -5.44 pp | **0.292** |
+| log replay into materialised state | -7.21 pp | 0.231 |
+| state-first selection | -15.38 pp | 0.242 |
+| 16,384-token reference view | -1.94 pp | 0.142 |
+
+Read down the columns: **fidelity is bought by the newest span, the decision by query-focused
+evidence, and no view buys both.**  The fidelity column is nearly saturated by recency - which
+is why a paper whose headline is "we halve the budget at equal fidelity" would be claiming
+something a one-line truncation policy already does - while the decision column is carried by
+the compiler (0.292 against 0.154 for recency and 0.045 for full history) and *destroyed* by
+spending budget on generic recency padding (tail_state 0.104, worse than recency itself, because
+older recency spans displace the evidence the decision needs).
+
+The proxy metric the compiler literature uses cannot see this.  On these traces it is dominated
+by the surface form of the turn being continued: keep the newest span whole and it is at parity
+even with 90% of the session gone.  The end task can see it, because the file a patch will touch
+is often named only in evidence from far back.  That is the paper's measurement contribution,
+and it also sets the design target: an 8K view that is *the current turn plus the query's
+evidence*, with no third category in the budget (`--compile-mode tail_query`, measured next).
+
+### What each gate needs
 
 | measurement | active budget it needs |
 |---|---|
-| G4 (routing) | **~2,048 tokens** - the cold-route law changes the routing decision only there, and only when a worker disappears and its sessions must be re-materialized |
-| G2 end-task (what a user sees) | **~8,192 tokens** - the agent's next decision (which files to change) collapses at 4,096 and holds from 8,192 |
-| G2 teacher-forced (the proxy) | **~16,384 tokens** with dedup (-1.94 pp), 32,768 without |
+| G4 (routing) | **2,048-4,096 tokens** - with the widened grid, ephemeral mobility advances in every forced-mobility cell at both sizes |
+| G2 end-task (what a user sees) | **~8,192 tokens** for the best decision (0.292); recency reaches only 0.154 |
+| G2 teacher-forced (the proxy) | **8,192 tokens if the newest span is kept whole** (+0.29 pp); ~16,384 with lexical selection of the tail |
 
-So the three requirements differ by 4x from the router to the decision, and the proxy metric
-is twice as demanding as the decision itself.  The honest system claim follows the middle
-number, and the paper's remaining work is the compiler rather than the router: closing the
-last 4x means reducing how much *distinct* content a turn needs (a semantic compiler that
-summarises spans), since neither re-ranking within a span nor removing duplicates can go
-further than they already have.  Two
-levers are already measured to move it in the right direction - recency + oversized-span
-truncation + identifier provenance took the long-history loss at a fixed 4,096-token view
-from -21.98 pp to -7.17 pp, and content-identity dedup then halved the budget that holds - so
-the question is whether a *snippet-level* or embedding compiler can reach 2-4K without losing
-the turn.  If it cannot, the honest system claim is the one G4 already supports: session
-mobility pays for recovery (worker loss) and for capacity, not for steady-state routing on
-coding-agent traces with their current compilers.
+The old reading of this table - "the proxy needs twice the decision, and the compiler is the
+open problem" - was wrong in an instructive way.  The proxy needs 8K, not 16K, and the 5-15 pp
+losses that looked like a compiler failure were the tail being truncated to 2,048 tokens by
+`max_span_fraction=0.25` in every lexical arm.  What the compiler actually buys is the *decision*
+at a fixed budget, and what remains open is whether one view can hold both columns at once:
+that is what `tail_query` measures, and if it cannot, the honest system claim is the frontier
+above plus the regime G4 supports - mobility pays for recovery and capacity, not for
+steady-state routing at the fidelity the proxy demands.
 
 ## G4 — Break sticky routing at cluster level
 
@@ -444,28 +525,47 @@ KV-aware escape hatch production ships), `full_kv_move`, `full_reprefill`, `ephe
 over balanced load, a slow worker, and a worker that disappears and must have its sessions
 re-materialized elsewhere.
 
-**Result: 4 of 48 cells advance, and they are all forced mobility with a 2,048-token
-active set** (goodput x1.97 against the strongest baseline, p50 2.46 s against 2.48 s).
-Everything else is `not_established`, and the reason is the same tension G2 found from the
-other side:
+**Result: 39 of 264 cells advance** in the widened grid, against 4 of 48 in the first one.  The
+first grid's boundary - "only forced mobility with a 2,048-token active set" - turned out to be
+an artefact of the grid rather than of the cost law: its active-set axis contained nothing
+between 2,048 and 16,384, so the region could only ever be reported at its extreme, and its
+longest session was 262K tokens.  Adding the sizes the compiler can actually run at, and the
+session scale the durability argument is about:
 
-* with a **16,384-token** active set - what G2 measured as fidelity-preserving on long
-  histories - an ephemeral cold route costs 0.485 s of prefill, while moving a KV payload
-  on this 23.2-23.4 GB/s fabric costs 0.017 s (32K history) to 0.556 s (1M).  The
-  ephemeral route is therefore *worse* in every regime measured (goodput x0.16-0.75),
-  including after a worker failure;
-* lowering the fabric to 10 or 2 GB/s does not rescue it while sessions stay warm: a cold
-  route is only paid on placement, migration, or displacement, so the cost law is rarely
-  exercised (at 2 GB/s only `worker_failure` + 2K advances, balanced is still
-  `not_established` at x1.17);
-* `strict_sticky` is the only policy the law clearly beats (goodput 0.00-0.29 against
-  0.33-0.42), which is the easy version of the claim and not the gate.
+| active set | advancing cells |
+|---|---:|
+| 2,048 | 17/66 |
+| 4,096 | 16/66 |
+| 8,192 | 4/66 |
+| 16,384 | 2/66 |
 
-So G4's honest state is **conditional and open**: mobility pays when the active set is
-small *and* sessions are forced to move, and the project's binding constraint is the joint
-requirement - small active sets are what make routing cheap, large ones are what make the
-next turn faithful. Closing G4 means closing that gap (a stronger compiler, or a workload
-whose turns need less of the transcript), not tuning the router.
+| session mix | advancing cells |
+|---|---:|
+| corpus (32K-262K) | 26/132 |
+| with a 1M-token mix | 13/132 |
+
+Every forced-mobility cell at 2,048 **and** 4,096 now advances (goodput x1.97 and x1.6 against
+the strongest baseline), where the old grid could only show the 2K column; and at million-token
+sessions - where moving the history's KV payload costs 555.6 ms against 0.053-0.095 s of
+rematerialisation - the capacity regimes open as well.  The one extrapolated input is the 1M
+lookup row (no trace in the public corpus is that long); every other cost is a G3 measurement,
+and each receipt records the history mix it sampled.
+
+The regimes that still do not advance are balanced load and short sessions, and the reason is
+unchanged:
+
+* with a **16,384-token** active set - what G2 measured as fidelity-preserving before the
+  compiler existed - an ephemeral cold route costs 0.485 s of prefill, while moving a KV payload
+  on this 23.2-23.4 GB/s fabric costs 0.017 s (32K history) to 0.556 s (1M), so the ephemeral
+  route is worse wherever the payload is small (goodput x0.16-0.75);
+* lowering the fabric to 10 or 2 GB/s does not rescue it while sessions stay warm: a cold route
+  is only paid on placement, migration, or displacement, so the cost law is rarely exercised;
+* in those cells the law still clearly beats only `strict_sticky`, which is the easy version of
+  the claim and not the gate.
+
+So G4 is now **measured and positive in the regimes it should be**, and its remaining coupling
+to G2 is explicit: the 4,096 column advances only if the compiler holds the decision at 4,096,
+which is exactly what the `tail_state`/`tail_query` arms at 4,096 are for.
 
 ## G5 — Recovery without session ownership
 

@@ -18,14 +18,14 @@ from __future__ import annotations
 import argparse
 import json
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from statistics import median
 from typing import Iterable
 
 from ephemeralkv.consolidate import compile_units, consolidate, render
 from ephemeralkv.index import terms
-from ephemeralkv.statecompile import compile_executable_state
+from ephemeralkv.statecompile import classify, compile_executable_state, state_first_units
 from ephemeralkv.index import DurableSpanIndex, Span
 from benchmarks.g2_trace_index import _content, messages_from_row
 
@@ -37,10 +37,34 @@ class Example:
     target: str
     history_tokens_estimate: int
     active_tokens_estimate: int
+    # recorded so receipts can be aggregated by session length: the killer table is a statement
+    # about what happens as a session grows, not only about how many tokens it holds
+    turns: int = 0
 
 
 def render_span(span: Span) -> str:
     return f"<{span.role}>\n{span.text}\n"
+
+
+def suffix_within(text: str, budget: int, token_counter) -> str:
+    """Largest suffix of `text` that fits `budget` tokens, marked when it is cut.
+
+    Only used when a single span is larger than the whole view budget - a whole-file dump can
+    be - where the alternative is either dropping the turn the model is answering or letting
+    the view exceed the budget it claims.  The cut is from the front: the end of a tool result
+    is what the next turn continues from.
+    """
+    if token_counter(text) <= budget:
+        return text
+    lo, hi = 0, len(text)
+    while lo < hi:
+        mid = (lo + hi + 1) // 2
+        if token_counter(text[-mid:]) <= budget:
+            lo = mid
+        else:
+            hi = mid - 1
+    cut = text[-lo:] if lo else ""
+    return "[... earlier lines elided ...]\n" + cut
 
 
 def render_message(msg: dict) -> str:
@@ -84,14 +108,136 @@ def build_examples(
                 collapse_paths = bool(options.pop("collapse_paths", True))
                 compile_mode = str(options.pop("compile_mode", "consolidate"))
                 keep_earlier_verbatim = bool(options.pop("keep_earlier_verbatim", False))
-                if consolidate_view:
+                tail_fraction = float(options.pop("tail_fraction", 0.6))
+                tail_cap = float(options.pop("tail_cap", 0.5))
+                if compile_mode == "recency":
+                    # feasibility control: the last N tokens of history, with no selection and
+                    # no compilation.  If 8K of plain recency is far from full history while
+                    # 16K is close, the gate is about token volume rather than about which
+                    # spans get chosen - and then no extractive compiler can pass it by
+                    # re-selecting the same text
+                    budget = token_budget
+                    taken = []
+                    for span in sorted(idx.spans, key=lambda sp: -sp.turn):
+                        cost = max(1, int(token_counter(span.text)))
+                        if budget - cost < 0:
+                            # skip rather than stop: the newest span is often a whole-file
+                            # dump that cannot fit, and stopping there leaves an empty view
+                            continue
+                        budget -= cost
+                        taken.append(span)
+                    taken.sort(key=lambda sp: sp.turn)
+                    active = "".join(f"<{sp.role}>\n{sp.text}\n" for sp in taken)
+                    view = taken
+                elif consolidate_view:
                     # retrieve generously, consolidate the evidence, then compile down: the
                     # point is that the *representation* changes, not that the ranking does
                     spans, _ = idx.compile_view(
                         query, token_budget=max(token_budget + 1,
                                                 int(token_budget * retrieve_multiplier)),
                         max_spans=max_spans, **options)
-                    if compile_mode == "materialize":
+                    if compile_mode == "tail_state":
+                        # The tail is the working set.  Keep the most recent spans whole and in
+                        # order, then spend what is left on the compiled far field.  This is the
+                        # arm the controls point at: surface fidelity is conditioned on a
+                        # verbatim tail (8,192 tokens of plain recency sits within 0.3 pp of
+                        # full history, while every arm that cut or re-ranked the tail lost
+                        # 5-15 pp), and the decision is conditioned on the compressed far field
+                        # (a compiled 8K view beats raw evidence on patch localisation).  It
+                        # tries to hold both at once, which is the only way both gate halves
+                        # pass together.
+                        tail_budget = int(token_budget * tail_fraction)
+                        tail, tail_used, tail_ids = [], 0, set()
+                        newest = max(idx.spans, key=lambda sp: sp.turn) if idx.spans else None
+                        for span in sorted(idx.spans, key=lambda sp: -sp.turn):
+                            cost = max(1, int(token_counter(span.text)))
+                            limit = tail_budget
+                            if span is newest:
+                                # the current turn is not optional.  Admit the newest span whole
+                                # even when it exceeds the tail share - the share governs how much
+                                # *older* context is protected, not whether the turn the model is
+                                # answering is visible - and if it cannot fit the whole budget,
+                                # keep its suffix rather than dropping the only evidence the new
+                                # turn has.
+                                limit = max(tail_budget, cost)
+                                if cost > token_budget:
+                                    text = suffix_within(span.text, token_budget, token_counter)
+                                    tail.append(replace(span, text=text,
+                                                        token_estimate=token_budget))
+                                    tail_ids.add(span.span_id)
+                                    tail_used = token_budget
+                                    break
+                            if tail_used + cost > limit:
+                                continue
+                            tail_used += cost
+                            tail.append(span)
+                            tail_ids.add(span.span_id)
+                        tail.sort(key=lambda sp: sp.turn)
+                        far_budget = max(0, token_budget - tail_used)
+                        far_options = dict(options)
+                        far_options["recency_spans"] = 0
+                        far_options["max_span_fraction"] = 1.0
+                        far_spans, _ = idx.compile_view(
+                            query, token_budget=far_budget, max_spans=max_spans,
+                            **far_options)
+                        far_spans = [sp for sp in far_spans if sp.span_id not in tail_ids]
+                        far_units, _ = compile_units(
+                            consolidate(far_spans, collapse_paths=collapse_paths,
+                                        keep_earlier_verbatim=keep_earlier_verbatim),
+                            far_budget, token_counter)
+                        active = render(far_units) + "".join(render_span(sp) for sp in tail)
+                        view = far_spans + tail
+                    elif compile_mode == "tail_query":
+                        # The current turn verbatim, the query's evidence for everything else.
+                        #
+                        # The two metrics want different things and both are conditional on the
+                        # newest span: fidelity is at parity when the newest span is kept whole
+                        # (8,192 tokens of recency, +0.29 pp) and loses 5-15 pp when it is
+                        # truncated or rewritten, while the decision is carried by query-focused
+                        # evidence (a compiled 8K view scores 0.292 against 0.237 raw and 0.154
+                        # for recency).  tail_state bought fidelity with a 60% tail and lost the
+                        # decision (0.104), because *generic* recency padding spends budget on
+                        # older spans the decision does not use.  This arm spends nothing on
+                        # generic recency: the newest span, then the compiler.
+                        tail, tail_used, tail_ids = [], 0, set()
+                        newest = max(idx.spans, key=lambda sp: sp.turn) if idx.spans else None
+                        if newest is not None:
+                            cost = max(1, int(token_counter(newest.text)))
+                            share = max(1, int(token_budget * tail_cap))
+                            if cost > share:
+                                # a newest span larger than its share is kept from the end: the
+                                # alternative is dropping the turn the model is answering or
+                                # leaving no budget for the evidence the decision needs
+                                text = suffix_within(newest.text, share, token_counter)
+                                tail.append(replace(newest, text=text,
+                                                    token_estimate=share))
+                                tail_used = share
+                            else:
+                                tail.append(newest)
+                                tail_used = cost
+                            tail_ids.add(newest.span_id)
+                        far_budget = max(0, token_budget - tail_used)
+                        far_options = dict(options)
+                        far_options["recency_spans"] = 0
+                        far_options["max_span_fraction"] = 1.0
+                        far_spans, _ = idx.compile_view(
+                            query, token_budget=far_budget, max_spans=max_spans,
+                            **far_options)
+                        far_spans = [sp for sp in far_spans if sp.span_id not in tail_ids]
+                        far_units, _ = compile_units(
+                            consolidate(far_spans, collapse_paths=collapse_paths,
+                                        keep_earlier_verbatim=keep_earlier_verbatim),
+                            far_budget, token_counter)
+                        active = render(far_units) + "".join(render_span(sp) for sp in tail)
+                        view = far_spans + tail
+                    elif compile_mode == "state_first":
+                        # selection, not compression: the view is built from state-carrying
+                        # evidence (all materialised file states, the latest result of each
+                        # command) and only then from loose text, instead of taking whatever
+                        # the lexical ranking happened to return
+                        units, _stats = state_first_units(idx, query, token_budget,
+                                                          token_counter)
+                    elif compile_mode == "materialize":
                         # the executable-state compiler: replay the log's file events and keep
                         # the materialised current state, not the latest view of it
                         units, _stats = compile_executable_state(
@@ -102,8 +248,8 @@ def build_examples(
                             consolidate(spans, collapse_paths=collapse_paths,
                                         keep_earlier_verbatim=keep_earlier_verbatim),
                             token_budget, token_counter)
-                    active = render(units)
-                    view = spans
+                        active = render(units)
+                        view = spans
                 else:
                     view, _ = idx.compile_view(
                         query, token_budget=token_budget, max_spans=max_spans, **options)
@@ -121,12 +267,14 @@ def build_examples(
                             max(1, int(token_counter(active))) if consolidate_view
                             else sum(max(1, s.token_estimate) for s in view)
                         ),
+                        turns=len(history),
                     )
                 )
 
         # Index every completed transcript event after constructing the example.
         tok_est = int(token_counter(text))
-        idx.append(turn=turn, role=role, text=text, token_estimate=max(1, tok_est))
+        idx.append(turn=turn, role=role, text=text, token_estimate=max(1, tok_est),
+                   kind=classify(text))
         history.append(msg)
 
     if min_history_tokens:
@@ -339,8 +487,15 @@ def main(argv=None):
                         "not in the ranking)")
     p.add_argument("--retrieve-multiplier", type=float, default=2.0,
                    help="how much evidence to retrieve before consolidating it down")
+    p.add_argument("--tail-fraction", type=float, default=0.6,
+                   help="share of the budget kept as an untruncated verbatim tail "
+                        "(tail_state mode)")
+    p.add_argument("--tail-cap", type=float, default=0.5,
+                   help="share of the budget the newest span may take before it is kept from "
+                        "the end instead (tail_query mode)")
     p.add_argument("--compile-mode", default="consolidate",
-                   choices=("consolidate", "materialize"),
+                   choices=("consolidate", "materialize", "state_first", "recency",
+                            "tail_state", "tail_query"),
                    help="`consolidate` picks among the retrieved views; `materialize` replays "
                         "the log's file events and keeps the current state")
     p.add_argument("--no-collapse-paths", action="store_true",
@@ -404,6 +559,8 @@ def main(argv=None):
                           "retrieve_multiplier": args.retrieve_multiplier,
                           "collapse_paths": not args.no_collapse_paths,
                           "compile_mode": args.compile_mode,
+                          "tail_fraction": args.tail_fraction,
+                          "tail_cap": args.tail_cap,
                           "keep_earlier_verbatim": args.keep_earlier_verbatim},
                 token_counter=lambda text: len(
                     tokenizer.encode(text, add_special_tokens=False)
@@ -422,6 +579,7 @@ def main(argv=None):
                     {
                         "history_tokens_estimate": ex.history_tokens_estimate,
                         "active_tokens_estimate": ex.active_tokens_estimate,
+                        "turns": ex.turns,
                         "full": full,
                         "active": active,
                     }

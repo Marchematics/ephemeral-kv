@@ -93,13 +93,14 @@ class DurableSpanIndex:
     def __init__(self) -> None:
         self._spans: list[Span] = []
         self._postings: dict[str, list[int]] = defaultdict(list)
+        self._kinds: dict[str, list[int]] = defaultdict(list)
 
     @property
     def spans(self) -> tuple[Span, ...]:
         return tuple(self._spans)
 
     def append(self, *, turn: int, role: str, text: str,
-               token_estimate: int | None = None) -> Span:
+               token_estimate: int | None = None, kind: str | None = None) -> Span:
         span_id = len(self._spans)
         if token_estimate is None:
             token_estimate = max(1, len(terms(text)))
@@ -107,7 +108,13 @@ class DurableSpanIndex:
         self._spans.append(span)
         for term in sorted(set(terms(text))):
             self._postings[term].append(span_id)
+        # a structural posting list, so state-first selection is indexed rather than a scan
+        if kind is not None:
+            self._kinds.setdefault(kind, []).append(span_id)
         return span
+
+    def spans_of_kind(self, kind: str) -> list[Span]:
+        return [self._spans[i] for i in self._kinds.get(kind, ())]
 
     def lookup(self, query: str, *, max_spans: int = 32) -> tuple[list[Span], LookupStats]:
         qterms = sorted(set(terms(query)))

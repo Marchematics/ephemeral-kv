@@ -54,16 +54,37 @@ def main(argv=None) -> int:
                     table[verdict.get("strongest_baseline", "full_kv_move")]["p50_s"], 3),
             })
     advances = [r for r in rows if r["decision"] == "advance"]
+    # The boundary is read off the grid rather than written down next to it: the region moved
+    # once the active-set axis contained the sizes the compiler can actually run at and the
+    # history axis contained the scale the durability argument is about, and prose that is not
+    # derived from the rows goes stale silently.
+    by_active: dict[int, list[int]] = {}
+    by_active_regime: dict[str, list[int]] = {}
+    by_history: dict[str, list[int]] = {}
+    for row in rows:
+        long_session = "1048576" in row["receipt"]
+        scale = "1M-mix" if long_session else "corpus-mix"
+        for bucket, key in ((by_active, row["active_tokens"]),
+                            (by_active_regime, f"{row['regime']}|{row['active_tokens']}"),
+                            (by_history, scale)):
+            counts = bucket.setdefault(key, [0, 0])
+            counts[1] += 1
+            if row["decision"] == "advance":
+                counts[0] += 1
     payload = {
         "schema": "ephemeral-kv-g4-phase-summary-v1",
         "kind": "gate_summary",
         "cells": len(rows),
         "advances": len(advances),
+        "advances_by_active_tokens": {str(k): v for k, v in sorted(by_active.items())},
+        "advances_by_regime_and_active": {k: v for k, v in sorted(by_active_regime.items())},
+        "advances_by_history_scale": by_history,
         "boundary": (
-            "ephemeral mobility clears the gate only in forced mobility with a small "
-            "active set; at the active-set size G2 measured as fidelity-preserving it "
-            "does not, because rematerializing 16K tokens costs more than moving a KV "
-            "payload on this fabric"),
+            "ephemeral mobility clears the gate where rematerialisation is cheaper than "
+            "moving the history's KV payload: forced mobility (a worker disappears) at any "
+            "active set the compiler can hold quality at, and capacity-pressured fleets with "
+            "long sessions.  It does not clear it under balanced load with short sessions, "
+            "where the KV payload is already cheap to move"),
         "rows": rows,
     }
     Path(args.out).write_text(json.dumps(payload, indent=2) + "\n")

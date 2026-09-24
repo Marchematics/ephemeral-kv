@@ -99,3 +99,34 @@ def test_compiled_state_fits_the_budget_and_keeps_the_current_file():
 
 def failure(turn):
     return f"{turn} failed, 2 passed" if turn % 2 else f"{turn} passed"
+
+
+def test_classify_separates_state_from_chatter():
+    from ephemeralkv.statecompile import classify
+
+    assert classify(DUMP) == "file_event"
+    assert classify("diff --git a/pkg/cache.py b/pkg/cache.py\n@@ -1 +1 @@\n-a\n+b") == "file_event"
+    assert classify("pytest -q tests/test_cache.py\n4 passed") == "command_result"
+    assert classify("Let me look at the cache one more time.") == "loose"
+
+
+def test_state_first_selection_prefers_state_over_chatter():
+    """The measured failure mode: lexical top-k returns 74% chatter, so state never fits."""
+    from benchmarks.g2_model_quality import DurableSpanIndex
+    from ephemeralkv.statecompile import state_first_units
+
+    idx = DurableSpanIndex()
+    for turn in range(20):
+        idx.append(turn=turn, role="assistant",
+                   text=f"cache eviction chatter number {turn} about the cache and eviction",
+                   token_estimate=20, kind="loose")
+    idx.append(turn=20, role="tool", text=DUMP, token_estimate=40, kind="file_event")
+    idx.append(turn=21, role="tool", text="pytest -q\n4 passed", token_estimate=10,
+               kind="command_result")
+    units, stats = state_first_units(idx, "fix the cache eviction", token_budget=80,
+                                     tokens_of=lambda t: max(1, len(t.split())))
+    text = "\n".join(u.text for u in units)
+    assert "class Cache:" in text                      # the file state is in the view
+    assert "4 passed" in text                          # and so is the latest result
+    assert stats["tokens_used"] <= 80
+    assert stats["kind_file_spans"] == 1 and stats["kind_loose"] >= 20

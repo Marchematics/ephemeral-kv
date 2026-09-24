@@ -297,3 +297,83 @@ def _fit(units: list[Unit], token_budget: int, tokens_of) -> tuple[list[Unit], d
     stats["tokens_used"] = used
     stats["budget"] = token_budget
     return out, stats
+
+# --------------------------------------------------------------------------- #
+# state-first selection
+# --------------------------------------------------------------------------- #
+
+def classify(text: str) -> str:
+    """What kind of evidence a span is: file state, a command result, or loose text.
+
+    Measured over three long examples: 74% of the spans a lexical retriever returns are loose
+    text (reasoning, acknowledgements, chatter), 14% are command results and only 6% are file
+    events - which is why a state compiler that only had the lexical top-k to work with behaved
+    exactly like plain truncation.  Selection has to be state-first, and that needs the span
+    kinds at index time.
+    """
+    if path_of(text) and (_dump_lines(text) is not None or _SEARCH.search(text)
+                          or text.lstrip().startswith("diff --git") or "@@ " in text):
+        return "file_event"
+    if _signature(text) is not None:
+        return "command_result"
+    return "loose"
+
+
+def state_first_units(index, query: str, token_budget: int, tokens_of,
+                      loose_spans: int = 12, recent_spans: int = 4) -> tuple[list[Unit], dict]:
+    """Build the view from state-carrying evidence, not from lexical top-k.
+
+    Order of preference: materialised file states (all of them - there are few, and each one
+    stands for every event that produced it), then the latest result of each command, then the
+    newest loose text, then loose text that overlaps the query.  The point is that state
+    evidence competes for the budget on its *kind*, not on how many query terms happen to be in
+    it - which is what let chatter crowd out file state before.
+    """
+    from ephemeralkv.index import terms as _terms
+
+    query_terms = set(_terms(query))
+    spans = list(index.spans)
+    file_spans = [span for span in spans if classify(span.text) == "file_event"]
+    result_spans = [span for span in spans if classify(span.text) == "command_result"]
+    loose = [span for span in spans if classify(span.text) == "loose"]
+
+    # results must go through the replayer too, otherwise the "latest result of each command"
+    # channel is computed and then dropped (measured: the file state appeared in the view and
+    # the test result did not)
+    files, results, _ = materialise(file_spans + result_spans)
+    newest_turn = max((max(f.turns) for f in files.values() if f.turns),
+                      default=0)
+    query_paths = {term for term in query_terms if "." in term}
+
+    units: list[Unit] = []
+    for state in sorted(files.values(),
+                        key=lambda f: (0 if any(p in f.path for p in query_paths) else 1,
+                                       -max(f.turns or [0]))):
+        units.append(Unit(text=f"# {state.path} (current state)\n{state.text}",
+                          tokens=max(1, len(state.text.split())), verbatim=True,
+                          turns=list(state.turns), superseded=list(state.superseded),
+                          kind="state"))
+    for result in sorted(results.values(), key=lambda r: -r.turn):
+        units.append(Unit(text=f"# latest `{result.signature}` result\n{result.text}",
+                          tokens=max(1, len(result.text.split())), verbatim=True,
+                          turns=[result.turn], superseded=list(result.superseded),
+                          kind="result"))
+
+    def overlap(span) -> float:
+        tokens = set(_terms(span.text))
+        return len(tokens & query_terms) / max(1, len(query_terms))
+
+    loose_sorted = sorted(loose, key=lambda s: (-overlap(s), -s.turn))
+    for span in loose_sorted[:loose_spans]:
+        units.append(Unit(text=span.text, tokens=span.token_estimate, verbatim=True,
+                          turns=[span.turn], kind="span"))
+    for span in sorted(loose, key=lambda s: -s.turn)[:recent_spans]:
+        if span.turn not in {u.turns[0] for u in units if u.kind == "span"}:
+            units.append(Unit(text=span.text, tokens=span.token_estimate, verbatim=True,
+                              turns=[span.turn], kind="recent"))
+
+    out, stats = _fit(units, token_budget, tokens_of)
+    stats.update({"kind_file_spans": len(file_spans), "kind_results": len(result_spans),
+                  "kind_loose": len(loose), "files": len(files),
+                  "query_paths": sorted(query_paths)[:4]})
+    return out, stats
