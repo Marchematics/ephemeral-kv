@@ -122,6 +122,11 @@ Measured at an 8,192-token view on the same examples, one change per row:
 | **the window kept whole, ranked evidence filling the rest** | **0.00 pp** | 0.139 |
 | plain recency, no compiler at all | +0.29 pp | 0.154 |
 
+The attribution is exact, which matters more than the ranking.  Content-identity dedup on its own
+is **neutral**: 0.239 against plain retrieval's 0.243 on the same 48 instances (paired -0.004,
+95% CI [-0.024, +0.016], 1 win / 2 losses).  What hurts are the two stages that actually *compile
+state* - collapsing each path to its newest view, and re-selecting the newest output's lines.
+
 Two of these are negative results the paper should keep, because they bound what "executable
 state" can mean here.  Collapsing a file to its latest state *costs* 8.5 pp against keeping the
 superseded views: a later view does not contain the region an earlier one showed, and the next
