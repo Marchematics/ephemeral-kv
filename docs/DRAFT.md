@@ -170,9 +170,18 @@ decision does not move at all (0.191 either way).  So:
 * the **fidelity** is set by *whether the newest evidence is rendered whole*, not by what else is
   in the view.
 
-A system that retrieves the right evidence and renders the newest spans entire therefore gets both
-at one budget, and that is the configuration measured here: 0.191 decision - statistically tied
-with the best measured (0.243 at 4,096) - at 0.00 pp fidelity.  The honest
+One caveat keeps this from being a free lunch: the far field must be *consolidated* rather than
+prefix-truncated raw dumps.  The same 3,072-token window with raw retrieval behind it scores
+**-6.94 pp** on fidelity - the truncated dumps in the far field hurt the surface even though the
+newest evidence is whole - while a consolidated far field is at 0.00 pp.  On the decision the two
+are tied (+0.029, 95% CI [-0.089, +0.146]), so consolidation is the better far field *because it is
+fidelity-neutral at no measurable decision cost*, not because it wins anything.
+
+A system that renders the newest evidence whole and consolidates the rest therefore gets both at
+one budget, and that is the configuration measured here: **0.161 decision with 0.00 pp fidelity**,
+statistically tied on the decision with every other bounded arm measured - plain retrieval at
+4,096 (0.243, paired +0.081, CI [-0.016, +0.177], 13 wins / 3 losses), window plus raw retrieval
+(0.191), dedup only (0.207-0.239) - while those arms carry -25 pp to -6.94 pp of fidelity.  The honest
 requirement is therefore the smallest budget at which both hold, and that is what the
 12,288-token arm measures (16,384 is the pre-compiler reference, already measured at -1.94 pp).
 
