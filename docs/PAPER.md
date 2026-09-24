@@ -149,6 +149,21 @@ So the two requirements do not compete for content.  They compete for *rendering
 evidence whole, consolidate the far field, and retrieve the rest.  That is the view the system
 ships, and it is the configuration in bold above.
 
+**Why 8,192 and not less.**  The budget is measured, not chosen for convenience.  Holding the
+window at 3,072 tokens and varying the total:
+
+| total budget | fidelity (window + consolidated far field) | end-task F1 |
+|---:|---:|---:|
+| 4,096 | -2.40 pp (outside the 2 pp allowance) | 0.117 |
+| **8,192** | **0.00 pp** | **0.161** (window ~4.1K) |
+| 12,288 | 0.00 pp | 0.155 |
+
+At 4,096 the window consumes three quarters of the budget: the surface is 2.4 pp out of tolerance and
+the far field has too little room, so the decision drops to 0.117 against 0.243 for plain retrieval
+at the same total.  The joint requirement therefore has a measured floor at 8,192 - and above it
+neither metric improves, which is why the paper's state is 8,192 rather than as large as the machine
+will hold.
+
 ### 2.3 The metric cannot see the difference
 
 Keep the newest spans whole and teacher-forced fidelity is at parity with **8,192 tokens of
