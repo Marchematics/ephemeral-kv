@@ -30,7 +30,7 @@ What is measured for that abstraction:
 | teacher-forced next-token fidelity can compare systems here | **false on this corpus**: it is saturated by recency (8,192 tokens of newest spans = parity), so it cannot see a compiler at all |
 | collapsing a file's history to its latest state is good state management | **false**: it costs 8.5 pp of fidelity against keeping the superseded views (-13.90 pp against -5.44 pp) |
 | log replay into materialised state pays | **no**: 0.231 against 0.237 on the decision, because only 6% of retrieved spans are file events (74% loose text, 14% command results) |
-| one 8,192-token view holds both metrics | **not with the arms measured**: fidelity parity costs the ranked budget the decision needs (best fidelity-admissible arm 0.161 against plain retrieval's 0.243 at half the budget) |
+| one 8,192-token view holds both metrics | **it does, if the window is verbatim and the rest is retrieval**: window + plain retrieval scores 0.191 against 0.243 for plain retrieval at 4,096 - a statistical tie (paired -0.052, CI [-0.154, +0.047]) - while the windowed view is at 0.00 pp fidelity and plain retrieval at 4,096 is at -25 pp.  The compiler is not what buys this |
 
 ## 3. The five hard results, scored
 
