@@ -621,7 +621,37 @@ KV-aware escape hatch production ships), `full_kv_move`, `full_reprefill`, `ephe
 over balanced load, a slow worker, and a worker that disappears and must have its sessions
 re-materialized elsewhere.
 
-**Result: 39 of 264 cells advance** in the widened grid, against 4 of 48 in the first one.  The
+**Result: 118 of 576 cells advance** across the three grids, against 4 of 48 in the first one,
+and **36 of them sit at the 8,192-token active set where both quality metrics hold** - in all
+three regimes, not only worker loss:
+
+| active set | balanced | slow worker | worker loss | total |
+|---|---:|---:|---:|---:|
+| 2,048 | 2/22 | 2/22 | 13/22 | 17/66 |
+| 4,096 | 8/66 | 11/66 | 44/66 | 63/198 |
+| **8,192 (quality-admissible)** | **5/82** | **6/82** | **25/82** | **36/246** |
+| 16,384 | 0/22 | 0/22 | 2/22 | 2/66 |
+
+The first grid's boundary - "only forced mobility with a 2,048-token active set" - was an
+artefact of the grid three times over: its active-set axis had nothing between 2,048 and 16,384,
+its longest session was 262K tokens, and its KV geometry was the *measured* 12,288 B/token of
+Qwen2.5-0.5B - the only model on this card that can hold a 1M-token context, and a payload so
+small that moving 262K tokens of history costs 138 ms.  Adding the sizes the compiler can run at,
+the session scale the durability argument is about, and the model geometry real agent fleets use
+changes the region: an 8B-class model (131,072 B/token) makes a 128K session a 16 GiB transfer and
+a 70B-class one (327,680) makes it 40 GiB, against 0.203 s to rematerialise an 8,192-token state.
+
+**The scope, stated exactly.**  Of the 36 admissible cells, the balanced and slow-worker wins come
+from the capacity-pressure regime where the fleet's warm cache holds a *fraction* of the sessions
+in flight and there is no cluster KV store, so the baseline's alternative is a full re-prefill
+(1.6 s at 32K, 14.3 s at 128K) - that is the regime the abstraction is about, and it is where
+ephemeral wins by 8-70x, but it is not the same claim as "ephemeral beats moving KV".  Against a
+tier that *can* move KV, the advancing cells are still worker loss plus the 1M-history mixes
+(17/264 in the geometry sweep alone).  The 4,096 column advances in 63 cells but is **not**
+fidelity-admissible (-25 pp), and the 16,384 column barely advances at all: at that size
+rematerialisation costs 0.485 s, which buys a lot of fabric.
+
+**The earlier result, for the record: 39 of 264 cells** in the widened grid, against 4 of 48 in the first one.  The
 first grid's boundary - "only forced mobility with a 2,048-token active set" - turned out to be
 an artefact of the grid rather than of the cost law: its active-set axis contained nothing
 between 2,048 and 16,384, so the region could only ever be reported at its extreme, and its

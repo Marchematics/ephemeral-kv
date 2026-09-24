@@ -371,6 +371,14 @@ def main(argv=None) -> int:
                         "with a cheap cold route never queues")
     p.add_argument("--gap-model", choices=["poisson", "bursty"], default="bursty")
     p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--kv-bytes-per-token", type=int, default=0,
+                   help="override the measured KV geometry (12,288 B/token on the G3 model).  "
+                        "The payload a full-KV move pays is history x this number, so the model "
+                        "size is a first-class axis of the phase diagram: an 8B-class model "
+                        "(131,072 B/token) makes a 128K session a 16 GiB transfer and a 70B-class "
+                        "one (327,680) makes it 40 GiB, both infeasible at the measured 23.3 GB/s "
+                        "while rematerialising 8,192 tokens stays 0.203 s.  0 keeps the measured "
+                        "value")
     p.add_argument("--history-choices", default="32768,131072,262144",
                    help="comma-separated session-history sizes the workload samples (the "
                         "measured corpus reaches 32K-262K; `1048576` adds the scale the "
@@ -380,6 +388,8 @@ def main(argv=None) -> int:
     costs = load_costs(Path(args.g3), Path(args.g3_warm), Path(args.g3_prefill))
     if args.bandwidth_gbs:
         costs.bandwidth_gbs = float(args.bandwidth_gbs)
+    if args.kv_bytes_per_token:
+        costs.kv_bytes_per_token = int(args.kv_bytes_per_token)
     history_choices = tuple(int(x) for x in str(args.history_choices).split(",") if x.strip())
     turns = build_turns(args.sessions, args.turns_per_session, seed=args.seed,
                         gap_model=args.gap_model, active_tokens=args.active_tokens,
