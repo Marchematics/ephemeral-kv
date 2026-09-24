@@ -153,8 +153,10 @@ def main(argv=None) -> int:
                    help="share of the budget kept as an untruncated verbatim tail "
                         "(tail_state mode)")
     p.add_argument("--far-compiler", default="consolidate",
-                   choices=("consolidate", "materialize"),
+                   choices=("consolidate", "materialize", "raw"),
                    help="how the far field of tail_state is compiled (see g2_model_quality)")
+    p.add_argument("--tail-tokens", type=int, default=0,
+                   help="absolute size of the verbatim window in tail_state mode (0 = fraction)")
     p.add_argument("--tail-cap", type=float, default=0.5,
                    help="share of the budget the newest span may take before it is kept from "
                         "the end instead (tail_query mode)")
@@ -210,6 +212,7 @@ def main(argv=None) -> int:
                           "collapse_paths": not args.no_collapse_paths,
                           "compile_mode": args.compile_mode,
                           "tail_fraction": args.tail_fraction,
+                          "tail_tokens": args.tail_tokens,
                           "tail_cap": args.tail_cap,
                           "far_compiler": args.far_compiler},
                 token_counter=lambda text: len(tokenizer.encode(text,

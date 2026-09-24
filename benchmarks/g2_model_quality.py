@@ -109,6 +109,12 @@ def build_examples(
                 compile_mode = str(options.pop("compile_mode", "consolidate"))
                 keep_earlier_verbatim = bool(options.pop("keep_earlier_verbatim", False))
                 tail_fraction = float(options.pop("tail_fraction", 0.6))
+                # an absolute window size is the right parameterisation: what the surface needs is
+                # a *fixed* amount of verbatim recent context (~2.9K measured), so every token
+                # beyond it should go to ranked evidence.  A fraction grows the window with the
+                # budget, which is why the windowed arms scored the same 0.16 decision at 8,192
+                # and at 12,288 - the split stayed proportional.
+                tail_tokens = int(options.pop("tail_tokens", 0))
                 tail_cap = float(options.pop("tail_cap", 0.5))
                 far_compiler = str(options.pop("far_compiler", "consolidate"))
                 if compile_mode == "recency":
@@ -147,7 +153,8 @@ def build_examples(
                         # (a compiled 8K view beats raw evidence on patch localisation).  It
                         # tries to hold both at once, which is the only way both gate halves
                         # pass together.
-                        tail_budget = int(token_budget * tail_fraction)
+                        tail_budget = (tail_tokens if tail_tokens > 0
+                                       else int(token_budget * tail_fraction))
                         tail, tail_used, tail_ids = [], 0, set()
                         newest = max(idx.spans, key=lambda sp: sp.turn) if idx.spans else None
                         for span in sorted(idx.spans, key=lambda sp: -sp.turn):
@@ -192,7 +199,16 @@ def build_examples(
                             query, token_budget=far_budget, max_spans=max_spans,
                             **far_options)
                         far_spans = [sp for sp in far_spans if sp.span_id not in tail_ids]
-                        if far_compiler == "materialize":
+                        if far_compiler == "raw":
+                            # no compiler at all: the window carries the surface, plain retrieval
+                            # carries the decision.  This is the arm a system would ship if the
+                            # compiler's stages cannot be shown to pay (and on this corpus they
+                            # cannot: plain retrieval at 4,096 beats the compiled 8,192 view by
+                            # 0.104 F1 paired on 48 sessions).
+                            active = "".join(render_span(sp) for sp in far_spans) + \
+                                "".join(render_span(sp) for sp in tail)
+                            view = far_spans + tail
+                        elif far_compiler == "materialize":
                             # the far field is the *executable state* (replay the log: dumps set a
                             # file's content, diffs and search/replace blocks apply to it, repeated
                             # commands collapse to their latest result), not a shortened transcript.
@@ -512,10 +528,16 @@ def main(argv=None):
                    help="share of the budget kept as an untruncated verbatim tail "
                         "(tail_state mode)")
     p.add_argument("--far-compiler", default="consolidate",
-                   choices=("consolidate", "materialize"),
-                   help="how the far field of tail_state is compiled: `consolidate` keeps the "
+                   choices=("consolidate", "materialize", "raw"),
+                   help="how the far field of tail_state is compiled: `raw` keeps the retrieved "
+                        "spans as they are, `consolidate` keeps the "
                         "newest view of each piece of state, `materialize` replays the log into "
                         "the current executable state")
+    p.add_argument("--tail-tokens", type=int, default=0,
+                   help="absolute size of the verbatim window in tail_state mode; 0 uses "
+                        "--tail-fraction x budget.  The surface needs a fixed amount of verbatim "
+                        "context, so an absolute window is the right knob: a fraction grows the "
+                        "window with the budget and leaves the ranked share unchanged")
     p.add_argument("--tail-cap", type=float, default=0.5,
                    help="share of the budget the newest span may take before it is kept from "
                         "the end instead (tail_query mode)")
@@ -586,6 +608,7 @@ def main(argv=None):
                           "collapse_paths": not args.no_collapse_paths,
                           "compile_mode": args.compile_mode,
                           "tail_fraction": args.tail_fraction,
+                          "tail_tokens": args.tail_tokens,
                           "tail_cap": args.tail_cap,
                           "far_compiler": args.far_compiler,
                           "keep_earlier_verbatim": args.keep_earlier_verbatim},
