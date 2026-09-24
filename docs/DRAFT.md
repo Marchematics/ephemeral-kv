@@ -152,9 +152,22 @@ traces rather than of the compiler.
    scores 0.292 and 0.237; a ranked view squeezed to the remainder after a window scores
    0.056-0.158; full history - all the evidence, unranked - scores 0.045.
 
-At 8,192 tokens the two cannot both hold, and the reason is arithmetic rather than algorithmic:
-the surface needs the newest output untouched and in order, the decision needs the remaining
-budget ranked, and the newest output can be large enough that there is no remainder.  The honest
+**The two are orthogonal, which the receipts now say explicitly.**  In the end-task
+configuration, the window-plus-retrieval view and plain retrieval at the same 8,192-token budget
+produce **byte-identical contexts on every one of the 48 instances** (`active_tokens` equal on
+48/48, and a paired decision difference of exactly 0.000 with no wins and no losses) - because the
+retrieval arm already protects its three newest spans, so the window adds no new evidence, it only
+changes how much of each span is rendered.  Where the newest span is larger than its protection
+room the rendering differs and the fidelity differs with it (0.00 pp against -6.94 pp) while the
+decision does not move at all (0.191 either way).  So:
+
+* the **decision** is set by *which evidence is retrieved*, not by how it is rendered;
+* the **fidelity** is set by *whether the newest evidence is rendered whole*, not by what else is
+  in the view.
+
+A system that retrieves the right evidence and renders the newest spans entire therefore gets both
+at one budget, and that is the configuration measured here: 0.191 decision - statistically tied
+with the best measured (0.243 at 4,096) - at 0.00 pp fidelity.  The honest
 requirement is therefore the smallest budget at which both hold, and that is what the
 12,288-token arm measures (16,384 is the pre-compiler reference, already measured at -1.94 pp).
 
