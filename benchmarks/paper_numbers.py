@@ -116,6 +116,14 @@ def main(argv=None) -> int:
     check("failover rebuild s p50",
           round(statistics.median(r["state_rebuild_s"] for r in failover), 3), 1.387, 1e-2)
 
+    # --- C3 (stricter end task): the action-level rescoring must stay a bound, not a win
+    action = load("artifacts/g2b-action-metric-v1.json")["rows"]
+    joint_action = next(r for r in action if r["arm"].startswith("windowcompiler-b8192-n96"))
+    check("action-level paired delta (joint arm)", joint_action["paired_action_delta"], 0.010, TOL)
+    ci_low, ci_high = joint_action["ci95"]
+    results.append(("action-level interval includes zero",
+                    ci_low <= 0 <= ci_high, f"ci95 [{ci_low}, {ci_high}]"))
+
     # --- C1 (structural): dead state
     dead = load("artifacts/g2-dead-state-v1.json")["rows"]
     top5 = sorted(r["top5_share"] for r in dead)
