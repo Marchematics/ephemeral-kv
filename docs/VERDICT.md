@@ -58,6 +58,25 @@ old session, small state  <  young session, large state
   (a routing trace with per-session age and state size, comparing a size-blind policy against a
   size-aware one) and it is the cleanest remaining Best-shaped result.
 
+## 4a. The capacity consequence (derived from measured state sizes and KV geometry)
+
+If the resident object is the history, sessions per worker = budget / (history x B/token) and the
+arithmetic is brutal.  If it is the execution state, the same budget holds states whose size does
+not depend on age.  Usable HBM 20 GiB per worker (`g5_capacity_planning.py`,
+`artifacts/g5-capacity-planning-v1.json`):
+
+| model geometry | resident history, 128K session | resident history, 1M session | resident compiled state, 8,192 |
+|---|---:|---:|---:|
+| Qwen2.5-0.5B (12,288 B/token, measured) | 13.3 sessions | 1.7 | **213** |
+| 8B-class (131,072 B/token) | 1.2 | 0.2 | **20** |
+| 70B-class (327,680 B/token) | 0.5 | 0.1 | **8** |
+
+Sixteen times the sessions at 128K, two orders of magnitude at 1M, and on real model geometries
+the full-history object does not fit at all (0.1-0.5 sessions per worker).  This is also what
+makes the G4 pressure sweep's "warm cache holds a fraction of the fleet" regime concrete rather
+than arbitrary: one or two resident histories per worker is what an 8B-class fleet with 128K
+sessions actually looks like, while sixteen resident states is what the bound allows.
+
 ## 4b. What recovery actually moves (derived, labelled as derived)
 
 The state sizes are measured and the KV geometry is measured, so the data-movement comparison is

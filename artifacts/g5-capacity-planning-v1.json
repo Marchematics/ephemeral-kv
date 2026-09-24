@@ -1,0 +1,152 @@
+{
+  "schema": "ephemeral-kv-capacity-planning-v1",
+  "kind": "derived_table",
+  "hbm_gib": 20.0,
+  "rows": [
+    {
+      "geometry": "Qwen2.5-0.5B (measured)",
+      "kv_bytes_per_token": 12288,
+      "resident": "history",
+      "tokens": 32768,
+      "bytes": 402653184,
+      "sessions_per_worker": 53.3
+    },
+    {
+      "geometry": "Qwen2.5-0.5B (measured)",
+      "kv_bytes_per_token": 12288,
+      "resident": "history",
+      "tokens": 131072,
+      "bytes": 1610612736,
+      "sessions_per_worker": 13.3
+    },
+    {
+      "geometry": "Qwen2.5-0.5B (measured)",
+      "kv_bytes_per_token": 12288,
+      "resident": "history",
+      "tokens": 1048576,
+      "bytes": 12884901888,
+      "sessions_per_worker": 1.7
+    },
+    {
+      "geometry": "Qwen2.5-0.5B (measured)",
+      "kv_bytes_per_token": 12288,
+      "resident": "compiled state",
+      "tokens": 4096,
+      "bytes": 50331648,
+      "sessions_per_worker": 426.7
+    },
+    {
+      "geometry": "Qwen2.5-0.5B (measured)",
+      "kv_bytes_per_token": 12288,
+      "resident": "compiled state",
+      "tokens": 8192,
+      "bytes": 100663296,
+      "sessions_per_worker": 213.3
+    },
+    {
+      "geometry": "Qwen2.5-0.5B (measured)",
+      "kv_bytes_per_token": 12288,
+      "resident": "compiled state",
+      "tokens": 16384,
+      "bytes": 201326592,
+      "sessions_per_worker": 106.7
+    },
+    {
+      "geometry": "8B-class",
+      "kv_bytes_per_token": 131072,
+      "resident": "history",
+      "tokens": 32768,
+      "bytes": 4294967296,
+      "sessions_per_worker": 5.0
+    },
+    {
+      "geometry": "8B-class",
+      "kv_bytes_per_token": 131072,
+      "resident": "history",
+      "tokens": 131072,
+      "bytes": 17179869184,
+      "sessions_per_worker": 1.2
+    },
+    {
+      "geometry": "8B-class",
+      "kv_bytes_per_token": 131072,
+      "resident": "history",
+      "tokens": 1048576,
+      "bytes": 137438953472,
+      "sessions_per_worker": 0.2
+    },
+    {
+      "geometry": "8B-class",
+      "kv_bytes_per_token": 131072,
+      "resident": "compiled state",
+      "tokens": 4096,
+      "bytes": 536870912,
+      "sessions_per_worker": 40.0
+    },
+    {
+      "geometry": "8B-class",
+      "kv_bytes_per_token": 131072,
+      "resident": "compiled state",
+      "tokens": 8192,
+      "bytes": 1073741824,
+      "sessions_per_worker": 20.0
+    },
+    {
+      "geometry": "8B-class",
+      "kv_bytes_per_token": 131072,
+      "resident": "compiled state",
+      "tokens": 16384,
+      "bytes": 2147483648,
+      "sessions_per_worker": 10.0
+    },
+    {
+      "geometry": "70B-class",
+      "kv_bytes_per_token": 327680,
+      "resident": "history",
+      "tokens": 32768,
+      "bytes": 10737418240,
+      "sessions_per_worker": 2.0
+    },
+    {
+      "geometry": "70B-class",
+      "kv_bytes_per_token": 327680,
+      "resident": "history",
+      "tokens": 131072,
+      "bytes": 42949672960,
+      "sessions_per_worker": 0.5
+    },
+    {
+      "geometry": "70B-class",
+      "kv_bytes_per_token": 327680,
+      "resident": "history",
+      "tokens": 1048576,
+      "bytes": 343597383680,
+      "sessions_per_worker": 0.1
+    },
+    {
+      "geometry": "70B-class",
+      "kv_bytes_per_token": 327680,
+      "resident": "compiled state",
+      "tokens": 4096,
+      "bytes": 1342177280,
+      "sessions_per_worker": 16.0
+    },
+    {
+      "geometry": "70B-class",
+      "kv_bytes_per_token": 327680,
+      "resident": "compiled state",
+      "tokens": 8192,
+      "bytes": 2684354560,
+      "sessions_per_worker": 8.0
+    },
+    {
+      "geometry": "70B-class",
+      "kv_bytes_per_token": 327680,
+      "resident": "compiled state",
+      "tokens": 16384,
+      "bytes": 5368709120,
+      "sessions_per_worker": 4.0
+    }
+  ],
+  "note": "state sizes are measured (G2); kv_bytes_per_token is measured for the 0.5B model and declared for the 8B/70B geometries"
+}
