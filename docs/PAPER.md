@@ -291,37 +291,62 @@ Against a tier that can move KV, the wins are worker loss plus the 1M-history mi
 
 ## 5. Related work
 
-**Context caching and tiering.**  Production systems optimise how a history-sized context cache
-moves between memory levels and report throughput gains of that optimisation; retention policies for
-multi-turn agents decide how long a span of KV should stay resident across tool gaps.  Those
-decisions are correct *given* that the resident object is the history.  Our measurement is that the
-resident object need not be: the execution state is bounded and independent of age, so the object
-these systems move is mostly state that will never be needed again (73-96% of tokens sit in five
-blocks).  The tier still holds something - the transcript and the index - but what a cold route
-rebuilds is 32 KB of text, not 12-128 GiB of KV.
+Two lines of work are close enough that the difference has to be stated in objects and in cost
+laws rather than in adjectives.
 
-**Query-dependent workspace virtualisation.**  Virtualising a million-token workspace to host or NVMe
-and materialising a query-dependent view is the closest prior position, and it shares the view
-mechanism.  What it does not change is the *cost law*: the workspace is still the session's
-footprint, moved and materialised as such.  Our claim is about the law - `dM/dL ~ 0`, the inversion,
-the ranking reversal - and about the scheduler and capacity consequences that follow, and we measure
-that the view itself is *not* where the win comes from: a compiler that "improves" the view is tied
-or worse than plain retrieval here, while the bound on the state is what moves the phase boundary.
+**Hierarchical context caching.**  [Strata](https://www.usenix.org/conference/osdi26/presentation/xie-zhiqiang)
+caches KV across GPU HBM, host memory and SSDs, and its contributions are a GPU-assisted I/O
+mechanism that decouples layouts so large transfers are possible, and a cache-aware scheduler that
+mitigates delay hits and hides cache-loading latency; it is implemented in SGLang, deployed, and
+reports up to 5x throughput over vLLM-LMCache.  Its stated problem is that naive designs become
+I/O-bound: fragmented layouts cause small transfers, cache loading stalls prefill.  That is the
+right optimisation *given* that the object being moved is the session's history.  Our measurement is
+that the object need not be: the execution state is 6-8K tokens compiled from a model-independent
+index, so what a cold route moves is ~32 KB of text and the transfer term leaves the cold path
+instead of being made efficient.  Strata's cache-aware scheduling remains the right design for the
+durable tier, where the transcript and index do live.
 
-**Affinity and load balancing.**  Cache-affinity routing and its interaction with load balancing is
-well studied, and sticky-until-saturated is the production answer.  We keep those policies as
-baselines and change only the miss cost; the phase change we report is therefore attributable to the
-cost law rather than to a new heuristic, and we state the regime where the baselines still win
-(balanced load with every session resident against a tier that can move KV).
+**KV virtualisation for agent workspaces.**  [KVMem](https://www.alphaxiv.org/abs/2609.04852)
+preserves overflowed workspace history as paged KV state across GPU, host and NVMe, indexes it with
+model-native attention-space summaries (Mean-K over blocks), and materialises a *query-dependent
+execution view* bounded by the model's native context window - 1M tokens of workspace on a 24 GB
+consumer GPU for a 27B model, with DeepSWE task success improving from 43.8% under compaction-only
+context management to 48.4%.  Two things are shared and we do not claim them: the idea of a
+query-dependent view, and the observation that compaction is lossy.  Two things differ, and they are
+the paper's subject.
+
+* **The object.**  KVMem's view is assembled from *KV blocks*, and its cold path is a transfer with
+  RoPE re-application at the new positions.  Our state is *text* compiled from a model-independent
+  index; nothing model-specific is transferred, and the same durable object resumes on a different
+  model (measured: end-task 0.137/0.145 against full history's 0.017/0.042 on two models that never
+  saw the sessions).
+* **The size.**  KVMem's view is bounded by the model's native window - 256K tokens for the model it
+  evaluates - while ours is bounded by the query and the current turn at 6-8K, a measured floor
+  (below it, 4,096 scores -2.40 pp of fidelity).  That difference is what produces the mobility,
+  capacity and routing consequences: a 32x-older session costing 2.4x less to move, 16x the
+  sessions per worker, and a routing phase change at a state size the quality measurements certify.
+
+KVMem also reports an end-to-end agent-success metric that we do not: our end task is file-level
+localisation of the next turn against the recorded patch.  Task success on a benchmark like DeepSWE
+is the stronger evidence for a deployed agent, and adopting it is the natural next step for this
+work rather than something we have measured.
+
+**Affinity, retention and load balancing.**  Cache-affinity routing and its interaction with load
+balancing is well studied, and sticky-until-saturated is the production answer; retention policies
+for multi-turn agents decide how long a span of KV stays resident across tool gaps, and workspace
+virtualisation decides what to keep where.  We keep those policies as baselines and change only the
+miss cost, so the phase change we report is attributable to the cost law rather than to a new
+heuristic - and we state the regime where the baselines still win: balanced load with every session
+resident, against a tier that can move KV.
 
 **Compaction-based context management.**  Summarising or compacting history before it re-enters the
-model is a crowded space and predates this work.  Our contribution there is negative and specific:
-on these traces compaction is neutral at best (dedup alone: tie), the state-compiling stages are
-harmful (path collapse -8.5 pp of fidelity, snippet re-selection -20 pp), and the metric usually
-quoted for it is saturated.  Reporting that is what keeps the positive claim honest - the win is the
-bound, not the compression.
-
----
+model is a crowded space and predates this work; KVMem itself uses compaction as its baseline.  Our
+contribution there is negative and specific: on these traces compaction is neutral at best (dedup
+alone is a statistical tie with plain retrieval), the state-compiling stages are harmful
+(collapse-each-file-to-its-latest costs 8.5 pp of fidelity, snippet re-selection of the newest output
+20 pp), and the metric usually quoted for it - teacher-forced next-token fidelity - is saturated by
+keeping the newest evidence whole.  Reporting that is what keeps the positive claim honest: what
+carries quality is the window and retrieval, and what carries mobility is the bound.
 
 ## 6. Limitations and non-claims
 
