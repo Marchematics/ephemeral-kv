@@ -1,0 +1,80 @@
+{
+  "schema": "ephemeral-kv-g5-failover-two-workers-v1",
+  "kind": "process_level_failover",
+  "interpretation": "worker A is killed with SIGKILL after serving; worker B is a fresh process that rebuilds the state from the durable object, so no KV is transferred and none survives",
+  "model_a": "/root/qcc/models/Llama-3.2-1B-Instruct",
+  "model_b": "/root/qcc/models/Qwen2.5-1.5B",
+  "token_budget": 8192,
+  "rows": [
+    {
+      "session": "nebius-swe-rebench-openhands::chatcmpl-05d7594fe59dfc0bb08ff7ca06730ee2",
+      "history_tokens": 32775,
+      "owner_killed": true,
+      "owner_kv_lost": true,
+      "worker_a": {
+        "model": "Llama-3.2-1B-Instruct",
+        "load_s": 2.87,
+        "compile_s": 0.006,
+        "prefill_and_score_s": 1.359,
+        "state_tokens": 8192,
+        "state_text_bytes": 31983,
+        "token_accuracy": 0.5703125
+      },
+      "worker_b": {
+        "model": "Qwen2.5-1.5B",
+        "load_s": 2.7,
+        "compile_s": 0.006,
+        "prefill_and_score_s": 1.772,
+        "state_tokens": 8192,
+        "state_text_bytes": 29342,
+        "token_accuracy": 0.5859375
+      },
+      "recovery_wall_s": 13.93,
+      "model_load_s": 2.7,
+      "state_rebuild_s": 1.778,
+      "durable_bytes_read": 29342,
+      "kv_payload_avoided_bytes": 402739200,
+      "recorded_files": [
+        "snakemake/io.py"
+      ],
+      "b_mentions_recorded": [],
+      "b_hit": false
+    },
+    {
+      "session": "swe-smith-claude-3-7-sonnet::tweepy__tweepy.91a41c6e.combine_file__eh14dsvt.cb713a4o",
+      "history_tokens": 32796,
+      "owner_killed": true,
+      "owner_kv_lost": true,
+      "worker_a": {
+        "model": "Llama-3.2-1B-Instruct",
+        "load_s": 3.22,
+        "compile_s": 0.006,
+        "prefill_and_score_s": 1.513,
+        "state_tokens": 8192,
+        "state_text_bytes": 35726,
+        "token_accuracy": 0.16666666666666666
+      },
+      "worker_b": {
+        "model": "Qwen2.5-1.5B",
+        "load_s": 2.71,
+        "compile_s": 0.006,
+        "prefill_and_score_s": 1.787,
+        "state_tokens": 8192,
+        "state_text_bytes": 32692,
+        "token_accuracy": 0.3333333333333333
+      },
+      "recovery_wall_s": 14.38,
+      "model_load_s": 2.71,
+      "state_rebuild_s": 1.793,
+      "durable_bytes_read": 32692,
+      "kv_payload_avoided_bytes": 402997248,
+      "recorded_files": [
+        "pr_test.py",
+        "reproduce_error.py",
+        "tweepy/cursor.py"
+      ],
+      "b_mentions_recorded": [],
+      "b_hit": false
+    }
+  ]
+}

@@ -1,0 +1,229 @@
+{
+  "schema": "ephemeral-kv-g5-failover-two-workers-v1",
+  "kind": "process_level_failover",
+  "interpretation": "worker A is killed with SIGKILL after serving; worker B is a fresh process that rebuilds the state from the durable object, so no KV is transferred and none survives",
+  "model_a": "/root/qcc/models/Llama-3.2-1B-Instruct",
+  "model_b": "/root/qcc/models/Llama-3.2-1B-Instruct",
+  "token_budget": 8192,
+  "rows": [
+    {
+      "session": "nebius-swe-rebench-openhands::chatcmpl-05d7594fe59dfc0bb08ff7ca06730ee2",
+      "history_tokens": 32775,
+      "owner_killed": true,
+      "owner_kv_lost": true,
+      "worker_a": {
+        "model": "Llama-3.2-1B-Instruct",
+        "load_s": 2.89,
+        "compile_s": 0.006,
+        "prefill_and_score_s": 1.391,
+        "state_tokens": 8192,
+        "state_text_bytes": 31983,
+        "token_accuracy": 0.5703125
+      },
+      "worker_b": {
+        "model": "Llama-3.2-1B-Instruct",
+        "load_s": 2.88,
+        "compile_s": 0.006,
+        "prefill_and_score_s": 1.373,
+        "state_tokens": 8192,
+        "state_text_bytes": 31983,
+        "token_accuracy": 0.5703125
+      },
+      "recovery_wall_s": 12.63,
+      "model_load_s": 2.88,
+      "state_rebuild_s": 1.379,
+      "durable_bytes_read": 31983,
+      "kv_payload_avoided_bytes": 402739200,
+      "recorded_files": [
+        "snakemake/io.py"
+      ],
+      "b_mentions_recorded": [],
+      "b_hit": false
+    },
+    {
+      "session": "swe-smith-claude-3-7-sonnet::tweepy__tweepy.91a41c6e.combine_file__eh14dsvt.cb713a4o",
+      "history_tokens": 32796,
+      "owner_killed": true,
+      "owner_kv_lost": true,
+      "worker_a": {
+        "model": "Llama-3.2-1B-Instruct",
+        "load_s": 2.9,
+        "compile_s": 0.007,
+        "prefill_and_score_s": 1.378,
+        "state_tokens": 8192,
+        "state_text_bytes": 35726,
+        "token_accuracy": 0.16666666666666666
+      },
+      "worker_b": {
+        "model": "Llama-3.2-1B-Instruct",
+        "load_s": 3.01,
+        "compile_s": 0.006,
+        "prefill_and_score_s": 1.396,
+        "state_tokens": 8192,
+        "state_text_bytes": 35726,
+        "token_accuracy": 0.16666666666666666
+      },
+      "recovery_wall_s": 12.98,
+      "model_load_s": 3.01,
+      "state_rebuild_s": 1.402,
+      "durable_bytes_read": 35726,
+      "kv_payload_avoided_bytes": 402997248,
+      "recorded_files": [
+        "pr_test.py",
+        "reproduce_error.py",
+        "tweepy/cursor.py"
+      ],
+      "b_mentions_recorded": [
+        "pr_test.py",
+        "reproduce_error.py"
+      ],
+      "b_hit": true
+    },
+    {
+      "session": "nebius-swe-rebench-openhands::chatcmpl-8073665d59c7c5595710a8e57c7d7c77",
+      "history_tokens": 32796,
+      "owner_killed": true,
+      "owner_kv_lost": true,
+      "worker_a": {
+        "model": "Llama-3.2-1B-Instruct",
+        "load_s": 2.88,
+        "compile_s": 0.007,
+        "prefill_and_score_s": 1.411,
+        "state_tokens": 8192,
+        "state_text_bytes": 27501,
+        "token_accuracy": 0.6015625
+      },
+      "worker_b": {
+        "model": "Llama-3.2-1B-Instruct",
+        "load_s": 2.91,
+        "compile_s": 0.007,
+        "prefill_and_score_s": 1.415,
+        "state_tokens": 8192,
+        "state_text_bytes": 27501,
+        "token_accuracy": 0.6015625
+      },
+      "recovery_wall_s": 12.68,
+      "model_load_s": 2.91,
+      "state_rebuild_s": 1.422,
+      "durable_bytes_read": 27501,
+      "kv_payload_avoided_bytes": 402997248,
+      "recorded_files": [
+        "CHANGES.md",
+        "ptr.py"
+      ],
+      "b_mentions_recorded": [
+        "ptr.py"
+      ],
+      "b_hit": true
+    },
+    {
+      "session": "nebius-swe-rebench-openhands::chatcmpl-088fc89a3401cf02eb827b439a89e068",
+      "history_tokens": 32812,
+      "owner_killed": true,
+      "owner_kv_lost": true,
+      "worker_a": {
+        "model": "Llama-3.2-1B-Instruct",
+        "load_s": 2.91,
+        "compile_s": 0.004,
+        "prefill_and_score_s": 1.383,
+        "state_tokens": 8192,
+        "state_text_bytes": 35156,
+        "token_accuracy": 0.6875
+      },
+      "worker_b": {
+        "model": "Llama-3.2-1B-Instruct",
+        "load_s": 2.89,
+        "compile_s": 0.004,
+        "prefill_and_score_s": 1.392,
+        "state_tokens": 8192,
+        "state_text_bytes": 35156,
+        "token_accuracy": 0.6875
+      },
+      "recovery_wall_s": 13.28,
+      "model_load_s": 2.89,
+      "state_rebuild_s": 1.396,
+      "durable_bytes_read": 35156,
+      "kv_payload_avoided_bytes": 403193856,
+      "recorded_files": [
+        "geoservercloud/models/featuretype.py"
+      ],
+      "b_mentions_recorded": [],
+      "b_hit": false
+    },
+    {
+      "session": "nebius-swe-rebench-openhands::chatcmpl-bd9ce33508fba80e343b61abf553eb66",
+      "history_tokens": 32822,
+      "owner_killed": true,
+      "owner_kv_lost": true,
+      "worker_a": {
+        "model": "Llama-3.2-1B-Instruct",
+        "load_s": 3.83,
+        "compile_s": 0.004,
+        "prefill_and_score_s": 1.417,
+        "state_tokens": 8192,
+        "state_text_bytes": 32927,
+        "token_accuracy": 0.609375
+      },
+      "worker_b": {
+        "model": "Llama-3.2-1B-Instruct",
+        "load_s": 2.83,
+        "compile_s": 0.004,
+        "prefill_and_score_s": 0.906,
+        "state_tokens": 8192,
+        "state_text_bytes": 32927,
+        "token_accuracy": 0.609375
+      },
+      "recovery_wall_s": 11.13,
+      "model_load_s": 2.83,
+      "state_rebuild_s": 0.91,
+      "durable_bytes_read": 32927,
+      "kv_payload_avoided_bytes": 403316736,
+      "recorded_files": [
+        "jwplatform/client.py"
+      ],
+      "b_mentions_recorded": [
+        "jwplatform/client.py"
+      ],
+      "b_hit": true
+    },
+    {
+      "session": "swe-smith-claude-3-7-sonnet::pydicom__pydicom.7d361b3d.func_pm_remove_assign__vi4iofh7.91hmylr4",
+      "history_tokens": 32794,
+      "owner_killed": true,
+      "owner_kv_lost": true,
+      "worker_a": {
+        "model": "Llama-3.2-1B-Instruct",
+        "load_s": 2.88,
+        "compile_s": 0.004,
+        "prefill_and_score_s": 1.283,
+        "state_tokens": 8192,
+        "state_text_bytes": 30237,
+        "token_accuracy": 0.9210526315789473
+      },
+      "worker_b": {
+        "model": "Llama-3.2-1B-Instruct",
+        "load_s": 2.86,
+        "compile_s": 0.004,
+        "prefill_and_score_s": 1.219,
+        "state_tokens": 8192,
+        "state_text_bytes": 30237,
+        "token_accuracy": 0.9210526315789473
+      },
+      "recovery_wall_s": 12.28,
+      "model_load_s": 2.86,
+      "state_rebuild_s": 1.223,
+      "durable_bytes_read": 30237,
+      "kv_payload_avoided_bytes": 402972672,
+      "recorded_files": [
+        "reproduce_error.py",
+        "src/pydicom/pixels/decoders/rle.py",
+        "test_rle_edge_cases.py",
+        "test_rle_fix.py"
+      ],
+      "b_mentions_recorded": [
+        "reproduce_error.py"
+      ],
+      "b_hit": true
+    }
+  ]
+}
