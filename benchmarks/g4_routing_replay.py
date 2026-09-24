@@ -243,9 +243,11 @@ def tax_of(policy: str, costs: Costs, turn: Turn) -> float | None:
 def route(turns: list[Turn], costs: Costs, *, workers: int, policy: str,
           turn_service_s: float = 0.6, escape_s: float | None = None,
           warm_capacity: int = 4, tier_capacity: int = 0,
-          slow_worker: int | None = None, fail_at: float | None = None,
+          slow_worker: int | None = None, slow_worker_speed: float = 0.35,
+          fail_at: float | None = None,
           fail_worker: int | None = None) -> dict:
-    fleet = [Worker(i, speed=0.35 if i == slow_worker else 1.0) for i in range(workers)]
+    fleet = [Worker(i, speed=slow_worker_speed if i == slow_worker else 1.0)
+             for i in range(workers)]
     tier = KvTier(tier_capacity)
     finished: list[tuple[float, float]] = []          # (completion, latency)
     unserved = 0
@@ -369,6 +371,9 @@ def main(argv=None) -> int:
                    help="decode + warm-turn service time common to every policy; "
                         "without it the cold-route tax is the only cost and a policy "
                         "with a cheap cold route never queues")
+    p.add_argument("--slow-worker-speed", type=float, default=0.35,
+                   help="service-rate multiplier for the slow worker (0.35 is the regime the "
+                        "earlier receipts used; 0.1 is a hotspot)")
     p.add_argument("--gap-model", choices=["poisson", "bursty"], default="bursty")
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--kv-bytes-per-token", type=int, default=0,
@@ -404,7 +409,7 @@ def main(argv=None) -> int:
                              tier_capacity=args.tier_capacity)
     regimes = {
         "balanced": {},
-        "slow_worker": {"slow_worker": 0},
+        "slow_worker": {"slow_worker": 0, "slow_worker_speed": args.slow_worker_speed},
         "worker_failure": {"fail_at": statistics.median(t.arrival for t in turns),
                            "fail_worker": 1},
     }

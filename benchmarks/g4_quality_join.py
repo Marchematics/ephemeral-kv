@@ -36,7 +36,8 @@ def main(argv=None) -> int:
 
     phase_paths = args.phase or ["artifacts/g4b-phase-summary-v1.json",
                                  "artifacts/g4c-phase-summary-v1.json",
-                                 "artifacts/g4d-phase-summary-v1.json"]
+                                 "artifacts/g4d-phase-summary-v1.json",
+                                 "artifacts/g4e-phase-summary-v1.json"]
     phase_rows = []
     for name in phase_paths:
         path = Path(name)
