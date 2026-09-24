@@ -18,6 +18,42 @@ from collections import defaultdict
 _TOKEN = re.compile(r"[A-Za-z0-9_./:-]+")
 
 
+def _snippet_text(text: str, keep_fraction: float, query_terms: set[str],
+                  context_lines: int = 2) -> str:
+    """Keep the lines of an oversized span that a query actually needs.
+
+    A coding trajectory's tool output is mostly whole-file dumps, so prefix truncation keeps
+    the file's first lines and loses the region the turn is about.  Lines are scored by query
+    overlap and by position (later lines in a trajectory's output are the newer state), the
+    best ones are kept with a little context, and the result is returned in original order
+    with an elision marker so the model can see that text is missing.
+    """
+    lines = text.splitlines()
+    if len(lines) <= 3:
+        return text
+    keep_lines = max(1, int(len(lines) * max(0.02, min(1.0, keep_fraction))))
+    if keep_lines >= len(lines):
+        return text
+    denominators = max(1, len(query_terms))
+    scored = []
+    for index, line in enumerate(lines):
+        overlap = len(set(terms(line)) & query_terms) / denominators
+        recency = index / max(1, len(lines) - 1)
+        scored.append((overlap + 0.25 * recency, index))
+    chosen = {index for _score, index in sorted(scored, reverse=True)[:keep_lines]}
+    for index in list(chosen):
+        for neighbour in range(max(0, index - context_lines),
+                               min(len(lines), index + context_lines + 1)):
+            chosen.add(neighbour)
+    out, previous = [], None
+    for index in sorted(chosen):
+        if previous is not None and index > previous + 1:
+            out.append("... [truncated] ...")
+        out.append(lines[index])
+        previous = index
+    return "\n".join(out)
+
+
 def _fingerprint(text: str) -> str:
     """Content identity for dedup: whitespace-insensitive, so re-indentation still matches."""
     import hashlib
@@ -119,7 +155,8 @@ class DurableSpanIndex:
                      recency_fraction: float = 0.5,
                      max_span_fraction: float = 1.0,
                      provenance_terms: int = 0,
-                     dedup: bool = False) -> tuple[list[Span], LookupStats]:
+                     dedup: bool = False,
+                     snippet: bool = False) -> tuple[list[Span], LookupStats]:
         """Select the spans that fit `token_budget`.
 
         The lexical channel alone is not enough for a *continuation* target and the
@@ -136,6 +173,7 @@ class DurableSpanIndex:
           with the top lexical hits, on top of the lexical ranking.
         """
         candidates, stats = self.lookup(query, max_spans=max_spans)
+        query_terms = set(terms(query))
         if dedup:
             candidates = self._dedup_order(candidates)
         kept: list[Span] = []
@@ -155,9 +193,15 @@ class DurableSpanIndex:
                 kept.append(span)
                 used += span.token_estimate
                 return
-            share = len(span.text) * (room / max(1, span.token_estimate))
-            head = span.text[: max(1, int(share))]
-            kept.append(Span(span.span_id, span.turn, span.role, head,
+            if snippet:
+                text = _snippet_text(span.text, room / max(1, span.token_estimate),
+                                     query_terms)
+            else:
+                # prefix truncation, which is what an oversized span gets by default: it
+                # keeps the head of a 2,000-line dump and drops the region the task is about
+                share = len(span.text) * (room / max(1, span.token_estimate))
+                text = span.text[: max(1, int(share))]
+            kept.append(Span(span.span_id, span.turn, span.role, text,
                              max(1, int(room))))
             used += max(1, int(room))
 

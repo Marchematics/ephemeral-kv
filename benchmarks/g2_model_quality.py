@@ -300,6 +300,9 @@ def main(argv=None):
     p.add_argument("--max-span-fraction", type=float, default=1.0,
                    help="truncate an oversized span to this share of the budget instead "
                         "of dropping it")
+    p.add_argument("--snippet-spans", action=argparse.BooleanOptionalAction, default=False,
+                   help="keep query-relevant lines of an oversized span instead of its "
+                        "prefix (tool outputs are mostly whole-file dumps)")
     p.add_argument("--dedup-spans", action=argparse.BooleanOptionalAction, default=False,
                    help="collapse identical span texts in the compiled view, keeping the "
                         "most recent copy (measured: 17.5%% of view spans are duplicates)")
@@ -350,7 +353,8 @@ def main(argv=None):
                           "recency_fraction": args.recency_fraction,
                           "max_span_fraction": args.max_span_fraction,
                           "provenance_terms": args.provenance_terms,
-                          "dedup": args.dedup_spans},
+                          "dedup": args.dedup_spans,
+                          "snippet": args.snippet_spans},
                 token_counter=lambda text: len(
                     tokenizer.encode(text, add_special_tokens=False)
                 ),
@@ -408,7 +412,8 @@ def main(argv=None):
                      "recency_fraction": args.recency_fraction,
                      "max_span_fraction": args.max_span_fraction,
                      "provenance_terms": args.provenance_terms,
-                     "dedup": args.dedup_spans},
+                     "dedup": args.dedup_spans,
+                     "snippet": args.snippet_spans},
         "sessions": sessions,
         "summary": summarize(rows),
         "by_history_bucket": summarize_by_bucket(rows),

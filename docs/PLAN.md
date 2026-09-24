@@ -189,6 +189,29 @@ sits near 120 GB/s effective bandwidth for a 2K active set. End-to-end multi-wor
 routing is G4.
 
 
+**The requirement is content volume, not selection granularity.**  A second compiler
+change was tried and did not help: `snippet=True` keeps the query-relevant lines of an
+oversized span (with context and an elision marker) instead of its prefix, which is the
+right response to a two-thousand-line tool dump.  Under the corrected renderer, on the same
+48 examples:
+
+| active budget | compiler | 32K-128K accuracy delta | active fraction |
+|---:|---|---:|---:|
+| 4,096 | dedup + snippet | -13.14 pp | 0.050 |
+| 8,192 | dedup | -6.94 pp | 0.100 |
+| 8,192 | dedup + snippet | -6.70 pp | 0.100 |
+| 16,384 | no dedup | -3.46 pp | 0.200 |
+| **16,384** | **dedup** | **-1.94 pp** | 0.200 |
+| 32,768 | no dedup | -0.49 pp | 0.372 |
+
+Snippet selection is within noise of plain truncation at 8,192 (-6.70 against -6.94 pp), so
+*which part* of a span is kept is not what binds; the loss grows steeply with less distinct
+content (about -7 pp at 8K, -13 pp at 4K against -1.9 pp at 16K).  Removing *duplicated*
+content helps by a factor of two in budget, and re-selecting *within* a span does not help
+at all.  The next lever therefore has to reduce how much distinct content the turn needs -
+a semantic/embedding compiler that summarises or compresses spans, or a workload whose turns
+depend on less of the transcript - rather than any further re-ranking of the same text.
+
 ## Where the gates stand together
 
 Two of them now bound the same quantity from opposite sides, and the gap between them is the

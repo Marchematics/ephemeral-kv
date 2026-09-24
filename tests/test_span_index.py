@@ -83,3 +83,33 @@ def test_dedup_distinguishes_genuinely_different_text():
     kept, _ = idx.compile_view("module cache queue", token_budget=100, max_spans=8,
                                dedup=True)
     assert len(kept) == 2
+
+
+def test_snippet_keeps_the_line_the_query_needs_and_its_context():
+    """Prefix truncation keeps the head of a dump; the task is usually further down."""
+    from ephemeralkv.index import DurableSpanIndex
+
+    body = [f"line {i} of an unrelated module" for i in range(200)]
+    body[150] = "the eviction policy in cache.py drops the wrong entry"
+    idx = DurableSpanIndex()
+    idx.append(turn=0, role="tool", text="\n".join(body), token_estimate=2000)
+
+    prefix, _ = idx.compile_view("fix the eviction policy in cache.py", token_budget=200,
+                                 max_spans=8, max_span_fraction=0.25)
+    snippet, _ = idx.compile_view("fix the eviction policy in cache.py", token_budget=200,
+                                  max_spans=8, max_span_fraction=0.25, snippet=True)
+    target = "the eviction policy in cache.py drops the wrong entry"
+    assert target in snippet[0].text
+    assert target not in prefix[0].text
+    assert "... [truncated] ..." in snippet[0].text
+    assert "line 149" in snippet[0].text and "line 151" in snippet[0].text   # context
+    assert snippet[0].text.index("line 149") < snippet[0].text.index(target)
+
+
+def test_snippet_leaves_small_spans_alone():
+    from ephemeralkv.index import DurableSpanIndex
+
+    idx = DurableSpanIndex()
+    idx.append(turn=0, role="tool", text="short output about cache.py", token_estimate=8)
+    kept, _ = idx.compile_view("cache.py", token_budget=100, max_spans=4, snippet=True)
+    assert kept[0].text == "short output about cache.py"
