@@ -113,7 +113,9 @@ nothing extra - which is the property that makes rollout and failover the same o
 
 1. the fixed-window sweep (in flight) - the last quality cell;
 2. the age-aware routing trace (the inversion as a scheduler decision);
-3. G5 at the measured operating point: worker loss and a model rollout resumed from the durable
-   index, reporting recovery cost and data moved (the primitive is measured; the end-to-end
-   recovery receipt is not);
+3. G5 at the measured operating point: **done for the model-rollout half** - on two models that
+   never saw the sessions, the index-built 4,096-token state scores end-task F1 0.137 against
+   0.017 (Qwen2.5-0.5B) and 0.145 against 0.042 (Qwen2.5-1.5B), so recovery on a foreign model
+   keeps the decision; what remains is a two-worker failover with a killed owner and a scheduler
+   that re-places the session;
 4. the paper: abstraction, law, phase change, negative compiler result, and the metric lesson.
