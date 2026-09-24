@@ -10,6 +10,7 @@ missing, and tracked artifacts that no document mentions - so the ledger cannot 
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import subprocess
 from pathlib import Path
@@ -42,11 +43,28 @@ def main(argv=None) -> int:
             cited.setdefault(entry, set()).add(name)
 
     missing = sorted(name for name in cited if not Path(name).exists())
+
+    # a killed run leaves a partial artifact at its final path; a cited partial is a problem
+    partial = []
+    for name in cited:
+        path = Path(name)
+        if path.suffix != ".json" or not path.exists():
+            continue
+        try:
+            payload = json.loads(path.read_text())
+        except (json.JSONDecodeError, OSError):
+            continue
+        if isinstance(payload, dict) and payload.get("partial"):
+            partial.append(name)
     tracked = subprocess.run(["git", "ls-files", args.artifacts], capture_output=True, text=True,
                              check=False).stdout.split()
     uncited = sorted(name for name in tracked if name not in cited)
 
     print(f"cited receipts: {len(cited)}   tracked artifacts: {len(tracked)}")
+    if partial:
+        print(f"\nCITED BUT PARTIAL ({len(partial)}) - a killed run wrote these; re-run before use:")
+        for name in partial:
+            print(f"  {name}   <- {', '.join(sorted(cited[name]))}")
     if missing:
         print(f"\nCITED BUT MISSING ({len(missing)}):")
         for name in missing:
