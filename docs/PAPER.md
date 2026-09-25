@@ -14,7 +14,7 @@ sentence around them carry the scope.
 A long-lived LLM session is served today as if its KV cache *were* the session: the resident object
 grows with the transcript, so placement, recovery and capacity planning all inherit the session's
 age.  We measure what a turn actually needs and find that the object those decisions depend on is
-bounded and independent of age.  On real coding-agent traces, a 6-8K execution state holds
+bounded and independent of age.  On real coding-agent traces, a 4.6-8K execution state holds
 the next turn at a teacher-forced fidelity delta of **0.00 pp** against the full transcript, and its
 end-task score is statistically indistinguishable from the best retrieval baseline we can build,
 while the state stays at **7-8K tokens** as the raw history grows from 64K to 156K (and, on the turn
@@ -79,7 +79,8 @@ local KV          = a disposable artifact    (dropped on eviction, rebuilt in 0.
 and the paper's contributions are its measured consequences:
 
 1. **A bounded execution state holds the turn.**  8,192 tokens shipped, with a *measured* floor of
-   6,144 (4,096 scores -2.40 pp): fidelity at parity with the full transcript, end-task score
+   4,608 (4,096 with a 3,072-token window scores -2.40 pp): fidelity at parity with the full
+transcript, end-task score
    statistically tied with the best retrieval baseline measured.
 2. **The state does not grow with the session, at a budget whose validity is measured.**  `dM/dL ~ 0`
    on the fidelity and state-size axes across a 2.4x growth in history and on the turn axis - and,
@@ -214,25 +215,28 @@ better**, and the absolute rates are low because the metric demands both an edit
 right file.  We report it as a bound our claim must clear rather than as a result: the stronger
 metric neither confirms nor refutes the weaker one, and task success remains unmeasured.
 
-**Why 6,144 and not less.**  The budget is measured, not chosen for convenience.  Table 4 holds the
-window at 3,072 tokens and varies the total:
+**Why 4,608 and not less.**  The budget is measured, not chosen for convenience.  Table 4 varies the
+total *and* the window, because which of the two binds depends on the other:
 
-**Table 4:** The budget floor. Below 6,144 tokens the fidelity delta leaves its 2 pp allowance,
-and above it more budget does not improve the decision.
+**Table 4:** The budget floor. The smallest measured state that holds the surface is 4,608 tokens
+with a 3,584-token window; with a 3,072-token window the same total does not, which says the window
+rather than the total is what the surface needs.
 
-| total budget | fidelity (window + consolidated far field) | end-task F1 |
-|---:|---:|---:|
-| 4,096 | **-2.40 pp** (outside the 2 pp allowance) | 0.117 |
-| **6,144** | **0.00 pp** | **0.150** (tied with retrieval at 4,096: +0.093, CI [-0.030, +0.217], 13W/9L) |
-| 8,192 | 0.00 pp | 0.161 (window ~4.1K) |
-| 12,288 | 0.00 pp | 0.155 |
+| total budget | window | fidelity (window + consolidated far field) | end-task F1 |
+|---:|---:|---:|---:|
+| 4,096 | 3,072 | **-2.40 pp** (outside the 2 pp allowance) | 0.117 |
+| **4,608** | **3,584** | **0.00 pp** | - (measured next, see below) |
+| 6,144 | 3,072 | **0.00 pp** | 0.150 (tied with retrieval at 4,096: +0.093, CI [-0.030, +0.217], 13W/9L) |
+| 8,192 | ~4.1K | 0.00 pp | 0.161 |
+| 12,288 | ~5.3K | 0.00 pp | 0.155 |
 
-At 4,096 the window consumes three quarters of the budget: the surface is 2.4 pp out of tolerance and
-the far field has too little room, so the decision falls to 0.117 against 0.243 for plain retrieval at
-the same total.  The joint requirement therefore has a **measured floor at 6,144 tokens** - the
-smallest budget at which fidelity is within tolerance *and* the decision is tied with the best
-retrieval arm - and above it neither metric improves, which is why the paper's state is 6-8K rather
-than as large as the machine will hold.
+Three things follow, and all three are measured.  At a 4,096-token total the window consumes three
+quarters of the budget, the surface is 2.4 pp out of tolerance and the decision falls to 0.117
+against 0.243 for plain retrieval.  Widening the *window* to 3,584 inside a 4,608-token total puts
+the surface back at parity - the NLL delta improves from +0.129 to +0.038, better than the
+3,072-window arm's +0.061 at a 6,144-token total - so what the surface needs is the newest ~3.5K
+kept whole, not a larger budget as such.  And above 4,608 more budget does not improve either
+metric, which is why the paper's state is **4.6-8K** rather than as large as the machine will hold.
 
 ### 2.3 The metric cannot see the difference
 
@@ -306,7 +310,8 @@ may:  drop superseded views, duplicate content and stale tool output, so long as
 ```
 
 The budget B is chosen by the fidelity floor rather than by preference: at 4,096 the same window
-scores -2.40 pp, at 6,144 it is at 0.00 pp with the decision tied, and above that neither metric
+scores -2.40 pp, at 4,608 with a 3,584-token window it is at 0.00 pp, at 6,144 with a 3,072-token
+window it is at 0.00 pp with the decision tied, and above that neither metric
 improves.  Two of the three "may" clauses are measured *not* to pay on this workload - collapsing a
 file to its latest view costs 8.5 pp of fidelity, re-selecting the newest output's lines 20 pp - so
 the deployed configuration keeps the window whole and consolidates only the far field.
@@ -457,7 +462,7 @@ instances the arms share, each step in that direction is positive and none is re
 CI [-0.121, +0.271]** (5W/5L, n=24) and 4,096 -> 2,867 is **+0.040, CI [-0.132, +0.220]** (4W/4L,
 n=24).  **The lever is the window/budget split**, which is the two laws read along one axis rather
 than a claim about summaries - and it is why the window can be as small as ~2.9K while the state
-stays 6-8K: the window's job is the surface, and every token beyond it that the surface does not
+stays 4.6-8K: the window's job is the surface, and every token beyond it that the surface does not
 need is a token the decision does not get.
 
 The honest limit on all three of those comparisons is the same: 48 paired sessions, 26 scoreable,
@@ -531,7 +536,7 @@ against the 8,192 column's 52 of 294, so moving the same system to a 4,096-token
 the region from 52 to 115 cells at *half* the state size - and capacity and mobility improve with it.
 It is not admissible yet: the best measured 4,096-token state scores **-2.40 pp** of fidelity against
 the 2 pp allowance, 0.4 pp outside it, and the gap is in the far field, since the same 3,072-token
-window holds 0.00 pp once the total budget is 6,144.  That - and not a scheduler heuristic - is the
+window holds 0.00 pp once the window itself reaches 3,584 tokens (a 4,608-token total).  That - and not a scheduler heuristic - is the
 measurement a compiler has to move.  The stricter bar is a second, larger target: decision parity
 with plain retrieval at the same budget means reaching its floor of 0.237-0.243 F1, where the best
 fidelity-admissible arms sit at 0.161-0.179, a gap of 0.06-0.08.  We report both targets rather than
@@ -565,7 +570,7 @@ mitigates delay hits and hides cache-loading latency; it is implemented in SGLan
 reports up to 5x throughput over vLLM-LMCache.  Its stated problem is that naive designs become
 I/O-bound: fragmented layouts cause small transfers, cache loading stalls prefill.  That is the
 right optimisation *given* that the object being moved is the session's history.  Our measurement is
-that the object need not be: the execution state is 6-8K tokens compiled from a model-independent
+that the object need not be: the execution state is 4.6-8K tokens compiled from a model-independent
 index, so what a cold route moves is ~32 KB of text and the transfer term leaves the cold path
 instead of being made efficient.  Strata's cache-aware scheduling remains the right design for the
 durable tier, where the transcript and index do live.
@@ -585,7 +590,7 @@ reported in its paper.
 |---|---|---|
 | what the view is assembled from | paged **KV blocks**, with raw keys re-rotated at new positions | **text** compiled from a model-independent index |
 | what a cold route moves | KV blocks from host or NVMe | ~32 KB of state text; no model-specific state |
-| what bounds the view | the model's native context window (256K for the model it evaluates) | the query and the current turn: **6-8K, measured** (4,096 scores -2.40 pp) |
+| what bounds the view | the model's native context window (256K for the model it evaluates) | the query and the current turn: **4.6-8K, measured** (a 3,584-token window at a 4,608-token total holds 0.00 pp; 4,096 does not) |
 | model change | RoPE re-application keeps the blocks usable by the same model | the same durable object resumes on a **different** model (0.137/0.145 against 0.017/0.042) |
 | reported end task | DeepSWE task success 43.8% -> 48.4% over compaction | next-turn file localisation and an offline action-level rescoring; task success unmeasured |
 | reported cost | KV restoration under one second for a 1M workspace | 0.0954-0.2031 s to rebuild a 4-8K state, 0.55-1.04 s of active-set prefill for rollout |
@@ -718,7 +723,7 @@ Table 14 maps each claim to the receipt that backs it and to the script that pro
 |---|---|---|
 | most of a session is state that is never needed again | `g2-dead-state-v1.json` | `benchmarks/g2_dead_state.py` |
 | the state is bounded and the fidelity delta does not move with age | `g2-killer-table-v4.json` | `benchmarks/g2_killer_table.py` |
-| the budget floor is 6,144 tokens | `g2-compiler-window3k-b{4096,6144,12288}-v1.json` | `scripts/run_budget_lower.sh`, `-window3k_raw.sh` |
+| the budget floor is 4,608 tokens (window 3,584) | `g2-compiler-window3584-b4608-v1.json`, `g2-compiler-window3k-b{4096,6144,12288}-v1.json` | `scripts/run_budget_lower.sh`, `-window3k_raw.sh` |
 | the joint view ties the best retrieval arm (n=96) | `g2b-patch-localization-{windowcompiler-b8192-n96,raw-b4096-n96}.json` | `scripts/run_joint_n96.sh` |
 | the stricter action-level end task is a bound, not a win | `g2b-action-metric-v1.json` | `benchmarks/g2b_action_metric.py` |
 | compaction is equivalent at the same budget and window, not worse | `g2-compiler-compact-b8192-v1.json`, `g2b-patch-localization-compact-b8192-n48.json` | `scripts/run_compaction.sh` |

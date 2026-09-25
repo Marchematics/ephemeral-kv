@@ -175,6 +175,15 @@ def main(argv=None) -> int:
                     f"missing: {join['summary']['sizes_without_quality_points'] or 'none'}"))
     check("region if 4096 were admissible (8192 + 4096 columns)",
           row8192["advance"] + row4096["advance"], 115, 0)
+    # the measured state floor: a 3,584-token window inside a 4,608-token total holds the surface,
+    # while the same 3,072-token window at a smaller total does not - which is what makes the
+    # headline state 4.6-8K rather than 6-8K
+    floor = bucket_stats("artifacts/g2-compiler-window3584-b4608-v1.json").get("32K-128K") or {}
+    check("4,608-token state (window 3,584) fidelity pp",
+          100 * (floor.get("token_accuracy_delta_p50") or 0.0), 0.0, TOL_PP)
+    floor_view = statistics.median(row["active_tokens_estimate"]
+                                   for row in load("artifacts/g2-compiler-window3584-b4608-v1.json")["rows"])
+    check("4,608-token state view p50", round(floor_view), 4350, 20)
     window3k = bucket_stats("artifacts/g2-compiler-window3k-b4096-v1.json").get("32K-128K") or {}
     check("best 4096-token state fidelity pp",
           100 * (window3k.get("token_accuracy_delta_p50") or 0.0), -2.40, TOL_PP)
