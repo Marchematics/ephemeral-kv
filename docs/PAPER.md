@@ -445,7 +445,10 @@ heuristic - and we state the regime where the baselines still win: balanced load
 resident, against a tier that can move KV.
 
 **Compaction-based context management.**  Summarising or compacting history before it re-enters the
-model is a crowded space and predates this work; KVMem itself uses compaction as its baseline.  Our
+model is a crowded space and predates this work; KVMem itself uses compaction as its baseline, and
+Section 4.2b measures that baseline under the same budget and instances: keeping the newest 3,072
+tokens verbatim and having the model summarise the rest scores **-23.86 pp** of fidelity where
+keeping the evidence and retrieving the rest scores 0.00 pp, with the decision tied in both.  Our
 contribution there is negative and specific: on these traces compaction is neutral at best (dedup
 alone is a statistical tie with plain retrieval), the state-compiling stages are harmful
 (collapse-each-file-to-its-latest costs 8.5 pp of fidelity, snippet re-selection of the newest output
@@ -494,9 +497,29 @@ compiler, is measured not to pay.  The session keeps growing; the state that mus
 
 ---
 
-## Appendix A. Receipts
+## Appendix A. Claims, receipts and reproduction
 
-The claim-to-receipt map is `VERDICT.md` §7 (C1-C10) and `CLAIMS.md` (Q1-Q10);
-`benchmarks/check_receipts.py` verifies that every receipt a document cites exists in the repository
-(35 cited, 0 missing at the time of writing).  The runner scripts that produce each family are in
-`/root/qcc/run_*.sh` and are named in the ledger entries.
+Every claim in this paper maps to a receipt in `artifacts/` and to the script in `scripts/` that
+produced it.  `benchmarks/paper_numbers.py` re-derives the headline numbers from the receipts and
+asserts them (27 checks); `benchmarks/check_receipts.py` verifies that every receipt a document
+cites exists and is not a partial write; `benchmarks/make_figures.py` regenerates the figures from
+the receipts.
+
+| claim | receipt | script |
+|---|---|---|
+| most of a session is state that is never needed again | `g2-dead-state-v1.json` | `benchmarks/g2_dead_state.py` |
+| the state is bounded and the fidelity delta does not move with age | `g2-killer-table-v4.json` | `benchmarks/g2_killer_table.py` |
+| the budget floor is 6,144 tokens | `g2-compiler-window3k-b{4096,6144,12288}-v1.json` | `scripts/run_budget_lower.sh`, `-window3k_raw.sh` |
+| the joint view ties the best retrieval arm (n=96) | `g2b-patch-localization-{windowcompiler-b8192-n96,raw-b4096-n96}.json` | `scripts/run_joint_n96.sh` |
+| the stricter action-level end task is a bound, not a win | `g2b-action-metric-v1.json` | `benchmarks/g2b_action_metric.py` |
+| compaction costs ~24 pp of fidelity at the same budget | `g2-compiler-compact-b8192-v1.json` | `scripts/run_compaction.sh` |
+| the compiler's stages do not pay, with attribution | `g2-compiler-{consolidate,dedup,materialize,statefirst,protectwhole}-*.json` | `scripts/run_tail_rerun.sh` |
+| the mobility law and the inversion | `g2-killer-table-v4.json`, G3 receipts | `benchmarks/g6_placement_inversion.py` |
+| the routing phase change at an admissible state | `g4-quality-join-v2.json` | `scripts/run_g4_{grid2,geometry,pressure,hotspot}.sh` |
+| capacity and recovery | `g5-capacity-planning-v1.json`, `g5-failover-two-workers-samemodel-v1.json` | `benchmarks/g5_*.py` |
+
+What is *not* here is as deliberate: the 1M lookup row is extrapolated (no public trace is that
+long), the 8B/70B geometries are declared rather than measured, the fleet-level scheduler is a replay
+over measured primitives rather than a deployment, and task success on a benchmark like DeepSWE is
+not measured at all.  Those four sentences are the paper's honest perimeter, and none of them is
+load-bearing for a claim above.

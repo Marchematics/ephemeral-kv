@@ -528,6 +528,9 @@ def verdict_by_bucket(by_bucket: dict) -> dict:
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     p.add_argument("--jsonl", required=True)
+    p.add_argument("--summarizer-model", default="",
+                   help="write compaction summaries with this checkpoint instead of the "
+                        "served model (empty = the served model); the scorer is unchanged")
     p.add_argument("--model", required=True)
     p.add_argument("--out", required=True)
     p.add_argument("--token-budget", type=int, default=4096)
@@ -620,7 +623,20 @@ def main(argv=None):
                 messages = messages_from_row(row)
             except ValueError:
                 continue
-            def _summarise(text: str, budget: int, _model=model, _tok=tokenizer) -> str:
+            # a stronger summariser than the served model is the fair version of the compaction
+            # baseline: the objection "your summariser was weak" has to be answered by measuring it
+            if args.summarizer_model and args.summarizer_model != args.model:
+                from transformers import AutoModelForCausalLM
+                import torch as _torch
+
+                summary_model = AutoModelForCausalLM.from_pretrained(
+                    args.summarizer_model, dtype=_torch.bfloat16).to(args.device).eval()
+                summary_tokenizer = AutoTokenizer.from_pretrained(args.summarizer_model)
+            else:
+                summary_model, summary_tokenizer = model, tokenizer
+
+            def _summarise(text: str, budget: int, _model=summary_model,
+                           _tok=summary_tokenizer) -> str:
                 """The model summarises its own older history, greedily and within the budget."""
                 import torch
 
