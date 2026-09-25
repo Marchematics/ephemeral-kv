@@ -340,7 +340,21 @@ def main(argv=None) -> int:
 
     # --- the decision column of the same table, and the reference it is read against: the two arms
     # are scored on the same instances, so their full-history means must agree
-    for name, want in (("artifacts/g2b-patch-localization-compact-b8192-n48.json", 0.122),
+    # the compaction baseline's paired comparisons, with its summary in the view: both intervals
+    # include zero, which is the paper's "equivalent, not worse" claim
+    for label, path_a, path_b, want in (
+            ("compaction vs same-window retrieval",
+             "artifacts/g2b-patch-localization-window6656-b8192-n48.json",
+             "artifacts/g2b-patch-localization-compact-b8192-n48.json", 0.042),
+            ("compaction vs the shipped view",
+             "artifacts/g2b-patch-localization-windowcompiler-b8192-n48.json",
+             "artifacts/g2b-patch-localization-compact-b8192-n48.json", -0.030)):
+        mean, low, high, n = paired_delta(path_a, path_b)
+        check(f"{label}: paired delta", round(mean, 3), want, TOL)
+        results.append((f"{label}: interval includes zero", low <= 0 <= high,
+                        f"ci95 [{low:.3f}, {high:.3f}] over {n} paired instances"))
+
+    for name, want in (("artifacts/g2b-patch-localization-compact-b8192-n48.json", 0.131),
                        ("artifacts/g2b-patch-localization-window6656-b8192-n48.json", 0.089)):
         path = Path(name)
         if not path.exists():

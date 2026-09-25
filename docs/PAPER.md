@@ -197,7 +197,7 @@ Table 3 reports it for every arm:
 Read the other way, the same arms are a frontier, and it is the honest answer to "does the bounded
 state beat retrieval": of the twelve arms measured at this budget that hold fidelity, the bounded
 state's score highest - **0.179** (n=24) and 0.165 (the shipped view, n=96) against full history's
-0.089 and compaction's 0.122 - and every arm that scores *higher* pays for it in fidelity:
+0.089 and compaction's 0.131 - and every arm that scores *higher* pays for it in fidelity:
 evidence consolidation 0.292 at -5.44 pp, state-first 0.242 at -15.38 pp, the collapsing compiler
 0.237 at -13.90 pp, log replay 0.231 at -7.21 pp, protect-whole 0.211 at -20.33 pp, and raw
 retrieval 0.191 at -6.94 pp.  So the claim is not that
@@ -475,22 +475,23 @@ is the last cell of Table 9:
 | view (8,192 tokens) | window | remainder | fidelity | end-task F1 |
 |---|---:|---|---:|---:|
 | window + consolidated retrieval | 6,656 | 1.5K retrieved | 0.00 pp | 0.089 (n=48) |
-| compaction | 6,656 | 0.5K summary | +0.13 pp | 0.122 (n=48) |
+| compaction | 6,656 | 0.5K summary | +0.13 pp | 0.131 (n=48) |
 | **window + consolidated retrieval (shipped)** | **4,096** | **4.1K retrieved** | **0.00 pp** | **0.161 (n=48)** |
 | window (2,867) + compiled far field | 2,867 | 5.3K retrieved | 0.00 pp | 0.179 (n=24) |
 | plain retrieval, no window | 0 | 4,096 retrieved | -22.84 pp | 0.243 (n=48) |
 | full history | - | - | reference | 0.089 (n=48) |
 
 **Compaction is equivalent here, not worse.**  Against the same-window retrieval arm the paired
-difference is **+0.033, 95% CI [-0.038, +0.105]** (7 wins / 3 losses); against the shipped view it is
-**-0.039, 95% CI [-0.148, +0.064]** (7 wins / 7 losses).  Both intervals include zero.  So the
+difference is **+0.042, 95% CI [-0.031, +0.117]** (8 wins / 3 losses); against the shipped view it is
+**-0.030, 95% CI [-0.147, +0.083]** (8 wins / 8 losses).  Both intervals include zero, with the
+summary in the view in every row.  So the
 controlled answer to "what should the remainder of the budget buy" is that at this window and this
 sample size it does not measurably matter - and, importantly, the withdrawn claim that summarising
 *damages* the view is not supported by the corrected measurement either.  Compaction is a viable
 baseline on this corpus, and the paper's contribution is not that it beats compaction.
 
 What the table does show is where the decision comes from: at a 6,656-token window it drops to the
-full-history level (0.089-0.122), because the window has consumed the budget the decision needs,
+full-history level (0.089-0.131), because the window has consumed the budget the decision needs,
 while a 4,096-token window spends 4.1K on retrieval and reaches 0.161, and a 2,867-token window
 spends 5.3K and reaches 0.179 - **at 0.00 pp of fidelity in all three cases**.  Paired on the
 instances the arms share, each step in that direction is positive and none is resolvable on its own:
@@ -679,7 +680,7 @@ resident, against a tier that can move KV.
 model is a crowded space and predates this work; KVMem itself uses compaction as its baseline, and
 Section 4.3 measures that baseline under the same budget and the same window, with the summariser
 written by the served model.  The honest result is that **compaction is equivalent here, not
-worse**: fidelity 0.00 pp both ways, and decision 0.122 against 0.089 with a paired interval that
+worse**: fidelity 0.00 pp both ways, and decision 0.131 against 0.089 with a paired interval that
 includes zero.  We therefore do not claim to beat
 compaction, and the paper's contribution is not in that comparison - it is the bound and its
 consequences.
