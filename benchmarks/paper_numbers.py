@@ -298,6 +298,30 @@ def main(argv=None) -> int:
             detail += f" (make_figures exit {rebuilt.returncode}, svg exit {drawn.returncode})"
         results.append(("figures regenerate byte-identically from the receipts", ok, detail))
 
+    # --- the killer table past the corpus: across 8.9x of raw history the state does not move.
+    # These are the numbers behind Table 7b, and they are the paper's sharpest claim
+    transfer = []
+    for name in ("real64k", "composed-128k", "composed-256k", "composed-512k", "composed-1m"):
+        rows = load(f"artifacts/g2-state-size-{name}-v1.json")["rows"]
+        transfer.append((name,
+                         round(statistics.median(r["history_tokens"] for r in rows)),
+                         round(statistics.median(r["turns"] or 0 for r in rows)),
+                         round(statistics.median(r["state_tokens"] for r in rows)),
+                         round(statistics.median(r["state_bytes"] for r in rows) / 1024, 1)))
+    want = (("real64k", 111084, 42, 8203, 18.1), ("composed-128k", 140666, 291, 6598, 40.1),
+            ("composed-256k", 284518, 614, 7174, 25.9), ("composed-512k", 514211, 963, 7010, 25.4),
+            ("composed-1m", 983692, 1879, 7039, 24.8))
+    for got, expected in zip(transfer, want):
+        label = got[0]
+        check(f"{label} raw history p50", got[1], expected[1], 2)
+        check(f"{label} state tokens p50", got[3], expected[3], 60)
+        check(f"{label} state KB p50", got[4], expected[4], 1.0)
+    history_growth = transfer[-1][1] / transfer[1][1]
+    state_growth = transfer[-1][3] / transfer[1][3]
+    results.append(("history grows 7x while the state moves under 10%",
+                    history_growth > 6.5 and abs(state_growth - 1.0) < 0.15,
+                    f"history x{history_growth:.1f}, state x{state_growth:.2f}"))
+
     # --- the evidence-mass caveat, measured at the long end: more than half of a 764K-token history
     # still shares terms with the query, so the bound is a design choice rather than a ceiling
     mass_long = load("artifacts/g2-evidence-mass-composed-1m-v1.json")["by_history_bucket"]

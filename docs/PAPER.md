@@ -364,6 +364,26 @@ sessions while the state stays inside its bound and the fidelity delta stays ins
 A 22-turn example with 67K of history fails badly (-46.9 pp); it is a singleton, reported as one, and
 it points at a limitation: a short session whose individual turns are enormous.
 
+**Table 7b:** The same law past the corpus, on histories composed out of whole real sessions
+(`benchmarks/build_composed_long_sessions.py`). The state is the shipped 8,192-token view; the
+tokens and bytes are CPU measurements of what a cold route transfers, and the rows count every
+qualifying turn in the bucket.
+
+| corpus | raw history p50 | turns p50 | state tokens p50 | state KB p50 |
+|---|---:|---:|---:|---:|
+| real sessions (64K+) | 111,084 | 42 | 8,203 | 18.1 |
+| composed | 140,666 | 291 | 6,598 | 40.1 |
+| composed | 284,518 | 614 | 7,174 | 25.9 |
+| composed | 514,211 | 963 | 7,010 | 25.4 |
+| composed | 983,692 | 1,879 | 7,039 | 24.8 |
+
+Across an **8.9x** range of raw history - and a 45x range of turns - the state that must move stays
+between 4,588 and 8,439 tokens with no trend (p50 6,598 -> 7,039), and between 18 and 40 KB of text.
+**The session keeps growing; the state that must move does not.**  The quality side of these same
+buckets - whether the decision and the surface hold at these lengths - is measured with the arms of
+Section 2.2 and reported in Section 4.2; the composition itself is the honest limit: the transcripts
+are real, the million-token sessions are not.
+
 ### 4.2 The mobility law and the inversion
 
 Table 8 gives the two costs side by side.  The lookup term in it is now measured rather than
@@ -624,6 +644,9 @@ carries quality is the window and retrieval, and what carries mobility is the bo
   lookup is measured on real transcripts concatenated into million-token histories
   (`g2-index-lookup-composed-1m-v1.json`): p50 **0.4-4.4 ms** depending on query size, against
   53-203 ms of active-set prefill.  What is still composed is the *session*, not the measurement.
+* **Histories past 156K tokens are composed.**  The transcripts are real and the final turn's patch
+  is real, but a million-token session is twenty-five sessions concatenated (Table 7b); the corpus
+  has no session that long, and the composition is labelled in the rows, the receipts and the table.
 * **The 8B and 70B geometries are declared, not measured.**  The fabric, prefill and 0.5B KV numbers
   are measured on this card.
 * **We do not claim `|E_q|` is intrinsically bounded.**  Lexical evidence mass grows with session
