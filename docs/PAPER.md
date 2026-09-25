@@ -549,32 +549,15 @@ capacity-pressure regime: a warm cache holding a fraction of the fleet and no cl
 the baseline's alternative is a full re-prefill (1.6-14.3 s) against 0.203 s of rematerialisation.
 Against a tier that can move KV, the wins are worker loss plus the 1M-history mixes.
 
-**How much, not just where.**  Every one of the 52 advancing cells at the admissible state clears
-the 1.5x SLO-goodput bar that defines an advance, and none needs the alternative route through the
-tail (the best p99 improvement in that column is 26%, short of the 30% bar).  Half of them clear it
-with a finite ratio - median **1.72x**, max **5.06x** - and in the other half the strongest baseline
-completes *no* work at all, so the ratio is unbounded rather than large: 26 of 52.  By regime,
-balanced 10 cells (all finite, median **2.15x**), slow-worker 13 (5 finite, median 3.15x), worker
-loss 29 (11 finite, median 1.56x).  The honest limit is the tail: this is a throughput win, and in
-the regimes where the baseline stalls the ephemeral policy's own p99 is worse in absolute terms -
-the p99 reduction is positive only in the balanced cells (median +6%, max +26%), because a baseline
-that completes nothing still has a p99.
-
-**And the same at the smaller state.**  The 4,096 column's 63 cells behave the way the 8,192
-column's do: every one clears the 1.5x bar, 53 of them with a finite ratio (median **1.57x**, max
-2.19x) and 10 against a baseline that completes no work - balanced 8 cells (median 1.61x),
-slow-worker 11 (1.63x), worker loss 44 (1.50x).  Across the **117** admissible cells: 79 clear the
-bar with a finite ratio (median **1.61x**) and 38 face a baseline that completes nothing.  No cell in
-either column advances through the p99 route - the best reduction in the admissible region is +26%,
-under the 30% bar - so this is a throughput result, and the paper says so rather than implying a tail
-improvement it did not measure.
-
-**The second admissible size agrees.**  Replaying the capacity grid at 6,144 tokens - the
-configuration to run when a deployment wants the whole 2 pp allowance in reserve (fidelity 0.00 pp,
-decision 0.150 on 48 instances) - advances in **10 of its 36 cells**, all clearing the 1.5x bar
-(8 with a finite ratio, median 1.53x).  Its prefill primitive is measured too, at 0.1496 s between
-the 4,096 (0.0946 s) and 8,192 (0.2026 s) points, so the column is priced the way the others are and
-the admissible region is not an artifact of the single smallest admissible size.
+**How much, not just where.**  Across the **117** admissible cells, **79** clear the 1.5x SLO-goodput
+bar that defines an advance with a finite ratio (median **1.61x**) and **38** face a strongest
+baseline that completes *no* work, so their ratio is unbounded rather than large.  By column: at
+4,096 the 63 cells run at median **1.57x** (max 2.19x; balanced 8 cells 1.61x, slow-worker 11 1.63x,
+worker-loss 44 1.50x), and at 8,192 the 52 cells at median **1.72x** (max 5.06x, balanced 2.15x).
+**No cell in either column advances through the p99 route** - the best reduction in the region is
++26%, under the 30% bar - so this is a throughput result, and the paper says so rather than implying
+a tail improvement it did not measure: where the baseline stalls, the ephemeral policy's own p99 is
+worse in absolute terms, because a baseline that completes nothing still has a p99.
 
 **What the region's size was waiting on.**  The columns differ by cell count: 4,096 advances in 63
 cells of 198 against the 8,192 column's 52 of 294, so moving the system to a 4,096-token state
@@ -647,23 +630,13 @@ miss cost, so the phase change we report is attributable to the cost law rather 
 heuristic - and we state the regime where the baselines still win: balanced load with every session
 resident, against a tier that can move KV.
 
-**Compaction-based context management.**  Summarising or compacting history before it re-enters the
-model is a crowded space and predates this work; KVMem itself uses compaction as its baseline, and
-Section 4.3 measures that baseline under the same budget and the same window, with the summariser
-written by the served model.  The honest result is that **compaction is equivalent here, not
-worse**: fidelity 0.00 pp both ways, and decision 0.131 against 0.089 with a paired interval that
-includes zero.  We therefore do not claim to beat
-compaction, and the paper's contribution is not in that comparison - it is the bound and its
-consequences.
-
-What we do report against the *compiler* variant of the same idea is negative and specific: content
-dedup alone is a statistical tie with plain retrieval, the two stages that actually compile state are
-harmful (collapsing each file to its latest costs 8.5 pp of fidelity, re-selecting the newest
-output's lines 20 pp), and the metric usually quoted for compaction - teacher-forced next-token
-fidelity - is saturated by keeping the newest evidence whole, which is why a system can appear to
-improve under it while nothing about the turn's evidence has changed.  Reporting that is what keeps
-the positive claim honest: what
-carries quality is the window and retrieval, and what carries mobility is the bound.
+**Compaction-based context management.**  Summarising history before it re-enters the model predates
+this work, and KVMem uses it as its own baseline.  Section 4.3 measures it under the same budget and
+the same window and finds it **equivalent, not worse** - paired intervals include zero - so the paper
+claims no win there.  Against the *compiler* variant of the same idea the report is negative and
+specific: the two stages that actually compile state are harmful, and the metric usually quoted for
+compaction is saturated by keeping the newest evidence whole.  What carries quality is the window and
+retrieval; what carries mobility is the bound.
 
 ## 6. Limitations and non-claims
 
