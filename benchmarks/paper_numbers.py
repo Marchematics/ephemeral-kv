@@ -546,6 +546,26 @@ def main(argv=None) -> int:
     check("dead state turn-by-turn low", round(100 * min(r["tail_share"] for r in dead_rows)), 4, 1)
     check("dead state turn-by-turn high", round(100 * max(r["tail_share"] for r in dead_rows)), 27, 1)
 
+    # --- two numbers Section 1 quotes from different measurements, and the ones the coverage sweep
+    # found uncovered: the recency arm's fidelity and the lexical evidence mass at two lengths
+    recency = bucket_stats("artifacts/g2-compiler-recency-b8192-v1.json").get("32K-128K") or {}
+    check("plain recency fidelity pp",
+          100 * (recency.get("token_accuracy_delta_p50") or 0.0), 0.29, 1e-2)
+    mass = load("artifacts/g2-evidence-mass-v2.json")["by_history_bucket"]
+    check("evidence mass at 45K histories (K tokens)",
+          round(mass["32K-64K"]["relevant_tokens_p50"] / 1000), 22, 1)
+    check("evidence mass at 95K histories (K tokens)",
+          round(mass["64K-128K"]["relevant_tokens_p50"] / 1000), 46, 1)
+    prefill_all = {r["tokens"]: r["times"]["p50_s"] for r in
+                   load("artifacts/g3-active-prefill-warm-qwen05b-v2.json")["active_prefill_rows"]}
+    launches = sorted(r["state_rebuild_s"] for r in
+                      load("artifacts/g5-failover-two-workers-samemodel-v1.json")["rows"])
+    results.append(("Section 1's rebuild range names two different measurements",
+                    round(prefill_all[2048], 2) == 0.05 and round(prefill_all[8192], 2) == 0.20
+                    and round(launches[0], 2) == 0.91 and round(launches[-1], 2) == 1.42,
+                    f"prefill {prefill_all[2048]:.4f}-{prefill_all[8192]:.4f} s, "
+                    f"replacement worker {launches[0]}-{launches[-1]} s"))
+
     # --- C5's lookup term: measured on composed histories, and query-driven rather than
     # history-driven - which is the abstraction's own claim, so it is asserted rather than narrated
     lookup_1m = load("artifacts/g2-index-lookup-composed-1m-v1.json")["rows"]

@@ -70,7 +70,9 @@ The abstraction that follows is:
 ```text
 durable session   = history + index          (append-only, model-independent, on the tier)
 execution state   = compile(history, q)      (bounded, rebuilt on demand, never transferred)
-local KV          = a disposable artifact    (dropped on eviction, rebuilt in 0.05-1.4 s)
+local KV          = a disposable artifact    (dropped on eviction and rebuilt on demand:
+                                              0.05-0.20 s of active-set prefill for a 2K-8K
+                                              state, 0.91-1.42 s for a replaced worker's)
 ```
 
 and the paper's contributions are its measured consequences:
