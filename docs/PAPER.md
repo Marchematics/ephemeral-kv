@@ -224,26 +224,26 @@ Against **plain retrieval the bounded state wins decisively**: 16 wins to 2 loss
 the comparison - the bounded state is the only one of the three that is both usable at 4K and
 capable of acting, and it does not act as reliably as the transcript.
 
-**The obvious explanation, and the experiment that killed it.**  The three views differ in what they
-show by an order of magnitude, and it is not the evidence: counting the prior *actions* each view
-contains at the scored turns (`benchmarks/g2d_view_composition.py`) gives a median of **44 for the
-full transcript, 6 for the bounded state, and 1 for retrieval**, with **23 of 48** retrieval views
-containing no action at all.  A ranking built for evidence selects tool output and file contents,
-because that is what the query terms match, and prior assistant actions are not evidence and do not
-rank.  That correlation suggests a mechanism - the model needs to see the action format to produce
-one - and the mechanism is **false**, which we know because we implemented it.  A window that keeps
-the newest span and then spends the rest on the most recent **action-bearing** spans
-(`--compile-mode action_window`) raises the action count the view holds - asserted by a test on the
-mode rather than argued, `tests/test_g2_model_quality.py::test_action_window_shows_more_actions_than_recency` -
-and it *lowers* the emit rate: on the 30 turns the two rules share so far, **0.167 against 0.367**,
-paired **-0.200, 95% CI [-0.367, -0.033]**, 1 win to 7 losses
-(`artifacts/g2d-window-comparison-v1.json`, with the full-transcript arm reproducing byte-identically
-across the two runs, so the difference is the window rule and nothing else).  Showing the model more
-prior actions while displacing recent evidence makes it *less* likely to act.  What a continuation
-needs is therefore not a corpus of format examples but a **coherent recent turn** - and that is what
-retrieval lacks, since a bag of query-ranked evidence fragments contains no turn boundary to
-continue from at all.  The counts above are a correlate and the paper reports them as one; the
-intervention is in the repository for anyone who wants to re-derive the correction.
+**The obvious explanation, and the experiment that does not support it.**  The three views differ in
+what they show by an order of magnitude, and it is not the evidence: counting the prior *actions*
+each view contains at the scored turns (`benchmarks/g2d_view_composition.py`) gives a median of
+**44 for the full transcript, 6 for the bounded state, and 1 for retrieval**, with **23 of 48**
+retrieval views containing no action at all.  A ranking built for evidence selects tool output and
+file contents, because that is what the query terms match, and prior assistant actions are not
+evidence and do not rank.  That correlation suggests a mechanism - the model needs to see the action
+format to produce one - so we implemented it rather than asserting it.  A window that keeps the
+newest span and then spends the rest on the most recent **action-bearing** spans
+(`--compile-mode action_window`, with a test asserting it holds more prior actions than the recency
+rule) does not raise the emit rate: over the 48 turns the two rules share, **0.229 against 0.375**,
+paired **-0.146, 95% CI [-0.313, +0.021]**, 5 wins to 12 losses
+(`artifacts/g2d-window-comparison-v1.json`; the full-transcript arm reproduces byte-identically
+across the two runs, so the difference is the window rule and nothing else).  The direction is
+opposite to the hypothesis and the interval includes zero, so **the mechanism is not supported**:
+the composition counts are a correlate, and this paper reports them as one.  What the evidence
+supports is narrower - a continuation needs a **coherent recent turn**, which is what retrieval
+lacks, since a bag of query-ranked evidence fragments contains no turn boundary to continue from -
+and how to close the remaining gap between 0.375 and the transcript's 0.625 is left open rather than
+explained by a mechanism we could not confirm.
 
 **The compiler does not rescue the floor; the window does.**  The one remaining place a state
 compiler could have paid is the size the system actually runs at, where the far field has least room
@@ -856,7 +856,7 @@ Table 12 maps each claim to the receipt that backs it and to the script that pro
 | the dead-state concentration does not extrapolate to composed lengths | `g2-dead-state-composed-1m-v1.json` | `benchmarks/g2_dead_state.py` |
 | lexical evidence mass grows with session length | `g2-evidence-mass-composed-1m-v1.json` | `benchmarks/g2_evidence_mass.py` |
 | 157 of 724 replay cells sit at an admissible state, 117 of them clearing 1.5x goodput | `g4-quality-join-v3.json`, `g4-all-phase-summary-v3.json`, `g4b-burst-*-v1.json` | `scripts/run_g4_join.sh`, `scripts/run_g4_regimes.sh` |
-| the action window raises the actions in the view (median 6 -> 13) and lowers the emit rate (0.167 against 0.367, paired -0.200, CI [-0.367, -0.033]), so the composition counts are a correlate | `g2d-window-comparison-v1.json`, `g2d-view-composition-v1.json` | `scripts/run_g2d_action_window.sh`, `benchmarks/g2d_window_comparison.py` |
+| a window that holds more prior actions does not emit more of them (0.229 against 0.375, paired -0.146, CI [-0.313, +0.021]), so the composition counts are a correlate | `g2d-window-comparison-v1.json`, `g2d-view-composition-v1.json` | `scripts/run_g2d_action_window.sh`, `benchmarks/g2d_window_comparison.py` |
 | the p99 half of the gate is conditional on the burst parameters, and where it holds | `g4b-burst-sensitivity-v1.json`, `g4b-burstsweep-*-v1.json` | `scripts/run_g4_burst_sweep.sh`, `benchmarks/g4_burst_sensitivity.py` |
 | the compiler does not rescue the 4,096-token floor | `g2-compiler-window3k-farmaterialize-b4096-v1.json`, `g2-compiler-window3584-b4096-v1.json` | `scripts/run_floor_3584.sh` |
 
