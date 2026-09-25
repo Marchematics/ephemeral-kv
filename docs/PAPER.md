@@ -19,7 +19,8 @@ the next turn inside the 2 pp fidelity allowance (-0.96 pp) and a 6,144-token on
 (0.00 pp), with an end-task score that ties the best retrieval baseline we can build and beats the
 full transcript (0.134 against 0.089 at the floor).  The state does not track the history: across an
 **8.9x range of raw history** and 45x of turns it stays between **4,588 and 8,439 tokens** and
-**18 and 40 KB** of transfer, and 3,922-3,928 tokens at the floor configuration.  The consequence is
+**18 and 40 KB** of transfer per bucket (14-64 KB across individual turns), and 3,922-3,928 tokens
+at the floor configuration.  The consequence is
 a phase change rather than a speedup: a session **32x older costs 2.4x less to move** (5.1x at a 4K
 state); one worker holds **32x more sessions**; recovery and a model revision rebuild the state from
 a durable index instead of moving 12-128 GiB of KV; and a replay over measured hardware primitives
@@ -378,7 +379,8 @@ rows paired by index).
 | **at the shipped floor** (4,096) | **140,666 -> 983,692** | **291 -> 1,879** | **3,922 -> 3,928** | **19.8 -> 14.1** | 0.134 (n=48, floor config) | - |
 
 Across an **8.9x** range of raw history - and a 45x range of turns - the state that must move stays
-between 4,588 and 8,439 tokens with no trend, and between 18 and 40 KB of text; at the floor
+between 4,588 and 8,439 tokens with no trend, and between 18 and 40 KB of text per bucket (14-64 KB
+per turn); at the floor
 configuration it is **3,922 to 3,928 tokens and 19.8 to 14.1 KB** from 141K to 984K tokens.  **The
 session keeps growing; the state that must move does not.**  The end task does not degrade with it
 (0.077 -> 0.122 -> 0.167 across those buckets), while the surface gives up a few points against a
@@ -871,5 +873,5 @@ costs.
 | two-worker failover, owner SIGKILLed | fresh process rebuilds 8,192 tokens in 0.91-1.42 s (p50 1.387 s); recorded files named in 4/6 sessions; token accuracy identical to the killed owner's (0.593 both) |
 | model rollout | resumes on a model that never saw the session: end-task 0.137/0.145 against full history's 0.017/0.042 (Qwen2.5-0.5B/1.5B) |
 | data moved | ~32,455 bytes of state text against 0.38 GiB of KV the dissolved owner held at these 33K histories (12-128 GiB at 1M on the declared geometries) |
-| data moved, at any age | the state is 18-40 KB of text at every history length measured, from 111K to 984K tokens (Table 7b), so what a recovering worker reads does not grow with the session either |
+| data moved, at any age | the state is 18-40 KB of text per bucket (14-64 KB per turn) at every history length measured, from 111K to 984K tokens (Table 7b), so what a recovering worker reads does not grow with the session either |
 | cost | 0.55-1.04 s of active-set prefill against 6.31 s of re-prefill |

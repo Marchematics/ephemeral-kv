@@ -502,6 +502,50 @@ def main(argv=None) -> int:
         check(f"floor state KB, {bucket}",
               round(statistics.median(r["state_bytes"] for r in rows) / 1024, 1), want_kb, 0.5)
 
+    # --- the derived quantities the prose quotes: ranges, ratios and the footprint estimate.  Each
+    # is computed from asserted receipts here, because a ratio or a range stated in prose is a claim
+    # like any other - and the transfer range was one bucket-median range away from being wrong
+    state_rows = []
+    for name in ("real64k", "composed-128k", "composed-256k", "composed-512k", "composed-1m"):
+        state_rows += load(f"artifacts/g2-state-size-{name}-v1.json")["rows"]
+    tokens = [r["state_tokens"] for r in state_rows]
+    transfer_kb = [r["state_bytes"] / 1024 for r in state_rows]
+    check("state range lower bound (tokens)", min(tokens), 4588, 0)
+    check("state range upper bound (tokens)", max(tokens), 8439, 0)
+    per_bucket_kb = []
+    for name in ("real64k", "composed-128k", "composed-256k", "composed-512k", "composed-1m"):
+        rows = load(f"artifacts/g2-state-size-{name}-v1.json")["rows"]
+        per_bucket_kb.append(statistics.median(r["state_bytes"] / 1024 for r in rows))
+    check("transfer KB, per-bucket range low", round(min(per_bucket_kb), 1), 18.1, 0.1)
+    check("transfer KB, per-bucket range high", round(max(per_bucket_kb), 1), 40.1, 0.1)
+    check("transfer KB, per-turn range low", round(min(transfer_kb)), 14, 1)
+    check("transfer KB, per-turn range high", round(max(transfer_kb)), 64, 1)
+    histories = [statistics.median(r["history_tokens"] for r in load(
+        f"artifacts/g2-state-size-{name}-v1.json")["rows"])
+        for name in ("real64k", "composed-128k", "composed-256k", "composed-512k", "composed-1m")]
+    turn_counts = [statistics.median(r["turns"] or 0 for r in load(
+        f"artifacts/g2-state-size-{name}-v1.json")["rows"])
+        for name in ("real64k", "composed-128k", "composed-256k", "composed-512k", "composed-1m")]
+    check("history range quoted in the paper", round(max(histories) / min(histories), 1), 8.9, 0.05)
+    check("turn range quoted in the paper", round(max(turn_counts) / min(turn_counts)), 45, 0)
+    by_session = {(r["history"], r["state"]): r for r in
+                  load("artifacts/g6-placement-inversion-v1.json")["rows"]}
+    check("mobility ratio at an 8,192 state",
+          round(by_session[(32768, 16384)]["true_cost_s"] / by_session[(1048576, 8192)]["true_cost_s"], 1),
+          2.4, 0.05)
+    check("mobility ratio at a 4,096 state",
+          round(by_session[(32768, 16384)]["true_cost_s"] / by_session[(1048576, 4096)]["true_cost_s"], 1),
+          5.1, 0.05)
+    check("footprint estimate, 1M/4K", round(by_session[(1048576, 4096)]["footprint_estimate_s"], 3),
+          5.899, 1e-3)
+    check("footprint estimate, 32K/16K", round(by_session[(32768, 16384)]["footprint_estimate_s"], 3),
+          0.184, 1e-3)
+    dead_rows = load("artifacts/g2-dead-state-v1.json")["rows"]
+    check("dead state top-5 low", round(100 * min(r["top5_share"] for r in dead_rows)), 73, 1)
+    check("dead state top-5 high", round(100 * max(r["top5_share"] for r in dead_rows)), 96, 1)
+    check("dead state turn-by-turn low", round(100 * min(r["tail_share"] for r in dead_rows)), 4, 1)
+    check("dead state turn-by-turn high", round(100 * max(r["tail_share"] for r in dead_rows)), 27, 1)
+
     # --- C5's lookup term: measured on composed histories, and query-driven rather than
     # history-driven - which is the abstraction's own claim, so it is asserted rather than narrated
     lookup_1m = load("artifacts/g2-index-lookup-composed-1m-v1.json")["rows"]

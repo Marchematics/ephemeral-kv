@@ -25,7 +25,8 @@ against a checked-in receipt, and the CPU-only path in
 * **The state is bounded and does not track age.**  4,096 tokens holds the surface inside the 2 pp
   fidelity allowance (-0.96 pp); 6,144 holds it at parity (0.00 pp).  Across an **8.9x range of raw
   history** (67K to 984K tokens, the long end composed from real sessions) and **45x of turns**, the
-  state stays between 4,588 and 8,439 tokens and 18-40 KB of transfer; at the floor configuration it
+  state stays between 4,588 and 8,439 tokens and 18-40 KB of transfer per bucket; at the floor
+  configuration it
   is 3,922-3,928 tokens.
 * **Placement stops depending on age.**  A session 32x older costs **2.4x less to move** (5.1x at a
   4K state), and one worker holds **32x more sessions** (427 / 40 / 16 per worker for 0.5B / 8B /
