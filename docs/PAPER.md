@@ -20,7 +20,7 @@ end-task score is statistically indistinguishable from the best retrieval baseli
 while the state stays at **7-8K tokens** as the raw history grows from 64K to 156K (and, on the turn
 axis, from 40 to 96 turns).  The consequence is a phase change rather than a speedup: a session
 **32x older costs 2.4x less to move** (5.1x at a 4K state) because the transfer term leaves the cold
-path; one worker holds **16x more sessions**; recovery and a model revision rebuild the state from a
+path; one worker holds **32x more sessions**; recovery and a model revision rebuild the state from a
 durable index instead of moving 12-128 GiB of KV; and a replay against measured hardware primitives
 advances routing in **117 cells at the states where fidelity holds** - 63 of them at 4,096 tokens,
 52 at 8,192 and 2 at 16,384 (the decision at those sizes is a tie with the best retrieval baseline,
@@ -90,7 +90,7 @@ inside the 2 pp allowance against the full transcript, end-task score
    fixed budget, not an intrinsic ceiling on what a query needs.
 3. **Session age stops predicting placement cost.**  The inversion, and the ranking reversal that
    makes a footprint-based scheduler prefer exactly the wrong session.
-4. **The consequences are systemic**: 16x sessions per worker, lossless recovery on a fresh process
+4. **The consequences are systemic**: 32x sessions per worker at the measured floor, lossless recovery on a fresh process
    (0.91-1.42 s, no KV transfer), and a routing phase change at the 8,192-token state where fidelity
    holds, in every regime we model, including a 10x-slow hotspot.
 5. **A negative result with an exact attribution.**  The obvious way to shrink the state - a semantic
@@ -490,11 +490,16 @@ model, declared for 8B/70B classes):
 **Table 10:** Sessions per worker at 20 GiB of usable HBM: resident history against resident
 compiled state.
 
-| geometry | resident history, 128K | resident history, 1M | resident compiled state, 8,192 |
-|---|---:|---:|---:|
-| Qwen2.5-0.5B (12,288 B/token) | 13.3 | 1.7 | **213** |
-| 8B-class (131,072 B/token) | 1.2 | 0.2 | **20** |
-| 70B-class (327,680 B/token) | 0.5 | 0.1 | **8** |
+| geometry | resident history, 128K | resident history, 1M | compiled state, 8,192 | compiled state, 4,096 |
+|---|---:|---:|---:|---:|
+| Qwen2.5-0.5B (12,288 B/token) | 13.3 | 1.7 | 213 | **427** |
+| 8B-class (131,072 B/token) | 1.2 | 0.2 | 20 | **40** |
+| 70B-class (327,680 B/token) | 0.5 | 0.1 | 8 | **16** |
+
+The compiled-state columns are one number per geometry rather than one per history length, because
+the state does not grow with age (Section 4.1): a worker holds **427** 0.5B sessions whether their
+histories are 64K tokens or a million, which is **32x** the resident-history column and stays 32x at
+every age.  Capacity planning stops depending on session age the same way placement does.
 
 ### 4.5 Routing
 
@@ -622,7 +627,7 @@ reported in its paper.
 * **The size.**  KVMem's view is bounded by the model's native window - 256K tokens for the model it
   evaluates - while ours is bounded by the query and the current turn at 6-8K, a measured floor
   (below it, 4,096 scores -2.40 pp of fidelity).  That difference is what produces the mobility,
-  capacity and routing consequences: a 32x-older session costing 2.4x less to move, 16x the
+  capacity and routing consequences: a 32x-older session costing 2.4x less to move, 32x the
   sessions per worker, and a routing phase change at a state size the quality measurements certify.
 
 KVMem also reports an end-to-end agent-success metric that we do not: our end task is file-level
@@ -699,7 +704,7 @@ For a long-lived agent session, the object a placement, recovery or capacity dec
 not the transcript and not its KV footprint: it is a bounded execution state compiled from the
 durable record, and its size is set by the current action and the query rather than by the session's
 age.  Measured on real traces, that bound makes a 32x-older session cheaper to move, gives a worker
-16x the sessions, makes recovery and model rollouts the same operation, and moves the routing phase
+32x the sessions, makes recovery and model rollouts the same operation, and moves the routing phase
 boundary in every regime we model - while the obvious way to shrink the state further, a semantic
 compiler, is measured not to pay.  The session keeps growing; the state that must move does not.
 

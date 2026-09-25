@@ -247,6 +247,20 @@ def main(argv=None) -> int:
                          if r["geometry"] == "8B-class" and r["resident"] == "compiled state"
                          and r["tokens"] == 8192)
     check("8B capacity, state 8192", eight_b_state["sessions_per_worker"], 20.0, TOL)
+    # and at the measured floor, which is what the paper's capacity claim now quotes
+    eight_b_floor = next(r for r in capacity
+                         if r["geometry"].startswith("8B") and r["resident"] == "compiled state"
+                         and r["tokens"] == 4096)
+    check("8B capacity, state 4096 (the measured floor)",
+          eight_b_floor["sessions_per_worker"], 40.0, TOL)
+    half_b_floor = next(r for r in capacity
+                        if r["geometry"].startswith("Qwen2.5-0.5B") and r["resident"] == "compiled state"
+                        and r["tokens"] == 4096)
+    half_b_history = next(r for r in capacity
+                          if r["geometry"].startswith("Qwen2.5-0.5B") and r["resident"] == "history"
+                          and r["tokens"] == 131072)
+    check("capacity ratio at the floor (0.5B, 128K history)",
+          round(half_b_floor["sessions_per_worker"] / half_b_history["sessions_per_worker"]), 32, 0)
 
     # --- C9: failover
     failover = load("artifacts/g5-failover-two-workers-samemodel-v1.json")["rows"]

@@ -77,17 +77,20 @@ arithmetic is brutal.  If it is the execution state, the same budget holds state
 not depend on age.  Usable HBM 20 GiB per worker (`g5_capacity_planning.py`,
 `artifacts/g5-capacity-planning-v1.json`):
 
-| model geometry | resident history, 128K session | resident history, 1M session | resident compiled state, 8,192 |
-|---|---:|---:|---:|
-| Qwen2.5-0.5B (12,288 B/token, measured) | 13.3 sessions | 1.7 | **213** |
-| 8B-class (131,072 B/token) | 1.2 | 0.2 | **20** |
-| 70B-class (327,680 B/token) | 0.5 | 0.1 | **8** |
+| model geometry | resident history, 128K session | resident history, 1M session | compiled state, 8,192 | compiled state, 4,096 |
+|---|---:|---:|---:|---:|
+| Qwen2.5-0.5B (12,288 B/token, measured) | 13.3 sessions | 1.7 | 213 | **427** |
+| 8B-class (131,072 B/token) | 1.2 | 0.2 | 20 | **40** |
+| 70B-class (327,680 B/token) | 0.5 | 0.1 | 8 | **16** |
 
-Sixteen times the sessions at 128K, two orders of magnitude at 1M, and on real model geometries
-the full-history object does not fit at all (0.1-0.5 sessions per worker).  This is also what
-makes the G4 pressure sweep's "warm cache holds a fraction of the fleet" regime concrete rather
-than arbitrary: one or two resident histories per worker is what an 8B-class fleet with 128K
-sessions actually looks like, while sixteen resident states is what the bound allows.
+**Thirty-two times** the sessions at 128K once the state is the measured 4,096-token floor, two
+orders of magnitude at 1M, and on real model geometries the full-history object does not fit at all
+(0.1-0.5 sessions per worker).  The compiled-state columns are one number per geometry rather than
+one per history length, because the state does not grow with age: the same 427 sessions per worker
+whether the sessions are 64K tokens or a million.  This is also what makes the G4 pressure sweep's
+"warm cache holds a fraction of the fleet" regime concrete rather than arbitrary: one or two
+resident histories per worker is what an 8B-class fleet with 128K sessions actually looks like,
+while forty resident states is what the bound allows.
 
 ## 4b. What recovery actually moves (derived, labelled as derived)
 
