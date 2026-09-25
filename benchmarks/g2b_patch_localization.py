@@ -152,6 +152,12 @@ def main(argv=None) -> int:
     p.add_argument("--tail-fraction", type=float, default=0.6,
                    help="share of the budget kept as an untruncated verbatim tail "
                         "(tail_state mode)")
+    p.add_argument("--summarizer-model", default="",
+                   help="write compaction summaries with this checkpoint instead of the served "
+                        "model (empty = the served model); the scorer is unchanged")
+    p.add_argument("--summary-tokens", type=int, default=512)
+    p.add_argument("--summary-input-tokens", type=int, default=8192)
+    p.add_argument("--summary-stride", type=int, default=8)
     p.add_argument("--far-compiler", default="consolidate",
                    choices=("consolidate", "materialize", "raw"),
                    help="how the far field of tail_state is compiled (see g2_model_quality)")
@@ -228,6 +234,9 @@ def main(argv=None) -> int:
                           "compile_mode": args.compile_mode,
                           "tail_fraction": args.tail_fraction,
                           "tail_tokens": args.tail_tokens,
+                          "summary_tokens": args.summary_tokens,
+                          "summary_input_tokens": args.summary_input_tokens,
+                          "summary_stride": args.summary_stride,
                           "tail_cap": args.tail_cap,
                           "far_compiler": args.far_compiler},
                 token_counter=lambda text: len(tokenizer.encode(text,
