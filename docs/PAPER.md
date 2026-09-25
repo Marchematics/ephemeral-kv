@@ -337,16 +337,29 @@ is the last cell of this table:
 
 | view (8,192 tokens) | window | remainder | fidelity | end-task F1 (n=48) |
 |---|---:|---|---:|---:|
-| window + consolidated retrieval | 6,656 | 1.5K retrieved | 0.00 pp | **0.089** |
-| compaction | 6,656 | 0.5K summary | 0.00 pp | (measuring) |
+| window + consolidated retrieval | 6,656 | 1.5K retrieved | 0.00 pp | 0.089 |
+| compaction | 6,656 | 0.5K summary | 0.00 pp | 0.122 |
 | **window + consolidated retrieval (shipped)** | **4,096** | **4.1K retrieved** | **0.00 pp** | **0.161** |
 | plain retrieval, no window | 0 | 4,096 retrieved | -25.00 pp | 0.243 |
 | full history | - | - | reference | 0.089 |
 
-At a 6,656-token window the decision falls to the full-history level (0.089), because the window has
-consumed the budget the decision needs; at a 4,096-token window it is 0.161 at the same fidelity.
-That is the trade-off the two laws describe, measured along the window axis at a fixed budget, and
-it is why the shipped view keeps the *smallest* window that still holds the surface.
+**Compaction is equivalent here, not worse.**  Against the same-window retrieval arm the paired
+difference is **+0.033, 95% CI [-0.038, +0.105]** (7 wins / 3 losses); against the shipped view it is
+**-0.039, 95% CI [-0.148, +0.064]** (7 wins / 7 losses).  Both intervals include zero.  So the
+controlled answer to "what should the remainder of the budget buy" is that at this window and this
+sample size it does not measurably matter - and, importantly, the withdrawn claim that summarising
+*damages* the view is not supported by the corrected measurement either.  Compaction is a viable
+baseline on this corpus, and the paper's contribution is not that it beats compaction.
+
+What the table does show is where the decision comes from: at a 6,656-token window it drops to the
+full-history level (0.089-0.122), because the window has consumed the budget the decision needs,
+while a 4,096-token window spends 4.1K on retrieval and reaches 0.161 at the same fidelity.  **The
+lever is the window/budget split**, which is the two laws read along one axis rather than a claim
+about summaries.
+
+The honest limit on all three of those comparisons is the same: 48 paired sessions, 26 scoreable,
+and differences of 0.03-0.07 are not resolvable at that size.  The extremes are: plain retrieval
+with no window scores 0.243 while losing 25 pp of fidelity, and full history scores 0.089.
 
 For the record, an earlier version of this baseline reported -23.86 pp and was **withdrawn**: the
 arm had never called its summariser, because a branch-placement bug left the "compaction" view a
