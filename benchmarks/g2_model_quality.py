@@ -234,7 +234,7 @@ def build_examples(
                         query, token_budget=max(token_budget + 1,
                                                 int(token_budget * retrieve_multiplier)),
                         max_spans=max_spans, **options)
-                    if compile_mode == "tail_state":
+                    if compile_mode in ("tail_state", "action_window"):
                         # The tail is the working set.  Keep the most recent spans whole and in
                         # order, then spend what is left on the compiled far field.  This is the
                         # arm the controls point at: surface fidelity is conditioned on a
@@ -248,7 +248,25 @@ def build_examples(
                                        else int(token_budget * tail_fraction))
                         tail, tail_used, tail_ids = [], 0, set()
                         newest = max(idx.spans, key=lambda sp: sp.turn) if idx.spans else None
-                        for span in sorted(idx.spans, key=lambda sp: -sp.turn):
+                        ordered = sorted(idx.spans, key=lambda sp: -sp.turn)
+                        if compile_mode == "action_window":
+                            # What the mid-session action measurement pointed at: a window chosen by
+                            # *recency of tokens* keeps the newest evidence but very few of the
+                            # agent's own prior actions (median 6, against 44 in the full
+                            # transcript), and the model then answers in prose instead of emitting
+                            # a tool call - 0.375 against 0.625.  This mode spends the same window
+                            # on the newest span plus the most recent **action-bearing** spans, and
+                            # only fills what is left with ordinary recency, so the comparison
+                            # isolates *which turns* the window holds from how many tokens it holds.
+                            def _is_action(span) -> bool:
+                                from benchmarks.g2c_action_reproduction import parse_action
+
+                                return span.role == "assistant" and parse_action(span.text) is not None
+
+                            actions = [sp for sp in ordered if sp is not newest and _is_action(sp)]
+                            rest = [sp for sp in ordered if sp is not newest and not _is_action(sp)]
+                            ordered = ([newest] if newest is not None else []) + actions + rest
+                        for span in ordered:
                             cost = max(1, int(token_counter(span.text)))
                             limit = tail_budget
                             if span is newest:
@@ -653,7 +671,7 @@ def main(argv=None):
                         "the end instead (tail_query mode)")
     p.add_argument("--compile-mode", default="consolidate",
                    choices=("consolidate", "materialize", "state_first", "recency",
-                            "tail_state", "tail_query", "compact"),
+                            "tail_state", "tail_query", "compact", "action_window"),
                    help="`consolidate` picks among the retrieved views; `materialize` replays "
                         "the log's file events and keeps the current state")
     p.add_argument("--no-collapse-paths", action="store_true",

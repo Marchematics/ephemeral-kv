@@ -217,3 +217,74 @@ def test_provenance_channel_pulls_identifier_matches():
     kept, _ = idx.compile_view("what should change in src/cache.py?", token_budget=200,
                                max_spans=8, provenance_terms=4)
     assert any("src/cache.py" in s.text for s in kept)
+
+
+def _action_trajectory():
+    """A trajectory whose assistant turns are tool calls, which is what a coding agent records."""
+    msgs = [{"role": "system", "content": "coding agent"}]
+    msgs += [
+        {"role": "user", "content": "fix src/cache.py"},
+        {"role": "assistant", "content": "```\nstr_replace_editor view /testbed/src/cache.py\n```"},
+        {"role": "tool", "content": "cache.py: lru eviction path"},
+    ]
+    for i in range(6):
+        # a prose turn between actions, which is what a real trajectory looks like and what makes the
+        # two window rules differ: recency fills with the newest prose, the action window does not
+        msgs += [
+            {"role": "user", "content": f"OBSERVATION: module_{i} output " + "x" * 120},
+            {"role": "assistant", "content": f"Let me look at module {i} and decide. " + "p" * 120},
+            {"role": "assistant",
+             "content": f"```\nstr_replace_editor str_replace /testbed/src/mod_{i}.py --old_str a\n```"},
+            {"role": "tool", "content": f"module_{i}.py changed " + "y" * 120},
+        ]
+    msgs += [{"role": "user", "content": "OBSERVATION: tests pass"},
+             {"role": "assistant", "content": "```\nstr_replace_editor view /testbed/src/cache.py\n```"}]
+    return msgs
+
+
+def _actions_in(context: str) -> int:
+    from benchmarks.g2c_action_reproduction import parse_action
+
+    return sum(1 for block in context.split("<assistant>")[1:] if parse_action(block))
+
+
+def test_action_window_shows_more_actions_than_recency():
+    """The mode exists to change *which* turns the window holds, so that is what is asserted."""
+    from benchmarks.g2_model_quality import build_examples
+
+    token_counter = lambda text: max(1, len(text.split()))
+    compiler = {"recency_spans": 1, "recency_fraction": 0.6, "max_span_fraction": 0.25,
+                "provenance_terms": 8, "dedup": False, "snippet": False, "consolidate": True,
+                "retrieve_multiplier": 1.0, "collapse_paths": True, "tail_fraction": 0.6,
+                "tail_tokens": 60, "summary_tokens": 64, "summary_input_tokens": 512,
+                "summary_stride": 8, "tail_cap": 0.5, "far_compiler": "consolidate"}
+    recency = build_examples(_action_trajectory(), token_budget=120, min_history_spans=4,
+                             compiler={**compiler, "compile_mode": "tail_state"},
+                             token_counter=token_counter)
+    actions = build_examples(_action_trajectory(), token_budget=120, min_history_spans=4,
+                             compiler={**compiler, "compile_mode": "action_window"},
+                             token_counter=token_counter)
+    assert recency and actions and len(recency) == len(actions)
+    recency_seen = [_actions_in(example.active_context) for example in recency]
+    action_seen = [_actions_in(example.active_context) for example in actions]
+    # strict, because the two rules agreeing would satisfy `>=` and the mode would be a no-op: the
+    # first version of this test asserted `>=` and passed with the reordering deleted
+    assert max(action_seen) > max(recency_seen), (recency_seen, action_seen)
+    assert sum(action_seen) > sum(recency_seen), (recency_seen, action_seen)
+
+
+def test_action_window_keeps_the_current_turn():
+    """The current turn is not optional in either mode: dropping it would answer a different question."""
+    from benchmarks.g2_model_quality import build_examples
+
+    token_counter = lambda text: max(1, len(text.split()))
+    compiler = {"recency_spans": 1, "recency_fraction": 0.6, "max_span_fraction": 0.25,
+                "provenance_terms": 8, "dedup": False, "snippet": False, "consolidate": True,
+                "retrieve_multiplier": 1.0, "collapse_paths": True, "tail_fraction": 0.6,
+                "tail_tokens": 60, "summary_tokens": 64, "summary_input_tokens": 512,
+                "summary_stride": 8, "tail_cap": 0.5, "far_compiler": "consolidate",
+                "compile_mode": "action_window"}
+    examples = build_examples(_action_trajectory(), token_budget=120, min_history_spans=4,
+                              compiler=compiler, token_counter=token_counter)
+    assert examples
+    assert all("tests pass" in example.active_context for example in examples[-1:])

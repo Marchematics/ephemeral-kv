@@ -223,7 +223,7 @@ def main(argv=None) -> int:
     p.add_argument("--tail-cap", type=float, default=0.5)
     p.add_argument("--compile-mode", default="tail_state",
                    choices=("consolidate", "materialize", "state_first", "recency",
-                            "tail_state", "tail_query", "compact"))
+                            "tail_state", "tail_query", "compact", "action_window"))
     p.add_argument("--far-compiler", default="consolidate",
                    choices=("consolidate", "materialize", "raw"))
     p.add_argument("--consolidate", action=argparse.BooleanOptionalAction, default=True)
