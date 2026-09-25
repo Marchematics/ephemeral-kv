@@ -236,10 +236,15 @@ Open items, in the order they matter:
    active-set prefill) are measured; the arrival models and the fleet geometries are declared.
 5. **The corpus stops at 96 turns and 156K tokens.**  The 1M rows are composed with one extrapolated
    lookup input and are labelled wherever they appear.
-6. **Float numbering.**  Figures and tables are numbered in this draft by the order they were
+6. **Length.**  The manuscript is ~10,300 words: ~8,800 of body plus a 1,400-word appendix, with 14
+   tables and 5 figures.  That is over an OSDI page budget, and the trimming pass should be
+   deliberate rather than incremental - the obvious candidates are moving the corpus-description,
+   action-level and recovery tables to the appendix, and cutting Section 5 by a third, since its two
+   compared systems are already carried by Table 13.
+7. **Float numbering.**  Figures and tables are numbered in this draft by the order they were
    generated; in a LaTeX build they are renumbered by order of appearance.  Figure 5 is a
    table-shaped CSV of the capacity numbers and has no drawing.
-7. **Configuration coverage.**  Receipts now record the flags that produced them and
+8. **Configuration coverage.**  Receipts now record the flags that produced them and
    `check_scripts.py` compares each script's invocation against the configuration its receipt
    recorded (21 outputs, 0 disagreements); `--config-audit` lists the receipts that predate the
    block, and re-running those arms is what closes the gap.  Six predate it: the tail-state arm and

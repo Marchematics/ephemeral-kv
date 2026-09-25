@@ -14,34 +14,27 @@ sentence around them carry the scope.
 A long-lived LLM session is served today as if its KV cache *were* the session: the resident object
 grows with the transcript, so placement, recovery and capacity planning all inherit the session's
 age.  We measure what a turn actually needs and find that the object those decisions depend on is
-bounded and independent of age.  On real coding-agent traces, a **4,096-token** execution state
-holds the next turn inside the 2 pp fidelity allowance (-0.96 pp) and a **6,144-token** one holds it
-at parity (0.00 pp), with an end-task score statistically indistinguishable from the best retrieval
-baseline we can build.  The state does not track the history: it stays between **4,588 and 8,439
-tokens** - and its transfer between **18 and 40 KB** - across an **8.9x range of raw history** (64K to
-984K tokens, the long end composed from real sessions) and a 45x range of turns, and paired against a
-resident 131K-token view its teacher-forced accuracy is 2.41-2.50 pp behind at every length.  The consequence is a phase change rather than a speedup: a session
-**32x older costs 2.4x less to move** (5.1x at a 4K state) because the transfer term leaves the cold
-path; one worker holds **32x more sessions**; recovery and a model revision rebuild the state from a
-durable index instead of moving 12-128 GiB of KV; and a replay against measured hardware primitives
-advances routing in **117 cells at the states where fidelity holds** - 63 of them at 4,096 tokens,
-52 at 8,192 and 2 at 16,384 (the decision at those sizes is a tie with the best retrieval baseline,
-not a win) - across the three
-regimes the replay models - balanced, slow-worker (a worker at a tenth of the service rate) and
-worker-loss - where the original grid advanced in four cells at a 2K corner that no quality
-measurement supported.
+bounded and independent of age.  On real coding-agent traces a **4,096-token** execution state holds
+the next turn inside the 2 pp fidelity allowance (-0.96 pp) and a 6,144-token one holds it at parity
+(0.00 pp), with an end-task score that ties the best retrieval baseline we can build and beats the
+full transcript (0.134 against 0.089 at the floor).  The state does not track the history: across an
+**8.9x range of raw history** and 45x of turns it stays between **4,588 and 8,439 tokens** and
+**18 and 40 KB** of transfer, and 3,922-3,928 tokens at the floor configuration.  The consequence is
+a phase change rather than a speedup: a session **32x older costs 2.4x less to move** (5.1x at a 4K
+state); one worker holds **32x more sessions**; recovery and a model revision rebuild the state from
+a durable index instead of moving 12-128 GiB of KV; and a replay over measured hardware primitives
+advances routing in **117 cells at states where fidelity holds** - 63 at 4,096 tokens, 52 at 8,192
+and 2 at 16,384 - in all three regimes the replay models.
 
-We also report what does not work, because it is the hypothesis this space reaches for first.  A
-semantic compiler - content dedup, collapse-each-file-to-its-latest-state, snippet re-selection, log
-replay into materialised file state - does **not** beat plain retrieval on the real task, and two of
-its stages measurably hurt: collapsing a file to its latest state costs 8.5 pp of fidelity against
-keeping the superseded views, and re-selecting the newest output's lines costs 20 pp.  What carries
-quality is weaker and more useful: render the newest evidence **whole** (a ~3K window suffices) and
-spend the rest of the budget on retrieval with a consolidated far field.  Finally, the metric the
-field uses to compare long-context systems - teacher-forced next-token fidelity - cannot see any of
-this: on these traces it is saturated by keeping the newest spans whole, which is why the end task is
-the primary metric and fidelity is a constraint.
-
+We also report what does not work, because it is the hypothesis this space reaches for first: a
+semantic compiler - dedup, collapse-each-file-to-its-latest-state, snippet re-selection, log replay
+into materialised state - does not beat plain retrieval, two of its stages measurably hurt, and at
+the size the system actually runs at it does not rescue the surface either.  What carries quality is
+weaker and more useful: render the newest evidence **whole** (a ~3.5K window suffices) and spend the
+rest of the budget on consolidated retrieval.  Finally, the metric the field uses to compare
+long-context systems - teacher-forced next-token fidelity - cannot see any of this: it is saturated
+by keeping the newest spans whole, which is why the end task is the primary metric and fidelity a
+constraint.
 ---
 
 ## 1. Introduction
