@@ -47,16 +47,20 @@
     {
       "active_tokens": 16384,
       "cells": 66,
-      "advance": 2
+      "advance": 2,
+      "arm": "retrieval only, no window, at a 16,384-token budget (dedup + snippet)",
+      "fidelity_pp": -1.94,
+      "decision_f1": 0.142,
+      "fidelity_admissible": true,
+      "decision_admissible": true,
+      "decision_parity_admissible": false
     }
   ],
   "summary": {
     "advancing_cells_total": 134,
-    "advancing_cells_fidelity_admissible": 52,
-    "advancing_cells_decision_admissible": 132,
+    "advancing_cells_fidelity_admissible": 54,
+    "advancing_cells_decision_admissible": 134,
     "advancing_cells_decision_parity": 0,
-    "sizes_without_quality_points": [
-      16384
-    ]
+    "sizes_without_quality_points": []
   }
 }

@@ -163,6 +163,16 @@ def main(argv=None) -> int:
           sum(1 for r in advancing if (r["p99_reduction"] or -9) >= 0.30), 0, 0)
     check("best p99 reduction in the admissible column",
           round(max((r["p99_reduction"] or -9) for r in advancing), 2), 0.26, 1e-2)
+    # the admissible region now covers every size with a measured point, including 16,384, whose
+    # retrieval-only point is inside tolerance - the join used to report that size as having no
+    # quality point and silently dropped its two advancing cells
+    row16384 = next(r for r in join["rows"] if r["active_tokens"] == 16384)
+    check("admissible region across sizes",
+          join["summary"]["advancing_cells_fidelity_admissible"], 54, 0)
+    check("advancing cells at 16384 (fidelity-admissible)", row16384["advance"], 2, 0)
+    results.append(("every active size has a quality point",
+                    not join["summary"]["sizes_without_quality_points"],
+                    f"missing: {join['summary']['sizes_without_quality_points'] or 'none'}"))
     check("region if 4096 were admissible (8192 + 4096 columns)",
           row8192["advance"] + row4096["advance"], 115, 0)
     window3k = bucket_stats("artifacts/g2-compiler-window3k-b4096-v1.json").get("32K-128K") or {}

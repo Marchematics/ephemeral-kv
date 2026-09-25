@@ -4,4 +4,4 @@ active_tokens,cells,advance,fidelity_pp,decision_f1,fidelity_admissible,decision
 2048,66,17,-27.92,0.179,False,True
 4096,198,63,-2.4,0.117,False,True
 8192,294,52,0.0,0.161,True,True
-16384,66,2,,,,
+16384,66,2,-1.94,0.142,True,True

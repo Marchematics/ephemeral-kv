@@ -22,10 +22,10 @@ axis, from 40 to 96 turns).  The consequence is a phase change rather than a spe
 **32x older costs 2.4x less to move** (5.1x at a 4K state) because the transfer term leaves the cold
 path; one worker holds **16x more sessions**; recovery and a model revision rebuild the state from a
 durable index instead of moving 12-128 GiB of KV; and a replay against measured hardware primitives
-advances routing in **52 cells at the 8,192-token state where fidelity holds** (0.00 pp; the decision
-there is a tie with the best retrieval baseline, not a win) across balanced, hotspot and worker-loss
-regimes, where the original grid advanced in four cells at a 2K corner that no quality measurement
-supported.
+advances routing in **54 cells at the states where fidelity holds** - 52 of them at 8,192 tokens,
+2 at 16,384 (the decision there is a tie with the best retrieval baseline, not a win) - across
+balanced, hotspot and worker-loss regimes, where the original grid advanced in four cells at a 2K
+corner that no quality measurement supported.
 
 We also report what does not work, because it is the hypothesis this space reaches for first.  A
 semantic compiler - content dedup, collapse-each-file-to-its-latest-state, snippet re-selection, log
@@ -454,10 +454,12 @@ gives the advancing cells:
 | 2,048 | 17/66 |
 | 4,096 | 63/198 |
 | **8,192 (fidelity-admissible)** | **52/294** |
-| 16,384 | 2/66 |
+| **16,384 (fidelity-admissible)** | **2/66** |
 
-134 of 624 cells advance; the 8,192 column covers balanced, hotspot (a worker at a tenth of the
-service rate), slow-worker and worker-loss regimes.  It is admissible because its fidelity holds
+134 of 624 cells advance, and **54** of them sit in a column whose measured quality point passes:
+the 8,192 column, which covers balanced, hotspot (a worker at a tenth of the service rate),
+slow-worker and worker-loss regimes, and the 16,384 column, whose retrieval-only point is -1.94 pp
+with a 0.142 decision.  It is admissible because its fidelity holds
 (0.00 pp); its decision is a tie with plain retrieval, so the cells that advance there do so on cost,
 and a strict decision-parity bar clears none of them.  The balanced/hotspot/slow-worker wins are the
 capacity-pressure regime: a warm cache holding a fraction of the fleet and no cluster KV store, so
@@ -475,8 +477,7 @@ the regimes where the baseline stalls the ephemeral policy's own p99 is worse in
 the p99 reduction is positive only in the balanced cells (median +6%, max +26%), because a baseline
 that completes nothing still has a p99.
 
-**What the region's size is waiting on, stated as two numbers.**  The admissible column is the one
-whose quality point passes, and the columns differ by cell count: 4,096 advances in 63 cells of 198
+**What the region's size is waiting on, stated as two numbers.**  The columns differ by cell count: 4,096 advances in 63 cells of 198
 against the 8,192 column's 52 of 294, so moving the same system to a 4,096-token state would widen
 the region from 52 to 115 cells at *half* the state size - and capacity and mobility improve with it.
 It is not admissible yet: the best measured 4,096-token state scores **-2.40 pp** of fidelity against

@@ -44,6 +44,18 @@
         "decision_best_arm": "artifacts/g2b-patch-localization-consolidate-b8192-v1.json"
       },
       "note": "the decision-best arm at this size scores 0.292 on 24 instances but carries -5.44 pp of fidelity, so it is not admissible; the joint arm is"
+    },
+    {
+      "active_tokens": 16384,
+      "arm": "retrieval only, no window, at a 16,384-token budget (dedup + snippet)",
+      "fidelity_pp": -1.94,
+      "decision_f1": 0.142,
+      "receipts": {
+        "fidelity": "artifacts/g2-compiler-dedup-b16384-v1.json",
+        "decision": "artifacts/g2b-patch-localization-b16384-v2.json",
+        "fidelity_alt": "artifacts/g2-compiler-recency-b16384-v1.json"
+      },
+      "note": "the alternative fidelity arm (plain recency at 16,384) scores 0.00 pp but has no decision arm at this size, so the point names the one design that has both metrics; either way the column is inside the 2 pp tolerance, which is why the join no longer reports this size as having no quality point"
     }
   ]
 }
