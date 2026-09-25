@@ -552,7 +552,7 @@ partial write; `benchmarks/check_scripts.py` checks that every script's promised
 Four checks run against the repository rather than against the prose:
 
 * **value audit** - `benchmarks/paper_numbers.py` re-derives every headline number from the
-  receipts and asserts it (27 checks, including that the routing cells which clear a strict
+  receipts and asserts it - including that the routing cells which clear a strict
   retrieval-parity bar are exactly zero, and that the stricter end task's interval contains zero);
 * **receipt audit** - `benchmarks/check_receipts.py` reports any cited receipt that is missing, and
   any whose payload is a *partial* write (the harnesses write incrementally, so a killed run leaves
