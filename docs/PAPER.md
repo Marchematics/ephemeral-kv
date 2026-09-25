@@ -219,17 +219,14 @@ says the window rather than the total is what the surface needs.
 | 8,192 | ~4.1K | 0.00 pp | 0.161 |
 | 12,288 | ~5.3K | 0.00 pp | 0.155 |
 
-Three things follow, and all three are measured.  At a 4,096-token total with a 3,072-token window
-the surface is 2.4 pp out of tolerance and the decision falls to 0.117 against 0.243 for plain
-retrieval.  Holding the total at 4,096 and widening the *window* to 3,584 brings the surface inside
-the allowance (-0.96 pp, NLL +0.049 against the narrower window's +0.129) - better on the surface
-than the 3,072-token window at a 6,144-token total (+0.061), which is the whole point: **the surface
-tracks how much newest evidence is kept whole, not how large the budget is.**  And above 4,096 more
-budget does not improve either metric, which is why the paper's state is **4-8K** rather than as
-large as the machine will hold.  The margin is worth stating: the 4,096-token floor spends half the
-2 pp allowance (-0.96 pp), where the 6,144-token arm spends none of it, so a deployment that wants
-the whole allowance in reserve should run the 6,144-token configuration - the paper reports both and
-the routing consequence is computed at the size each implies.
+Two things follow, and both are measured.  Widening the *window* at a fixed total is what moves the
+surface: it is better on the loss (+0.049 at 3,584 tokens against +0.129 at 3,072) than the narrower
+window is at a *larger* total (+0.061 at 6,144), which is the point - **the surface tracks how much
+newest evidence is kept whole, not how large the budget is.**  And above 4,096 more budget improves
+neither metric, which is why the state is **4-8K** rather than as large as the machine will hold.
+The margin is worth stating: the floor spends half the 2 pp allowance, where a 6,144-token state
+spends none of it, so a deployment that wants the whole allowance in reserve should run 6,144 - the
+paper reports both, and the routing consequence is computed at the size each implies.
 
 ### 2.3 The metric cannot see the difference
 
