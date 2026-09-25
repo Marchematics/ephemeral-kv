@@ -224,16 +224,24 @@ Against **plain retrieval the bounded state wins decisively**: 16 wins to 2 loss
 the comparison - the bounded state is the only one of the three that is both usable at 4K and
 capable of acting, and it does not act as reliably as the transcript.
 
-**Why, measured rather than guessed.**  The three views differ in what they show by an order of
-magnitude, and it is not the evidence: counting the prior *actions* each view contains at the scored
-turns (`benchmarks/g2d_view_composition.py`) gives a median of **44 for the full transcript, 6 for
-the bounded state, and 1 for retrieval**, with **23 of 48** retrieval views containing no action at
-all.  A ranking built for evidence selects tool output and file contents, because that is what the
-query terms match; prior assistant actions are not evidence and do not rank.  So a view assembled
-only from ranked evidence is not context management with a quality cost - it removes the format the
-continuation is supposed to be in, and the model answers in prose.  This also names the gap the
-bounded state has left: it keeps 6 actions where the transcript keeps 44, and closing it is a
-question about *which* turns the window holds, not about how many tokens it holds.
+**The obvious explanation, and the experiment that killed it.**  The three views differ in what they
+show by an order of magnitude, and it is not the evidence: counting the prior *actions* each view
+contains at the scored turns (`benchmarks/g2d_view_composition.py`) gives a median of **44 for the
+full transcript, 6 for the bounded state, and 1 for retrieval**, with **23 of 48** retrieval views
+containing no action at all.  A ranking built for evidence selects tool output and file contents,
+because that is what the query terms match, and prior assistant actions are not evidence and do not
+rank.  That correlation suggests a mechanism - the model needs to see the action format to produce
+one - and the mechanism is **false**, which we know because we implemented it.  A window that keeps
+the newest span and then spends the rest on the most recent **action-bearing** spans
+(`--compile-mode action_window`) raises the action count in the view from a median of 6 to **13**,
+and *lowers* the emit rate: over the turns the two rules share, **3 against 7** of 18
+(`artifacts/g2d-window-comparison-v1.json`, with the full-transcript arm reproducing byte-identically
+across the two runs, so the comparison is the window rule and nothing else).  Showing the model more
+prior actions while displacing recent evidence makes it *less* likely to act.  What a continuation
+needs is therefore not a corpus of format examples but a **coherent recent turn** - and that is what
+retrieval lacks, since a bag of query-ranked evidence fragments contains no turn boundary to
+continue from at all.  The counts above are a correlate and the paper reports them as one; the
+intervention is in the repository for anyone who wants to re-derive the correction.
 
 **The compiler does not rescue the floor; the window does.**  The one remaining place a state
 compiler could have paid is the size the system actually runs at, where the far field has least room
@@ -846,6 +854,7 @@ Table 12 maps each claim to the receipt that backs it and to the script that pro
 | the dead-state concentration does not extrapolate to composed lengths | `g2-dead-state-composed-1m-v1.json` | `benchmarks/g2_dead_state.py` |
 | lexical evidence mass grows with session length | `g2-evidence-mass-composed-1m-v1.json` | `benchmarks/g2_evidence_mass.py` |
 | 157 of 724 replay cells sit at an admissible state, 117 of them clearing 1.5x goodput | `g4-quality-join-v3.json`, `g4-all-phase-summary-v3.json`, `g4b-burst-*-v1.json` | `scripts/run_g4_join.sh`, `scripts/run_g4_regimes.sh` |
+| the action window raises the actions in the view and lowers the emit rate, so the composition counts are a correlate | `g2d-window-comparison-v1.json`, `g2d-view-composition-v1.json` | `scripts/run_g2d_action_window.sh`, `benchmarks/g2d_window_comparison.py` |
 | the p99 half of the gate is conditional on the burst parameters, and where it holds | `g4b-burst-sensitivity-v1.json`, `g4b-burstsweep-*-v1.json` | `scripts/run_g4_burst_sweep.sh`, `benchmarks/g4_burst_sensitivity.py` |
 | the compiler does not rescue the 4,096-token floor | `g2-compiler-window3k-farmaterialize-b4096-v1.json`, `g2-compiler-window3584-b4096-v1.json` | `scripts/run_floor_3584.sh` |
 

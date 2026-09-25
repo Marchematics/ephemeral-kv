@@ -62,9 +62,11 @@ against a checked-in receipt, and the CPU-only path in
   patch, plus an offline action-level rescoring.  Its **executable** form - 48 mid-session turns,
   three arms parsed into tool invocations - is measured and is deliberately two-sided: the bounded
   state **beats plain retrieval decisively** (+0.292, CI [+0.146, +0.438]) and **regresses against
-  the full transcript** (-0.250, CI [-0.417, -0.063]), because the views carry a median of 44, 6 and
-  1 prior actions respectively.  A view ranked for *evidence* does not show the model the format it
-  is being asked to produce.
+  the full transcript** (-0.250, CI [-0.417, -0.063]).  The views carry a median of 44, 6 and 1
+  prior actions respectively, which looks like the mechanism - and the intervention says it is not:
+  a window that spends its budget on recent action-bearing spans raises the count from 6 to 13 and
+  *lowers* the emit rate, 3 against 7.  More examples of the format while displacing recent evidence
+  makes the model less likely to act; what a continuation needs is a coherent recent turn.
 * **Past 156K tokens the histories are composed** out of whole real sessions, and the 8B/70B
   geometries are declared rather than measured.  Both are labelled wherever they appear.
 
