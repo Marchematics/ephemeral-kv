@@ -117,6 +117,7 @@ def build_examples(
                 # budget, which is why the windowed arms scored the same 0.16 decision at 8,192
                 # and at 12,288 - the split stayed proportional.
                 tail_tokens = int(options.pop("tail_tokens", 0))
+                summary_tokens = int(options.pop("summary_tokens", 1536))
                 tail_cap = float(options.pop("tail_cap", 0.5))
                 far_compiler = str(options.pop("far_compiler", "consolidate"))
                 if compile_mode == "recency":
@@ -158,7 +159,10 @@ def build_examples(
                         tail_ids.add(span.span_id)
                     tail.sort(key=lambda sp: sp.turn)
                     older = [sp for sp in idx.spans if sp.span_id not in tail_ids]
-                    summary_budget = max(64, token_budget - tail_used)
+                    # a realistic compaction keeps a *small* summary and a large verbatim window;
+                    # generating a summary as large as the remaining budget is neither what
+                    # production compaction does nor affordable to measure
+                    summary_budget = max(64, min(summary_tokens, token_budget - tail_used))
                     older_text = "".join(render_span(sp) for sp in older)
                     if summarizer is not None and older_text.strip():
                         summary = (summarizer(older_text, summary_budget) or "").strip()
@@ -541,6 +545,9 @@ def verdict_by_bucket(by_bucket: dict) -> dict:
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     p.add_argument("--jsonl", required=True)
+    p.add_argument("--summary-tokens", type=int, default=1536,
+                   help="size of the model-written summary in compact mode; the rest of the "
+                        "budget stays verbatim (a realistic compaction, and affordable to measure)")
     p.add_argument("--summarizer-model", default="",
                    help="write compaction summaries with this checkpoint instead of the "
                         "served model (empty = the served model); the scorer is unchanged")
@@ -683,6 +690,7 @@ def main(argv=None):
                           "compile_mode": args.compile_mode,
                           "tail_fraction": args.tail_fraction,
                           "tail_tokens": args.tail_tokens,
+                          "summary_tokens": args.summary_tokens,
                           "tail_cap": args.tail_cap,
                           "far_compiler": args.far_compiler,
                           "keep_earlier_verbatim": args.keep_earlier_verbatim},
