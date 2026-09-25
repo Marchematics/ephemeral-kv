@@ -390,21 +390,30 @@ A 22-turn example with 67K of history fails badly (-46.9 pp); it is a singleton,
 it points at a limitation: a short session whose individual turns are enormous.
 
 **Table 7b:** The same law past the corpus, on histories composed out of whole real sessions
-(`benchmarks/build_composed_long_sessions.py`). The state is the shipped 8,192-token view; the
-tokens and bytes are CPU measurements of what a cold route transfers
-(`g2-state-size-{real64k,composed-128k,composed-256k,composed-512k,composed-1m}-v1.json`), and the
-rows count every qualifying turn in the bucket.
+(`benchmarks/build_composed_long_sessions.py`).  Every column is measured: the history and turn
+counts are the corpus's, the state's tokens and bytes are CPU measurements of what a cold route
+transfers (`g2-state-size-*`), and the quality columns are the end task and the surface against a
+*resident* view that uses the model's whole 131,072-token window (`g2-composed-*-{state8192,reference131k}`,
+rows paired by index).
 
-| corpus | raw history p50 | turns p50 | state tokens p50 | state KB p50 |
-|---|---:|---:|---:|---:|
-| real sessions (64K+) | 111,084 | 42 | 8,203 | 18.1 |
-| composed | 140,666 | 291 | 6,598 | 40.1 |
-| composed | 284,518 | 614 | 7,174 | 25.9 |
-| composed | 514,211 | 963 | 7,010 | 25.4 |
-| composed | 983,692 | 1,879 | 7,039 | 24.8 |
+| corpus | raw history p50 | turns p50 | state tokens p50 | state KB p50 | end-task F1 | vs resident view |
+|---|---:|---:|---:|---:|---:|---:|
+| real sessions (64K+) | 111,084 | 42 | 8,203 | 18.1 | - | - |
+| composed | 140,666 | 291 | 6,598 | 40.1 | 0.077 | -0.38 pp |
+| composed | 284,518 | 614 | 7,174 | 25.9 | queued | -3.26 pp |
+| composed | 514,211 | 963 | 7,010 | 25.4 | 0.122 | -4.91 pp |
+| composed | 983,692 | 1,879 | 7,039 | 24.8 | 0.167 | -3.35 pp |
+| **at the shipped floor** (4,096) | **140,666 -> 983,692** | **291 -> 1,879** | **3,922 -> 3,928** | **19.8 -> 14.1** | 0.134 (n=48, floor config) | - |
 
 Across an **8.9x** range of raw history - and a 45x range of turns - the state that must move stays
-between 4,588 and 8,439 tokens with no trend (p50 6,598 -> 7,039), and between 18 and 40 KB of text.
+between 4,588 and 8,439 tokens with no trend, and between 18 and 40 KB of text; at the floor
+configuration it is **3,922 to 3,928 tokens and 19.8 to 14.1 KB** from 141K to 984K tokens.  **The
+session keeps growing; the state that must move does not.**  The end task does not degrade with it
+(0.077 -> 0.122 -> 0.167 across those buckets), while the surface gives up a few points against a
+resident view once the history is several times that view's window (-0.38 / -3.26 / -4.91 / -3.35 pp,
+medians of paired differences with a per-example spread of -26 to +2 pp).  The composition is the
+honest limit: the transcripts are real, the million-token sessions are not.
+
 **The session keeps growing; the state that must move does not.**  The quality side of these same
 buckets has a shape that matters more than its level: paired against a *resident* view that uses the
 model's whole 131,072-token window (`g2-composed-{128k,256k}-reference131k-v1.json` against

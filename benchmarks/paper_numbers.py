@@ -466,6 +466,20 @@ def main(argv=None) -> int:
     check("4,096 prefill p50 s", round(prefill[4096], 4), 0.0946, 1e-3)
     check("8,192 prefill p50 s", round(prefill[8192], 4), 0.2026, 1e-3)
 
+    # --- Table 7b's quality columns: the end task does not degrade with age, and the floor
+    # configuration's state is measured at the long end as well
+    for bucket, want in (("128k", 0.077), ("512k", 0.122), ("1m", 0.167)):
+        rows = [r for r in load(f"artifacts/g2b-patch-localization-composed-{bucket}-b8192-v1.json")["rows"]
+                if r.get("recorded_files")]
+        check(f"composed {bucket}: end-task F1", round(statistics.mean(r["active"]["f1"] for r in rows), 3),
+              want, TOL)
+    for bucket, want_tokens, want_kb in (("128k", 3922, 19.8), ("512k", 3960, 14.2), ("1m", 3928, 14.1)):
+        rows = load(f"artifacts/g2-state-size-floor-composed-{bucket}-v1.json")["rows"]
+        check(f"floor state tokens, {bucket}",
+              round(statistics.median(r["state_tokens"] for r in rows)), want_tokens, 30)
+        check(f"floor state KB, {bucket}",
+              round(statistics.median(r["state_bytes"] for r in rows) / 1024, 1), want_kb, 0.5)
+
     # --- C5's lookup term: measured on composed histories, and query-driven rather than
     # history-driven - which is the abstraction's own claim, so it is asserted rather than narrated
     lookup_1m = load("artifacts/g2-index-lookup-composed-1m-v1.json")["rows"]
