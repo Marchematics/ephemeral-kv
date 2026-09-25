@@ -2,114 +2,98 @@
 
 **A long-lived LLM session should have an identity, not a home.**
 
-Agent-serving stacks increasingly make a session *sticky*: a follow-up turn is routed
-back to the worker that already owns its KV prefix because moving or rebuilding a
-history-sized KV cache is expensive. EphemeralKV tests a different systems abstraction:
+Agent-serving stacks increasingly make a session *sticky*: a follow-up turn is routed back to the
+worker that already owns its KV prefix, because moving or rebuilding a history-sized KV cache is
+expensive.  This project tests a different abstraction, in three objects rather than one:
 
-> The transcript and its compact retrieval index are durable. Per-worker KV is an
-> opportunistic execution cache, not session ownership. A turn may move when the
-> queueing benefit exceeds the cost of rematerializing its active working set.
+```text
+durable session     the transcript plus a model-independent index; append-only, grows
+execution state     compile(history, q): a bounded view, rebuilt on demand
+local KV            a disposable artifact of having computed that state once
+```
 
-The core hypothesis is stronger than "KV can be evicted." It is that **session affinity
-is a consequence of history-sized migration cost, not a fundamental property of agent
-serving**. If a cold route costs `index_lookup + prefill(active_set)` instead of
-`move_or_recompute(full_history)`, session age no longer determines where the next
-turn may run.
+If a cold route costs `lookup + prefill(active_set)` instead of `move_or_recompute(history)`, then
+session age stops determining where the next turn may run - not because KV is cheap to move, but
+because the thing that moves is small.
 
-## What this project must establish
+## What this repository reports
 
-1. **History-free mobility.** With the active working set held fixed, measured remote
-   materialization cost stays roughly flat as history grows from 32K toward 1M tokens,
-   while full-KV movement/re-prefill grows with history.
-2. **A routing phase change.** Under realistic load skew, tool gaps, or worker failure,\n   replacing a history-sized cold-route penalty with an active-set-sized penalty changes\n   when a scheduler should leave the warm worker. The routing heuristic itself is not\n   claimed as novel.
-3. **The inversion.** A 1M-token session with a small active set can be cheaper to move
-   than a 32K-token session with a larger active set.
-4. **No hidden QCC dependency.** BM25/embedding/provenance-style compilers are
-   first-class backends. QCC may be evaluated as one optional backend but is never
-   required for the claim.
+Measured on real coding-agent traces; every number below is asserted by `benchmarks/paper_numbers.py`
+against a checked-in receipt, and the CPU-only path in
+[`docs/REPRODUCING.md`](docs/REPRODUCING.md) re-derives all of them without a GPU.
 
-## What is *not* the novelty
+* **The state is bounded and does not track age.**  4,096 tokens holds the surface inside the 2 pp
+  fidelity allowance (-0.96 pp); 6,144 holds it at parity (0.00 pp).  Across an **8.9x range of raw
+  history** (67K to 984K tokens, the long end composed from real sessions) and **45x of turns**, the
+  state stays between 4,588 and 8,439 tokens and 18-40 KB of transfer; at the floor configuration it
+  is 3,922-3,928 tokens.
+* **Placement stops depending on age.**  A session 32x older costs **2.4x less to move** (5.1x at a
+  4K state), and one worker holds **32x more sessions** (427 / 40 / 16 per worker for 0.5B / 8B /
+  70B geometries) - the same number whether the sessions are 64K tokens or a million.
+* **Routing has a phase change at an admissible state.**  Of 624 replay cells, **117 advance at a
+  state whose measured quality point passes** - 63 at the 4,096-token floor, 52 at 8,192, 2 at
+  16,384 - and **all 117 clear the 1.5x SLO-goodput bar** (79 with a finite ratio, median 1.61x).
+  None advances through the tail: the best p99 improvement is 26%, under the 30% bar.
+* **Recovery moves state, not history.**  A killed worker's replacement rebuilds 8,192 tokens in
+  0.91-1.42 s with identical token accuracy, reading ~32 KB instead of the 0.38 GiB of KV the owner
+  held; the durable object also resumes on a **different** model.
 
-The first scaffold used the slogan "the conversation is durable; the KV cache is
-disposable." The literature/implementation audit in
-[`docs/NOVELTY.md`](docs/NOVELTY.md) found that this is not sufficient: regenerable-KV
-designs already treat text as source and KV as a derived artifact, and KVMem /
-sparse-attention systems already keep bounded active KV working sets.
+## What is not claimed
 
-Those observations remain useful enabling mechanisms. The paper claim is now about
-**breaking hard session affinity by bounding the cost of a cold route**.
+* **A semantic compiler does not pay here.**  Content dedup is a statistical tie with plain
+  retrieval, collapsing a file to its latest state costs 8.5 pp of fidelity, re-selecting the newest
+  output's lines costs 20 pp, and at the 4,096-token floor a materialised far field scores -2.48 pp
+  against consolidation's -2.40 pp while widening the window reaches -0.96 pp.  What carries quality
+  is the window and retrieval, not a compiler.
+* **Compaction is equivalent, not worse.**  Measured under the same budget and window, with the
+  summary in every scored context; the paper claims no win over it.
+* **Task success is unmeasured.**  The end task is next-turn file localisation against the recorded
+  patch, plus an offline action-level rescoring.
+* **Past 156K tokens the histories are composed** out of whole real sessions, and the 8B/70B
+  geometries are declared rather than measured.  Both are labelled wherever they appear.
 
-## Relationship to QCC
+## Where to read
 
-This is deliberately separate from
-[qcc-transformer](https://github.com/Marchematics/qcc-transformer).
-
-* QCC asks: **how much live state does one query need?**
-* EphemeralKV asks: **when should a long-lived session be free to move between workers?**
-
-Paper A's context compiler is not copied here. EphemeralKV owns a routing/lifecycle
-problem, different workloads (multi-turn agents), and different primary metrics
-(p99/TTFT/SLO goodput/failover rather than single-request quality-state curves).
-
-## Current gate signal
-
-G1's accounting model produced a useful negative result: with its original
-history-scanning index assumption, `discard + recompile` did **not** beat DRAM/NVMe KV
-restore by 512 turns. So tiered-storage latency is not the headline.
-
-G3 now asks the sharper question: if the durable index supports bounded/sublinear
-lookup, does the **remote-route tax** stop scaling with history? The checked-in
-accounting artifacts define the phase boundary across active-set size, KV bytes/token,\nand fabric bandwidth; they are not hardware results.
+| document | what it is |
+|---|---|
+| [`docs/PAPER.md`](docs/PAPER.md) | the manuscript: abstract, laws, system, evaluation, limitations, claim-to-receipt map |
+| [`docs/REPRODUCING.md`](docs/REPRODUCING.md) | the corpora's derivation, the CPU-only verification path, the GPU runners, the cold-start drill |
+| [`docs/VERDICT.md`](docs/VERDICT.md) | the claim/limit ledger: every claim with its measured value and scope |
+| [`docs/CLAIMS.md`](docs/CLAIMS.md) | the accounting ledger for structural and cost claims |
+| [`docs/PAPER_SPEC.md`](docs/PAPER_SPEC.md) | the gate table and the open items before submission |
+| [`docs/REVIEW.md`](docs/REVIEW.md) | the objections a reviewer will raise, with the receipt that answers each |
+| [`docs/NOVELTY.md`](docs/NOVELTY.md) | the overlap audit: headlines deliberately not claimed |
 
 ## Repository layout
 
 ```text
-benchmarks/   kill gates; each emits a machine-readable JSON artifact
-artifacts/    checked-in gate receipts; accounting is labelled as accounting
-docs/        PLAN.md, CLAIMS.md, NOVELTY.md
-tests/       CPU tests; no GPU/downloads
+benchmarks/   harnesses and audits; each writes a machine-readable JSON receipt
+artifacts/    150+ checked-in receipts, including the ones the figures are built from
+scripts/      the runner scripts that produced them, with the exact flags
+figures/      each figure as CSV (numbers, traceable to receipts) and SVG (the drawing)
+ephemeralkv/  the library: durable span index, consolidation, state compilation
+tests/        CPU tests; no GPU and no downloads
+docs/         the manuscript and its ledgers
 ```
 
-## Running
+## Verifying what is here
 
 ```bash
-python -m venv .venv && . .venv/bin/activate
-pip install -e '.[dev]'
-pytest -q
-
-python benchmarks/kill_gate_crossover.py \
-  --out artifacts/g1-accounting.json
-
-python benchmarks/kill_gate_mobility.py \
-  --out artifacts/g3-mobility-accounting.json
+python -m pytest tests/ -q                    # library semantics
+python benchmarks/check_receipts.py            # every cited receipt exists, is complete, is tracked
+python benchmarks/check_scripts.py             # every script's promised output exists, with the
+                                              # flags its receipt recorded
+python benchmarks/paper_numbers.py             # re-derives and asserts every headline number
+python benchmarks/make_figures.py --outdir /tmp/figs && diff -r /tmp/figs figures
 ```
 
-The measured gates need the public trace corpus and a GPU.  The trace JSONL is *not*
-committed (15,000 real transcripts are 2.3 GB); it is rebuilt from the public parquet by
-a script, so a receipt can always be regenerated:
+The corpora (4.9 GB of public agent traces) and the model checkpoints are not committed; both are
+rebuildable, and `docs/REPRODUCING.md` gives the commands.  The measured arms need a GPU: they are in
+`scripts/`, one runner per experiment family.
 
-```bash
-# 1. the trace corpus (needs an interpreter with pyarrow; note that the HTTP stack
-#    needs a no_proxy value httpx can parse - a bracketed [::1] raises InvalidURL)
-no_proxy=localhost,127.0.0.1,::1 python benchmarks/build_trace_sessions.py \
-  --out data/sessions.jsonl
+## Relationship to QCC
 
-# 2. G2 index half: active fraction and lookup cost against session age
-python benchmarks/g2_trace_index.py --jsonl data/sessions.jsonl \
-  --tokenizer cl100k_base --out artifacts/g2-thoughtworks-structural-v1.json
-
-# 3. G2 model half: does the retrieved active view preserve the next assistant turn?
-#    (full history vs lexical/provenance view, teacher-forced, model-agnostic)
-python benchmarks/g2_model_quality.py --jsonl data/sessions.jsonl \
-  --model <frozen checkpoint> --token-budget 4096 --max-length 32768 \
-  --out artifacts/g2-model-quality-<model>-v1.json
-
-# 4. G3: H2D movement and prefill primitives at each history length
-python benchmarks/g3_hardware_primitives.py --model <frozen checkpoint> \
-  --kv-bytes-per-token <bytes> --histories 32768 131072 524288 1048576 \
-  --active 2048 4096 8192 16384 --out artifacts/g3-hardware-primitives-v1.json
-```
-
-`g2_model_quality.py` reports per-history-bucket statistics and a `verdict_by_bucket`
-that encodes the G2 advance rule (`advance` / `kill` / `inconclusive`), so the gate can be
-read off a run instead of argued about afterwards.
+Deliberately separate from [`qcc-transformer`](https://github.com/Marchematics/qcc-transformer): QCC
+asks how much live state *one query* needs, while this project asks when a long-lived session should
+be free to move between workers.  No QCC code is copied here, and no claim depends on another
+project's compiler.
