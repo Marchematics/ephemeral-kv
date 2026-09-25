@@ -16,7 +16,8 @@ import subprocess
 from pathlib import Path
 
 DOCS = ("docs/CLAIMS.md", "docs/VERDICT.md", "docs/DRAFT.md", "docs/PLAN.md",
-        "docs/PAPER_SPEC.md", "docs/NOVELTY.md", "docs/REPORT.md")
+        "docs/PAPER_SPEC.md", "docs/NOVELTY.md", "docs/REPORT.md", "docs/REVIEW.md",
+        "docs/PAPER.md")
 # receipts that exist only as part of an external run (models, corpora, GPU sweeps) or that are
 # deliberately not tracked; listing them here is the documented-omission mechanism
 OPTIONAL_PREFIXES = ("data/", "models/")
