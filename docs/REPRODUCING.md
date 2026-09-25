@@ -75,6 +75,11 @@ diff -r /tmp/figs figures                        # the figures are reproducible,
 
 What each one is for:
 
+* **A receipt read only through a formatted path is invisible to the receipt audit** - it scans
+  documents and tools for quoted paths, and `f"artifacts/x-{bucket}-v1.json"` is a template rather
+  than a citation.  Where a tool reads a series of receipts, name them literally so the audit can see
+  them; the cold-start drill has caught three receipts that existed only in the working directory,
+  and one of them arrived that way.
 * **`paper_numbers.py`** is the value audit: it reads the receipts and asserts the numbers the
   manuscript quotes, prints `PASS`/`FAIL` per claim and exits non-zero on any failure.  If a receipt
   is regenerated and a number moves, this is where it shows up.  Where two arms have to be compared

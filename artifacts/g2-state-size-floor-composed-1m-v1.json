@@ -1,0 +1,1409 @@
+{
+  "schema": "ephemeral-kv-state-size-v1",
+  "kind": "measured_primitive",
+  "what": "tokens and bytes of the shipped compiled state (what a cold route transfers), measured through the harness's own view builder with no model loaded, plus the CPU wall time of that builder - index build, scan and view - which is an upper bound on the CPU side of a cold route, since the runtime reads a stored index",
+  "config": {
+    "compile_mode": "tail_state",
+    "jsonl": "data/sessions-composed-1m.jsonl",
+    "max_examples": 1,
+    "min_history_tokens": 900000,
+    "model": "/root/qcc/models/Llama-3.2-1B-Instruct",
+    "repeats": 1,
+    "tail_tokens": 3584,
+    "token_budget": 4096
+  },
+  "rows": [
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 900579,
+      "state_tokens": 3908,
+      "state_bytes": 13450,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1704
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 901756,
+      "state_tokens": 3849,
+      "state_bytes": 13586,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1706
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 902587,
+      "state_tokens": 3782,
+      "state_bytes": 14379,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1708
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 903728,
+      "state_tokens": 3867,
+      "state_bytes": 13355,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1710
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 904551,
+      "state_tokens": 4140,
+      "state_bytes": 14821,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1712
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 905809,
+      "state_tokens": 3754,
+      "state_bytes": 11730,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1714
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 908898,
+      "state_tokens": 3985,
+      "state_bytes": 15038,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1716
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 908945,
+      "state_tokens": 4115,
+      "state_bytes": 16013,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1718
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 909588,
+      "state_tokens": 4022,
+      "state_bytes": 14683,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1721
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 909811,
+      "state_tokens": 3981,
+      "state_bytes": 13913,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1723
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 912440,
+      "state_tokens": 3988,
+      "state_bytes": 14749,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1725
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 913512,
+      "state_tokens": 4075,
+      "state_bytes": 14545,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1727
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 914095,
+      "state_tokens": 4095,
+      "state_bytes": 15868,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1729
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 914496,
+      "state_tokens": 4358,
+      "state_bytes": 16526,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1731
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 914721,
+      "state_tokens": 3901,
+      "state_bytes": 15098,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1733
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 915860,
+      "state_tokens": 3776,
+      "state_bytes": 13640,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1735
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 916204,
+      "state_tokens": 4110,
+      "state_bytes": 15182,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1737
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 916666,
+      "state_tokens": 3966,
+      "state_bytes": 14512,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1739
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 917560,
+      "state_tokens": 3778,
+      "state_bytes": 14125,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1741
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 917805,
+      "state_tokens": 3775,
+      "state_bytes": 14324,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1743
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 918161,
+      "state_tokens": 3794,
+      "state_bytes": 14142,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1745
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 918544,
+      "state_tokens": 3918,
+      "state_bytes": 14641,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1747
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 918775,
+      "state_tokens": 3916,
+      "state_bytes": 14600,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1749
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 919048,
+      "state_tokens": 3926,
+      "state_bytes": 14717,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1751
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 919719,
+      "state_tokens": 3791,
+      "state_bytes": 14026,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1753
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 920064,
+      "state_tokens": 3800,
+      "state_bytes": 14073,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1755
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 920646,
+      "state_tokens": 3797,
+      "state_bytes": 13971,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1757
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 920953,
+      "state_tokens": 3807,
+      "state_bytes": 13895,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1759
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 921194,
+      "state_tokens": 4097,
+      "state_bytes": 14933,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1761
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 921537,
+      "state_tokens": 3955,
+      "state_bytes": 14648,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1763
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 921855,
+      "state_tokens": 3934,
+      "state_bytes": 14431,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1765
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 922451,
+      "state_tokens": 3944,
+      "state_bytes": 14972,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1767
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 922756,
+      "state_tokens": 3808,
+      "state_bytes": 14400,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1769
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 923105,
+      "state_tokens": 3808,
+      "state_bytes": 14595,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1771
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 923441,
+      "state_tokens": 3655,
+      "state_bytes": 14050,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1773
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 924078,
+      "state_tokens": 3804,
+      "state_bytes": 14690,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1775
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 924439,
+      "state_tokens": 3676,
+      "state_bytes": 14217,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1777
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 924720,
+      "state_tokens": 4197,
+      "state_bytes": 15865,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1779
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 924908,
+      "state_tokens": 3788,
+      "state_bytes": 14548,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1781
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 928474,
+      "state_tokens": 3743,
+      "state_bytes": 14460,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1783
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 928817,
+      "state_tokens": 3902,
+      "state_bytes": 14376,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1785
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 929231,
+      "state_tokens": 4130,
+      "state_bytes": 14774,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1787
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 929519,
+      "state_tokens": 3938,
+      "state_bytes": 13965,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1789
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 930428,
+      "state_tokens": 3799,
+      "state_bytes": 13868,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1791
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 930764,
+      "state_tokens": 3796,
+      "state_bytes": 13724,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1793
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 931840,
+      "state_tokens": 4317,
+      "state_bytes": 14953,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1795
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 932710,
+      "state_tokens": 3920,
+      "state_bytes": 13741,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1797
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 933667,
+      "state_tokens": 3794,
+      "state_bytes": 13418,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1799
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 934557,
+      "state_tokens": 3736,
+      "state_bytes": 13791,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1801
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 935331,
+      "state_tokens": 3782,
+      "state_bytes": 14465,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1803
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 936135,
+      "state_tokens": 3903,
+      "state_bytes": 14925,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1805
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 936613,
+      "state_tokens": 3804,
+      "state_bytes": 14692,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1807
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 937806,
+      "state_tokens": 3801,
+      "state_bytes": 15727,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1809
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 938669,
+      "state_tokens": 3956,
+      "state_bytes": 15478,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1811
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 939014,
+      "state_tokens": 4069,
+      "state_bytes": 16165,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1813
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 942996,
+      "state_tokens": 3880,
+      "state_bytes": 14451,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1815
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 943053,
+      "state_tokens": 4156,
+      "state_bytes": 17253,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1817
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 943587,
+      "state_tokens": 4029,
+      "state_bytes": 16673,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1820
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 962748,
+      "state_tokens": 4108,
+      "state_bytes": 16622,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1822
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 963029,
+      "state_tokens": 3962,
+      "state_bytes": 15829,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1824
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 963794,
+      "state_tokens": 4030,
+      "state_bytes": 15365,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1826
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 965951,
+      "state_tokens": 4050,
+      "state_bytes": 14728,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1828
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 967358,
+      "state_tokens": 4012,
+      "state_bytes": 14437,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1830
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 969759,
+      "state_tokens": 3971,
+      "state_bytes": 14385,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1832
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 969957,
+      "state_tokens": 4348,
+      "state_bytes": 15339,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1834
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 970145,
+      "state_tokens": 3940,
+      "state_bytes": 14425,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1836
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 970732,
+      "state_tokens": 3952,
+      "state_bytes": 14066,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1838
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 971240,
+      "state_tokens": 3825,
+      "state_bytes": 14376,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1840
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 971717,
+      "state_tokens": 3803,
+      "state_bytes": 14473,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1842
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 971875,
+      "state_tokens": 3795,
+      "state_bytes": 14485,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1844
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 972174,
+      "state_tokens": 4181,
+      "state_bytes": 15489,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1846
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 972377,
+      "state_tokens": 3674,
+      "state_bytes": 13701,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1848
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 972927,
+      "state_tokens": 4159,
+      "state_bytes": 15607,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1850
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 973404,
+      "state_tokens": 3664,
+      "state_bytes": 13605,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1852
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 973839,
+      "state_tokens": 3811,
+      "state_bytes": 14226,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1854
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 974178,
+      "state_tokens": 3952,
+      "state_bytes": 14717,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1856
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 974883,
+      "state_tokens": 4119,
+      "state_bytes": 15138,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1858
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 975128,
+      "state_tokens": 3655,
+      "state_bytes": 13166,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1860
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 975741,
+      "state_tokens": 3800,
+      "state_bytes": 14327,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1862
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 975883,
+      "state_tokens": 3821,
+      "state_bytes": 14280,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1864
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 976194,
+      "state_tokens": 4119,
+      "state_bytes": 14845,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1866
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 976357,
+      "state_tokens": 3674,
+      "state_bytes": 13395,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1868
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 976842,
+      "state_tokens": 4098,
+      "state_bytes": 15184,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1870
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 977089,
+      "state_tokens": 4093,
+      "state_bytes": 14813,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1872
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 977272,
+      "state_tokens": 3975,
+      "state_bytes": 14272,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1874
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 983412,
+      "state_tokens": 3898,
+      "state_bytes": 14163,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1876
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 983572,
+      "state_tokens": 3928,
+      "state_bytes": 13533,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1878
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 983813,
+      "state_tokens": 3796,
+      "state_bytes": 13277,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1880
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 984553,
+      "state_tokens": 4260,
+      "state_bytes": 14507,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1882
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 985148,
+      "state_tokens": 3839,
+      "state_bytes": 12693,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1884
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 991724,
+      "state_tokens": 4107,
+      "state_bytes": 15210,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1886
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 996587,
+      "state_tokens": 4107,
+      "state_bytes": 15069,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1888
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 996684,
+      "state_tokens": 4145,
+      "state_bytes": 14517,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1890
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 997257,
+      "state_tokens": 4068,
+      "state_bytes": 14507,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1893
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1016419,
+      "state_tokens": 4108,
+      "state_bytes": 16622,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1895
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1016709,
+      "state_tokens": 3953,
+      "state_bytes": 14022,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1897
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1021417,
+      "state_tokens": 4107,
+      "state_bytes": 14776,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1899
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1022763,
+      "state_tokens": 4090,
+      "state_bytes": 15672,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1901
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1025594,
+      "state_tokens": 4084,
+      "state_bytes": 13775,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1903
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1027704,
+      "state_tokens": 3911,
+      "state_bytes": 15493,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1905
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1027748,
+      "state_tokens": 3855,
+      "state_bytes": 15325,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1907
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1029460,
+      "state_tokens": 3916,
+      "state_bytes": 14509,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1909
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1030988,
+      "state_tokens": 4036,
+      "state_bytes": 14706,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1911
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1032429,
+      "state_tokens": 4069,
+      "state_bytes": 15235,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1913
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1032509,
+      "state_tokens": 4137,
+      "state_bytes": 15397,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1915
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1033266,
+      "state_tokens": 4092,
+      "state_bytes": 15108,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1917
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1033630,
+      "state_tokens": 4386,
+      "state_bytes": 15815,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1919
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1033922,
+      "state_tokens": 3927,
+      "state_bytes": 14258,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1921
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1034734,
+      "state_tokens": 3806,
+      "state_bytes": 13930,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1923
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1034944,
+      "state_tokens": 3698,
+      "state_bytes": 13419,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1925
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1035943,
+      "state_tokens": 3641,
+      "state_bytes": 12520,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1927
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1036469,
+      "state_tokens": 3951,
+      "state_bytes": 13752,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1929
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1037128,
+      "state_tokens": 3912,
+      "state_bytes": 14364,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1931
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1037244,
+      "state_tokens": 3783,
+      "state_bytes": 13888,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1933
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1038203,
+      "state_tokens": 3639,
+      "state_bytes": 12739,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1935
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1038370,
+      "state_tokens": 3781,
+      "state_bytes": 13229,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1937
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1038689,
+      "state_tokens": 3782,
+      "state_bytes": 13265,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1939
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1038860,
+      "state_tokens": 3778,
+      "state_bytes": 13230,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1941
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1040091,
+      "state_tokens": 3783,
+      "state_bytes": 12797,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1943
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1040124,
+      "state_tokens": 4130,
+      "state_bytes": 14546,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1945
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1040901,
+      "state_tokens": 4054,
+      "state_bytes": 14485,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1948
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1041059,
+      "state_tokens": 3947,
+      "state_bytes": 13742,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1950
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1042650,
+      "state_tokens": 4030,
+      "state_bytes": 14490,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1952
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1043670,
+      "state_tokens": 3915,
+      "state_bytes": 14331,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1954
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1044571,
+      "state_tokens": 4040,
+      "state_bytes": 14724,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1956
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1045107,
+      "state_tokens": 3965,
+      "state_bytes": 15241,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1958
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1045417,
+      "state_tokens": 3936,
+      "state_bytes": 14931,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1960
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1046772,
+      "state_tokens": 4098,
+      "state_bytes": 15491,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1962
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1047254,
+      "state_tokens": 4340,
+      "state_bytes": 15802,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1964
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1047550,
+      "state_tokens": 3977,
+      "state_bytes": 14394,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1966
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1048357,
+      "state_tokens": 3813,
+      "state_bytes": 14065,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1968
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1048877,
+      "state_tokens": 3907,
+      "state_bytes": 14277,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1970
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1049821,
+      "state_tokens": 3810,
+      "state_bytes": 14685,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1972
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1050124,
+      "state_tokens": 3817,
+      "state_bytes": 14595,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1974
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1050543,
+      "state_tokens": 3822,
+      "state_bytes": 14976,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1976
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1050958,
+      "state_tokens": 3995,
+      "state_bytes": 15601,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1978
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1051775,
+      "state_tokens": 3910,
+      "state_bytes": 15338,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1980
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1052730,
+      "state_tokens": 3915,
+      "state_bytes": 15442,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1982
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1053889,
+      "state_tokens": 3932,
+      "state_bytes": 15694,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1984
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1054498,
+      "state_tokens": 4047,
+      "state_bytes": 16723,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1986
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1055358,
+      "state_tokens": 3987,
+      "state_bytes": 14430,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1988
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1056306,
+      "state_tokens": 3919,
+      "state_bytes": 14233,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1990
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1057113,
+      "state_tokens": 3950,
+      "state_bytes": 13883,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1992
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1057380,
+      "state_tokens": 3932,
+      "state_bytes": 13942,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1994
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1057776,
+      "state_tokens": 3921,
+      "state_bytes": 13760,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1996
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1058091,
+      "state_tokens": 3914,
+      "state_bytes": 13487,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 1998
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1058528,
+      "state_tokens": 3803,
+      "state_bytes": 15215,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 2000
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1059450,
+      "state_tokens": 3941,
+      "state_bytes": 15824,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 2002
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1060411,
+      "state_tokens": 3961,
+      "state_bytes": 13109,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 2004
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1061699,
+      "state_tokens": 4079,
+      "state_bytes": 14698,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 2006
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1062495,
+      "state_tokens": 3827,
+      "state_bytes": 12296,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 2008
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1063963,
+      "state_tokens": 3924,
+      "state_bytes": 15415,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 2010
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1065230,
+      "state_tokens": 4055,
+      "state_bytes": 15688,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 2012
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1066026,
+      "state_tokens": 3847,
+      "state_bytes": 14876,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 2014
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1067344,
+      "state_tokens": 3922,
+      "state_bytes": 15098,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 2016
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1068287,
+      "state_tokens": 3693,
+      "state_bytes": 11931,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 2018
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1069333,
+      "state_tokens": 4161,
+      "state_bytes": 13443,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 2020
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1070497,
+      "state_tokens": 3726,
+      "state_bytes": 10090,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 2022
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1070771,
+      "state_tokens": 4080,
+      "state_bytes": 11167,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 2024
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1071675,
+      "state_tokens": 4076,
+      "state_bytes": 12437,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 2026
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1072269,
+      "state_tokens": 3926,
+      "state_bytes": 12864,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 2028
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1073173,
+      "state_tokens": 3945,
+      "state_bytes": 13796,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 2030
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1073241,
+      "state_tokens": 3902,
+      "state_bytes": 13632,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 2032
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1074197,
+      "state_tokens": 3950,
+      "state_bytes": 13451,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 2034
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1075181,
+      "state_tokens": 3757,
+      "state_bytes": 13887,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 2036
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1076228,
+      "state_tokens": 3960,
+      "state_bytes": 13646,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 2038
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1076534,
+      "state_tokens": 3798,
+      "state_bytes": 13140,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 2040
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1077581,
+      "state_tokens": 3846,
+      "state_bytes": 12191,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 2042
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1078002,
+      "state_tokens": 3956,
+      "state_bytes": 12292,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 2044
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1078460,
+      "state_tokens": 4065,
+      "state_bytes": 13067,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 2046
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1079462,
+      "state_tokens": 3818,
+      "state_bytes": 11731,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 2048
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1080425,
+      "state_tokens": 3755,
+      "state_bytes": 11244,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 2050
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1085483,
+      "state_tokens": 4107,
+      "state_bytes": 16913,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 2052
+    },
+    {
+      "session_id": "composed::1m::pandas-dev__pandas::0",
+      "history_tokens": 1085524,
+      "state_tokens": 4104,
+      "state_bytes": 13328,
+      "cpu_path_ms_p50": 1225675.7,
+      "turns": 2054
+    }
+  ]
+}

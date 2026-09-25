@@ -473,8 +473,13 @@ def main(argv=None) -> int:
                 if r.get("recorded_files")]
         check(f"composed {bucket}: end-task F1", round(statistics.mean(r["active"]["f1"] for r in rows), 3),
               want, TOL)
-    for bucket, want_tokens, want_kb in (("128k", 3922, 19.8), ("512k", 3960, 14.2), ("1m", 3928, 14.1)):
-        rows = load(f"artifacts/g2-state-size-floor-composed-{bucket}-v1.json")["rows"]
+    # the paths are literals, not f-strings, so that the receipt audit can see them: a receipt read
+    # only through a formatted path is invisible to it (the cold-start drill found one that way)
+    floor_series = (("128k", "artifacts/g2-state-size-floor-composed-128k-v1.json", 3922, 19.8),
+                    ("512k", "artifacts/g2-state-size-floor-composed-512k-v1.json", 3960, 14.2),
+                    ("1m", "artifacts/g2-state-size-floor-composed-1m-v1.json", 3928, 14.1))
+    for bucket, path, want_tokens, want_kb in floor_series:
+        rows = load(path)["rows"]
         check(f"floor state tokens, {bucket}",
               round(statistics.median(r["state_tokens"] for r in rows)), want_tokens, 30)
         check(f"floor state KB, {bucket}",
