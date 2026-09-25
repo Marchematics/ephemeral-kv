@@ -629,23 +629,22 @@ costs.
 Two lines of work are close enough that the difference has to be stated in objects and in cost
 laws rather than in adjectives.
 
-**Hierarchical context caching.**  Strata [1] caches KV across GPU HBM, host memory and SSDs, and its contributions are a GPU-assisted I/O
-mechanism that decouples layouts so large transfers are possible, and a cache-aware scheduler that
-mitigates delay hits and hides cache-loading latency; it is implemented in SGLang, deployed, and
-reports up to 5x throughput over vLLM-LMCache.  Its stated problem is that naive designs become
-I/O-bound: fragmented layouts cause small transfers, cache loading stalls prefill.  That is the
-right optimisation *given* that the object being moved is the session's history.  Our measurement is
-that the object need not be: the execution state is 4-8K tokens compiled from a model-independent
-index, so what a cold route moves is ~32 KB of text and the transfer term leaves the cold path
-instead of being made efficient.  Strata's cache-aware scheduling remains the right design for the
-durable tier, where the transcript and index do live.
+**Hierarchical context caching.**  Strata [1] caches KV across GPU HBM, host memory and SSDs with a
+GPU-assisted I/O mechanism and a cache-aware scheduler, is deployed in SGLang, and reports up to 5x
+throughput over vLLM-LMCache; its stated problem is that naive designs become I/O-bound, with
+fragmented layouts causing small transfers and cache loading stalling prefill.  That is the right
+optimisation *given* that the object being moved is the session's history.  Our measurement is that
+the object need not be: the execution state is 4-8K tokens compiled from a model-independent index,
+so a cold route moves ~32 KB of text and the transfer term leaves the cold path instead of being
+made efficient.  Cache-aware scheduling remains the right design for the durable tier, where the
+transcript and index do live.
 
-**KV virtualisation for agent workspaces.**  KVMem [2] preserves overflowed workspace history as paged KV state across GPU, host and NVMe, indexes it with
-model-native attention-space summaries (Mean-K over blocks), and materialises a *query-dependent
-execution view* bounded by the model's native context window - 1M tokens of workspace on a 24 GB
-consumer GPU for a 27B model, with DeepSWE task success improving from 43.8% under compaction-only
-context management to 48.4%.  Two things are shared and we do not claim them: the idea of a
-query-dependent view, and the observation that compaction is lossy.  Two things differ, and they
+**KV virtualisation for agent workspaces.**  KVMem [2] preserves overflowed workspace history as paged
+KV state across GPU, host and NVMe, indexes it with model-native attention-space summaries, and
+materialises a *query-dependent execution view* bounded by the model's native window - 1M tokens of
+workspace on a 24 GB consumer GPU for a 27B model, with DeepSWE task success improving from 43.8%
+under compaction-only context management to 48.4%.  Two things are shared and we do not claim them:
+the query-dependent view, and the observation that compaction is lossy.  Two things differ, and they
 are the paper's subject; Table 13 states them in objects and in costs.
 
 **Table 13:** The two closest systems, compared in objects and in costs. The KVMem column is as
@@ -660,17 +659,6 @@ reported in its paper.
 | reported end task | DeepSWE task success 43.8% -> 48.4% over compaction | next-turn file localisation and an offline action-level rescoring; task success unmeasured |
 | reported cost | KV restoration under one second for a 1M workspace | 0.0954-0.2031 s to rebuild a 4-8K state, 0.55-1.04 s of active-set prefill for rollout |
 
-
-* **The object.**  KVMem's view is assembled from *KV blocks*, and its cold path is a transfer with
-  RoPE re-application at the new positions.  Our state is *text* compiled from a model-independent
-  index; nothing model-specific is transferred, and the same durable object resumes on a different
-  model (measured: end-task 0.137/0.145 against full history's 0.017/0.042 on two models that never
-  saw the sessions).
-* **The size.**  KVMem's view is bounded by the model's native window - 256K tokens for the model it
-  evaluates - while ours is bounded by the query and the current turn at 6-8K, a measured floor
-  (below it, 4,096 scores -2.40 pp of fidelity).  That difference is what produces the mobility,
-  capacity and routing consequences: a 32x-older session costing 2.4x less to move, 32x the
-  sessions per worker, and a routing phase change at a state size the quality measurements certify.
 
 KVMem also reports an end-to-end agent-success metric that we do not: our end task is file-level
 localisation of the next turn against the recorded patch.  Task success on a benchmark like DeepSWE
