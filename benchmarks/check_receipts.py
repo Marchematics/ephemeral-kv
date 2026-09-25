@@ -33,13 +33,25 @@ def main(argv=None) -> int:
     p.add_argument("--artifacts", default="artifacts")
     args = p.parse_args(argv)
 
+    # A document may also cite a family of receipts with a brace glob
+    # (`g2-compiler-window3k-b{4096,6144,12288}-v1.json`).  Left unexpanded, those citations were
+    # invisible: the arms they name looked uncited, and - worse - a member of the family could go
+    # missing without the receipt audit noticing, because the glob matches nothing on disk either.
+    def expand(token: str) -> list[str]:
+        match = re.search(r"\{([^{}]*)\}", token)
+        if not match:
+            return [token]
+        return [expansion for alternative in match.group(1).split(",")
+                for expansion in expand(token[:match.start()] + alternative + token[match.end():])]
+
     cited: dict[str, set[str]] = {}
     # Two citation styles have to be recognised.  A document may name a receipt in full
     # (`artifacts/x.json`) or, as the manuscript's claim map and ledger do, by its bare filename
     # (`x.json`).  Matching only the first style is what let a load-bearing receipt look uncited:
     # the audit's "cited" set was missing everything the paper's own table names.
     full = re.compile(r"`([^`]*artifacts/[^`]+?)`")
-    bare = re.compile(r"`([A-Za-z0-9][A-Za-z0-9._+-]*\.json)`")
+    # braces and commas are allowed so a family citation is captured whole and then expanded
+    bare = re.compile(r"`([A-Za-z0-9][A-Za-z0-9._+{},-]*\.json)`")
     quoted = re.compile(r"\"([^\"]*artifacts/[^\"]+?\.json)\"")
     sources = [(name, full, bare) for name in args.docs]
     sources += [(name, quoted, None) for name in FIGURE_SOURCES]
@@ -51,8 +63,12 @@ def main(argv=None) -> int:
         found = list(first.findall(text))
         if second is not None:
             for candidate in second.findall(text):
-                if (Path(args.artifacts) / candidate).exists():
-                    found.append(f"{args.artifacts}/{candidate}")
+                for name_ in expand(candidate):
+                    # a bare filename is a citation only if it resolves; a brace glob is a citation
+                    # of its members whether or not they are present, so that a missing member is
+                    # reported rather than silently skipped
+                    if (Path(args.artifacts) / name_).exists() or "{" in candidate:
+                        found.append(f"{args.artifacts}/{name_}")
         for match in found:
             entry = match.strip()
             # skip globs, shell commands and placeholder paths: they are patterns or invocations,
