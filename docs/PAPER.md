@@ -26,10 +26,12 @@ state); one worker holds **32x more sessions**; recovery and a model revision re
 a durable index instead of moving 12-128 GiB of KV; and a replay over measured hardware primitives
 advances routing in **157 cells at states where fidelity holds** - 77 at 4,096 tokens, 18 at 6,144,
 59 at 8,192 and 3 at 16,384 - across **all five regimes** the replay models, including a slow-worker
-hotspot, a worker loss, a flash crowd and a heavy-tailed session-size mix.  Both halves of the
-cluster gate clear, in different regimes: 117 of those cells on SLO goodput (median 1.61x) and 23 on
-the tail (>=30% p99, best +68.7%), every one of the 23 in the flash crowd, where a fleet-wide
-arrival burst evicts warm state everywhere at once.
+hotspot, a worker loss, a flash crowd and a heavy-tailed session-size mix.  On a workload whose sessions **actually reach a million tokens** - the grid's history choices are
+targets, and its 8-turn sessions top out at 113K, which the receipts now record - the region
+advances in **16 of 20 cells and every one clears the 30% p99 bar**, in four of the five regimes at
+both the 4,096- and 8,192-token states.  Both halves of the cluster gate clear, in different
+regimes: 117 of those cells on SLO goodput (median 1.61x), and on the tail 16 cells once sessions
+age against 23 in the flash crowd alone when they do not.
 
 We also report what does not work, because it is the hypothesis this space reaches for first: a
 semantic compiler - dedup, collapse-each-file-to-its-latest-state, snippet re-selection, log replay
@@ -451,12 +453,10 @@ improvement on the loss.  The summariser is fixed (the scorer writes the summari
 it mostly copies older text rather than abstracting it); one summariser family is a scope limit of
 this measurement, not a claim that the surface is summariser-independent.
 
-An earlier version of this arm was measured with a **window-only view**: the builder skipped the
-oversized span it was meant to summarise, so no summary was ever built on the long-history turns the
-arm keeps, while the summariser was still called on other turns and the view size still matched.  The
-arm above is the corrected run - the same runner, with the summary in the view - and the difference
-is visible exactly where it should be: the NLL delta moves from -0.020 to -0.032 and fidelity from
-0.00 to +0.13 pp.  Appendix A.2 records it as the third silent-failure mode.
+An earlier version of this arm was a **window-only view** - the summary was built, counted and never
+reached the scored context - and the corrected run above moves the NLL delta from -0.020 to -0.032
+and fidelity from 0.00 to +0.13 pp.  Appendix A.2 records the mechanism as the third silent-failure
+mode, which is why the receipt records `summary_tokens_in_view` per row.
 
 Which makes the comparison a controlled one: the two designs spend the same budget and keep the
 same window, and differ only in what the remaining ~1.5K buys.  On the decision, that comparison

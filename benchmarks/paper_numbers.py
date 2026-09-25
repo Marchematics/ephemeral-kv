@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
+import re
 import random
 import statistics
 import subprocess
@@ -503,6 +504,25 @@ def main(argv=None) -> int:
         if raw96:
             check("figure 3 carries the retrieval arm's decision",
                   float(raw96["active_f1"]), 0.169, TOL)
+
+    # --- the floats: numbered by order of appearance, and every reference resolving to one.  The
+    # numbering was by generation order until it was fixed, which put Figure 1 in Section 4 and
+    # Table 1 in the appendix, so this check exists to keep the draft matching a LaTeX build.
+    paper = Path("docs/PAPER.md")
+    if paper.exists():
+        text = paper.read_text()
+        defined: dict[str, list[str]] = {"Table": [], "Figure": []}
+        for match in re.finditer(r"^\*\*(Table|Figure) ([0-9]+[a-z]?):", text, re.M):
+            defined[match.group(1)].append(match.group(2))
+        referenced = {(m.group(1), m.group(2))
+                      for m in re.finditer(r"\b(Table|Figure) ([0-9]+[a-z]?)\b", text)}
+        dangling = sorted(f"{kind} {num}" for kind, num in referenced if num not in defined[kind])
+        check("references to floats that do not exist", len(dangling), 0, 0)
+        results.append(("the draft's float numbering matches a LaTeX build",
+                        all(numbers == [str(i + 1) for i in range(len(numbers))]
+                            for numbers in defined.values()) and not dangling,
+                        f"{len(defined['Table'])} tables and {len(defined['Figure'])} figures, "
+                        f"dangling: {dangling or 'none'}"))
 
     # --- the figures must be *reproducible*, not merely present: regenerate every one of them from
     # the receipts in a temporary directory and require the tracked files to be identical.  This is
