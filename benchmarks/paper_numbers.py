@@ -116,6 +116,19 @@ def main(argv=None) -> int:
     check("failover rebuild s p50",
           round(statistics.median(r["state_rebuild_s"] for r in failover), 3), 1.387, 1e-2)
 
+    # --- receipts must do what their name claims, not merely contain the expected value
+    # (the compaction arm once reported a plausible number while never calling its summariser)
+    for name in ("artifacts/g2-compiler-compact-b8192-v1.json",
+                 "artifacts/g2-compiler-compact-strongsummary-b8192-v1.json"):
+        path = Path(name)
+        if not path.exists():
+            continue
+        rows = load(name)["rows"]
+        calls = sum(int(r.get("summariser_calls") or 0) for r in rows)
+        results.append((f"{path.stem} actually summarised",
+                        calls > 0 and len(rows) > 0,
+                        f"{calls} summariser calls over {len(rows)} rows"))
+
     # --- C4b: the compaction baseline
     compact = bucket_stats("artifacts/g2-compiler-compact-b8192-v1.json").get("32K-128K") or {}
     check("compaction fidelity pp",
