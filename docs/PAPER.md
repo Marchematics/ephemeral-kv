@@ -130,8 +130,9 @@ turn-by-turn content is a minority.
 
 **How far that concentration extends is measured, and the answer is that it does not extend to
 composed lengths.**  Concatenating whole real sessions into 145K, 278K, 545K and 1.07M-token
-histories (`benchmarks/build_composed_long_sessions.py`, 12 examples per bucket) leaves the largest
-span at ~28K and the top-5 share at **3-14%** (p50 3%, ~2,600 spans per session), against 73-96% on
+histories (`benchmarks/build_composed_long_sessions.py`, 12 examples per bucket;
+`g2-dead-state-composed-1m-v1.json`) leaves the largest span at ~28K and the top-5 share at
+**3-14%** (p50 3%, ~2,600 spans per session), against 73-96% on
 real sessions of 123K-156K.  Concentration is a property of *a real session*, not of a long token
 stream: at a million tokens the same tokens are spread across twenty-five sessions' worth of tool
 output.  What justifies a bounded state at those lengths is therefore not that a few spans dominate
@@ -388,8 +389,9 @@ it points at a limitation: a short session whose individual turns are enormous.
 
 **Table 7b:** The same law past the corpus, on histories composed out of whole real sessions
 (`benchmarks/build_composed_long_sessions.py`). The state is the shipped 8,192-token view; the
-tokens and bytes are CPU measurements of what a cold route transfers, and the rows count every
-qualifying turn in the bucket.
+tokens and bytes are CPU measurements of what a cold route transfers
+(`g2-state-size-{real64k,composed-128k,composed-256k,composed-512k,composed-1m}-v1.json`), and the
+rows count every qualifying turn in the bucket.
 
 | corpus | raw history p50 | turns p50 | state tokens p50 | state KB p50 |
 |---|---:|---:|---:|---:|
@@ -403,8 +405,9 @@ Across an **8.9x** range of raw history - and a 45x range of turns - the state t
 between 4,588 and 8,439 tokens with no trend (p50 6,598 -> 7,039), and between 18 and 40 KB of text.
 **The session keeps growing; the state that must move does not.**  The quality side of these same
 buckets has a shape that matters more than its level: paired against a *resident* view that uses the
-model's whole 131,072-token window, the bounded state's teacher-forced accuracy is **2.41 pp** behind
-at 145K histories and **2.50 pp** behind at 278K - the gap does not grow with the session, the same
+model's whole 131,072-token window (`g2-composed-{128k,256k}-reference131k-v1.json` against
+`g2-composed-{128k,256k}-state8192-v1.json`), the bounded state's teacher-forced accuracy is
+**2.41 pp** behind at 145K histories and **2.50 pp** behind at 278K - the gap does not grow with the session, the same
 way the state and its transfer cost do not.  The reference there is not full history: past 131K
 tokens a resident system cannot serve the whole transcript at all, so the comparison is against the
 strongest view it *can* serve, which is why the number is reported separately from the 2 pp
