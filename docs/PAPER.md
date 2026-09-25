@@ -124,6 +124,17 @@ This is the arithmetic behind the abstraction: the footprint is dominated by blo
 needed once (a task prompt carrying the workspace, a whole-file dump, a long plan), and the
 turn-by-turn content is a minority.
 
+**How far that concentration extends is measured, and the answer is that it does not extend to
+composed lengths.**  Concatenating whole real sessions into 145K, 278K, 545K and 1.07M-token
+histories (`benchmarks/build_composed_long_sessions.py`, 12 examples per bucket) leaves the largest
+span at ~28K and the top-5 share at **3-14%** (p50 3%, ~2,600 spans per session), against 73-96% on
+real sessions of 123K-156K.  Concentration is a property of *a real session*, not of a long token
+stream: at a million tokens the same tokens are spread across twenty-five sessions' worth of tool
+output.  What justifies a bounded state at those lengths is therefore not that a few spans dominate
+but that the turn does not need them, which is what the two laws in Section 2.2 and the decision
+measurements in Section 4.3 establish - and it is why the bound is reported as a design choice
+validated by quality rather than as a property the corpus hands us.
+
 ### 2.2 Two laws, and the view that satisfies both
 
 **Table 2:** Every arm at an 8,192-token view, on both metrics.

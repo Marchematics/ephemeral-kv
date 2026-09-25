@@ -364,6 +364,15 @@ def main(argv=None) -> int:
     top5 = sorted(r["top5_share"] for r in dead)
     check("dead state: min top-5 share", round(top5[0], 3), 0.73, TOL)
     check("dead state: max top-5 share", round(top5[-1], 3), 0.96, TOL)
+    # the concentration does not extrapolate to composed lengths, which is why the paper says the
+    # bound is a design choice: at a million tokens the top five spans hold a few percent
+    composed = load("artifacts/g2-dead-state-composed-1m-v1.json")["rows"]
+    composed_top5 = [100 * row["top5_share"] for row in composed]
+    check("composed 1M: top-5 share p50", round(statistics.median(composed_top5)), 3, 1)
+    results.append(("composed 1M: top-5 share stays under 15%",
+                    max(composed_top5) < 15, f"max {max(composed_top5):.1f}%"))
+    check("composed 1M: spans p50",
+          round(statistics.median(row["spans"] for row in composed)), 2601, 500)
 
     failures = [name for name, ok, _ in results if not ok]
     for name, ok, detail in results:

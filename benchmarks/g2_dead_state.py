@@ -14,6 +14,13 @@ durable history is dead state" is a measurement rather than an impression.
 
 from __future__ import annotations
 
+import sys as _sys
+from pathlib import Path as _Path
+
+# the repository root, so a direct `python benchmarks/<harness>.py` run works from a
+# clone without an exported PYTHONPATH; the runner scripts set it as well
+_sys.path.insert(0, str(_Path(__file__).resolve().parent.parent))
+
 import argparse
 import json
 from pathlib import Path
@@ -24,9 +31,6 @@ from benchmarks.g2_model_quality import classify
 from benchmarks.g2_trace_index import _content, messages_from_row
 import sys
 
-# the repository root, so a direct `python benchmarks/<harness>.py` run works from a
-# clone without an exported PYTHONPATH; the runner scripts set it as well
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from ephemeralkv.index import DurableSpanIndex
 
@@ -73,6 +77,9 @@ def main(argv=None) -> int:
     payload = {"schema": "ephemeral-kv-dead-state-v1", "kind": "structural_measurement",
                "interpretation": ("the share of a session's tokens held by its largest spans; the "
                                   "tail is what a turn-by-turn view actually walks"),
+               # what produced this receipt, including which corpus: a structural measurement is
+               # only comparable across corpora if the corpus is part of the artifact
+               "config": {k: v for k, v in sorted(vars(args).items()) if k != "out"},
                "rows": rows}
     Path(args.out).write_text(json.dumps(payload, indent=2) + "\n")
     print(f"{'history':>9} {'spans':>6} {'largest':>8} {'top2':>7} {'top5':>7} {'tail':>7}")

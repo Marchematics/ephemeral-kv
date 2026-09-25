@@ -202,7 +202,11 @@ def main(argv=None) -> int:
                 continue
             # ground truth is the recorded patch's file set; the context is built from the
             # history *before* the final turn, so nothing about it leaks into the view
-            recorded = patch_files_from_messages(messages)
+            recorded = (row.get("composed_target_files")
+                        or patch_files_from_messages(messages))
+            # A composed row carries the ground truth of its *final* turn, because deriving it from
+            # the concatenated transcript collects every part's file set and makes the end task
+            # easier as the history grows.  Real rows are unaffected: they carry no such field.
             if not recorded:
                 continue
             def _summarise(text: str, budget: int) -> str:

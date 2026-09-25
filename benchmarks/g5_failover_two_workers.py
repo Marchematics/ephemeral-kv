@@ -26,6 +26,13 @@ Usage:
 
 from __future__ import annotations
 
+import sys as _sys
+from pathlib import Path as _Path
+
+# the repository root, so a direct `python benchmarks/<harness>.py` run works from a
+# clone without an exported PYTHONPATH; the runner scripts set it as well
+_sys.path.insert(0, str(_Path(__file__).resolve().parent.parent))
+
 import argparse
 import json
 import os
@@ -39,9 +46,6 @@ from benchmarks.g2_model_quality import build_examples, render_span, score_targe
 from benchmarks.g2_trace_index import messages_from_row
 from benchmarks.g2b_patch_localization import patch_files_from_messages
 
-# the repository root, so a direct `python benchmarks/<harness>.py` run works from a
-# clone without an exported PYTHONPATH; the runner scripts set it as well
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from ephemeralkv.index import DurableSpanIndex
 

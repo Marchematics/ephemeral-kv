@@ -15,6 +15,13 @@ assistant action before we build a cluster runtime.
 
 from __future__ import annotations
 
+import sys as _sys
+from pathlib import Path as _Path
+
+# the repository root, so a direct `python benchmarks/<harness>.py` run works from a
+# clone without an exported PYTHONPATH; the runner scripts set it as well
+_sys.path.insert(0, str(_Path(__file__).resolve().parent.parent))
+
 import argparse
 import json
 import math
@@ -25,9 +32,6 @@ from typing import Iterable
 
 import sys
 
-# the repository root, so a direct `python benchmarks/<harness>.py` run works from a
-# clone without an exported PYTHONPATH; the runner scripts set it as well
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from ephemeralkv.consolidate import compile_units, consolidate, render
 from ephemeralkv.index import terms
