@@ -24,6 +24,15 @@ library (`ephemeralkv/`) and its test suite (`tests/`), and the manuscript and i
   | `sessions-patch-long.jsonl` | 2,736 | patch filter, `max_isl >= 32768` |
   | `sessions-patch-64k.jsonl` | 338 | patch filter, `max_isl >= 65536` |
 
+  Past that, `benchmarks/build_composed_long_sessions.py` builds **composed** corpora out of whole
+  real sessions - `data/sessions-composed-{128k,256k,512k,1m}.jsonl`, 12 examples each, up to 1.07M
+  tokens and 1,321 turns - because the corpus's longest real session is ~156K tokens and the law the
+  paper reports has to be measured past it.  A composed row concatenates whole sessions, keeps the
+  *final* turn's patch as the end task's ground truth (`composed_target_files`, so the target set does
+  not grow with the history), and records what it was built from (`composed_from`,
+  `composed_same_repo`).  It is labelled in every receipt and table that uses it: the transcripts are
+  real, the million-token sessions are not.
+
   The *patch filter* is the one the patch-localisation harness applies to its own examples: the
   row's ground-truth metadata says a patch is present and the patch's file set is recoverable from
   the transcript (`benchmarks/g2b_patch_localization.py`).  `data/sessions-patch-64k.jsonl` is the
@@ -68,7 +77,11 @@ What each one is for:
 
 * **`paper_numbers.py`** is the value audit: it reads the receipts and asserts the numbers the
   manuscript quotes, prints `PASS`/`FAIL` per claim and exits non-zero on any failure.  If a receipt
-  is regenerated and a number moves, this is where it shows up.
+  is regenerated and a number moves, this is where it shows up.  Where two arms have to be compared
+  the pairing is explicit: the composed quality gap pairs rows by index and verifies the pairing
+  against the per-row history tokens, because a paired test whose key is silently missing compares
+  arbitrary rows (that mistake is in this repository's history, and the check now refuses to run
+  without the correspondence evidence).
 * **`check_receipts.py`** is the receipt audit.  It reports a cited receipt that is missing, one
   whose payload is a *partial* write (the harnesses write incrementally, so a killed run leaves a
   partial artifact at its final path), and one that exists only in the working directory rather than
