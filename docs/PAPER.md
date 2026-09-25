@@ -633,8 +633,8 @@ Two lines of work are close enough that the difference has to be stated in objec
 laws rather than in adjectives.
 
 **Hierarchical context caching.**  Strata [1] caches KV across GPU HBM, host memory and SSDs with a
-GPU-assisted I/O mechanism and a cache-aware scheduler, is deployed in SGLang, and reports up to 5x
-throughput over vLLM-LMCache; its stated problem is that naive designs become I/O-bound, with
+GPU-assisted I/O mechanism and a cache-aware scheduler, is deployed in SGLang [3], and reports up to 5x
+throughput over vLLM-LMCache [4]; its stated problem is that naive designs become I/O-bound, with
 fragmented layouts causing small transfers and cache loading stalling prefill.  That is the right
 optimisation *given* that the object being moved is the session's history.  Our measurement is that
 the object need not be: the execution state is 4-8K tokens compiled from a model-independent index,
@@ -669,7 +669,8 @@ is the stronger evidence for a deployed agent, and adopting it is the natural ne
 work rather than something we have measured.
 
 **Affinity, retention and load balancing.**  Cache-affinity routing and its interaction with load
-balancing is well studied, and sticky-until-saturated is the production answer; retention policies
+balancing is well studied, and sticky-until-saturated is the production answer [5]; sparse-attention
+serving systems reason about active working sets and per-request HBM budgets [6]; retention policies
 for multi-turn agents decide how long a span of KV stays resident across tool gaps, and workspace
 virtualisation decides what to keep where.  We keep those policies as baselines and change only the
 miss cost, so the phase change we report is attributable to the cost law rather than to a new
@@ -753,8 +754,10 @@ compiler, is measured not to pay.  The session keeps growing; the state that mus
 ## References
 
 The two systems Section 5 compares against are cited from their primary sources; the remaining
-systems named in that section (SGLang, vLLM-LMCache, SPIN/SparseServe, llm-d) are named as
-deployments rather than cited, and need citations before submission.
+systems named in that section are deployed systems rather than papers, and are cited by their
+primary sources: SGLang's paper, LMCache's integration documentation, SparseServe's paper, and
+llm-d's routing documentation.  SPIN, which an earlier draft named alongside SparseServe, is dropped:
+its source could not be verified, and a name without a reference is worse than no name.
 
 [1] **Strata** - KV caching across GPU HBM, host memory and SSDs, with a GPU-assisted I/O path and a
 cache-aware scheduler, implemented in SGLang.  OSDI '26 presentation:
@@ -763,6 +766,20 @@ be taken from the published paper.
 
 [2] **KVMem** - virtualises million-token agent workspaces as paged KV across GPU, host and NVMe,
 with a query-dependent bounded view.  arXiv:2609.04852, <https://www.alphaxiv.org/abs/2609.04852>.
+
+[3] **SGLang** - efficient execution of structured language-model programs, with RadixAttention for
+prefix reuse.  NeurIPS 2024,
+<https://proceedings.neurips.cc/paper_files/paper/2024/file/724be4472168f31ba1c9ac630f15dec8-Paper-Conference.pdf>.
+
+[4] **LMCache** - a KV-cache layer for vLLM, including disaggregated prefill and cache offloading.
+<https://docs.vllm.ai/en/latest/examples/disaggregated/lmcache/>.
+
+[5] **llm-d** - token-aware routing that stays sticky until a worker saturates, then escapes to
+load-based placement.  <https://llm-d.ai/blog/sticky-until-saturated-token-aware-routing>.
+
+[6] **SparseServe** - parallelism for dynamic sparse attention in long-context serving, with
+per-request working sets and memory budgets.  arXiv:2509.24626,
+<https://browse-export.arxiv.org/pdf/2509.24626>.
 
 ## Appendix A. Claims, receipts and reproduction
 

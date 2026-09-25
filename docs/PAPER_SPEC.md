@@ -224,9 +224,11 @@ pay.
 
 Open items, in the order they matter:
 
-1. **Citations for the deployments named in Section 5.**  The two systems compared against (Strata,
-   KVMem) are cited from their primary sources; SGLang, vLLM-LMCache, SPIN/SparseServe and llm-d are
-   named as deployments, without citations, and need them.
+1. ~~Citations for the deployments named in Section 5.~~  **Done.**  Strata and KVMem are cited from
+   their primary sources, and the deployments now are too: SGLang's NeurIPS paper, LMCache's vLLM
+   integration documentation, llm-d's routing documentation and SparseServe's paper.  SPIN, which an
+   earlier draft named alongside SparseServe, is dropped - its source could not be verified, and a
+   name without a reference is worse than no name.
 2. **Task success on a benchmark like DeepSWE.**  The end task here is file-level localisation of the
    next turn plus an offline action-level rescoring, which is weaker evidence than task success, and
    Section 6 says so.
