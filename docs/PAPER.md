@@ -111,7 +111,7 @@ inside the 2 pp allowance against the full transcript, end-task score
 
 ### 2.1 Most of a session is state that is never needed again
 
-Table 1, in Appendix B, measures the token share held by the largest spans of each long session
+Table 13, in Appendix B, measures the token share held by the largest spans of each long session
 (`g2_dead_state.py`).
 
 This is the arithmetic behind the abstraction: the footprint is dominated by blocks that were
@@ -132,9 +132,9 @@ validated by quality rather than as a property the corpus hands us.
 
 ### 2.2 Two laws, and the view that satisfies both
 
-**Table 2:** Every arm at an 8,192-token view, on both metrics.
+**Table 1:** Every arm at an 8,192-token view, on both metrics.
 
-Table 2 lists every arm measured at an 8,192-token view on the same examples (fidelity n=44
+Table 1 lists every arm measured at an 8,192-token view on the same examples (fidelity n=44
 long-history examples, decision n=48 paired sessions, 26 scoreable):
 
 | view | teacher-forced fidelity | end-task F1 |
@@ -149,13 +149,13 @@ long-history examples, decision n=48 paired sessions, 26 scoreable):
 | protected spans kept whole + ranked rest | -20.33 pp | 0.211 |
 | newest span only + compiled far field | -25.36 pp | 0.083 |
 
-**Figure 2** plots the two metrics against each other and **Figure 6** plots the fidelity column
+**Figure 1** plots the two metrics against each other and **Figure 2** plots the fidelity column
 against how the newest evidence was rendered.
 
-**Figure 2:** The two metrics against each other for every arm. No arm moves both: the arms that
+**Figure 1:** The two metrics against each other for every arm. No arm moves both: the arms that
 hold fidelity spend the budget on the window, the arms that win the decision spend it on retrieval.
 
-**Figure 6:** Fidelity against how the newest evidence was rendered. Rendering it whole is what
+**Figure 2:** Fidelity against how the newest evidence was rendered. Rendering it whole is what
 holds the surface; the way the far field is compiled is what the decision reads.
 
 1. **Fidelity is set by how the newest evidence is rendered.**  Kept whole it is at parity with as
@@ -192,7 +192,7 @@ retrieval 0.191 at -6.94 pp.  So the claim is not that
 a bounded view decides better than retrieval, which it does not; it is that among the views a
 fidelity-gated system may actually use, this is the one that decides best.
 
-The action-level table is in Appendix B (Table 3): it holds every arm's paired interval, and its
+The action-level table is in Appendix B (Table 14): it holds every arm's paired interval, and its
 reading is the same - a bound the claim must clear, not a win.
 
 On this bar the bounded state is **not worse** than the full transcript - every interval includes
@@ -210,10 +210,10 @@ So the surface is bought by keeping more of the newest evidence whole, not by co
 evidence harder, which is the negative result Section 2.2's two laws predict and Section 3.2's
 ablation attributes.
 
-**Why 4,096 and not less.**  The budget is measured, not chosen for convenience, and Table 4 varies
+**Why 4,096 and not less.**  The budget is measured, not chosen for convenience, and Table 2 varies
 the total *and* the window, because which of the two binds depends on the other:
 
-**Table 4:** The budget floor. The smallest measured state that holds the surface is **4,096 tokens
+**Table 2:** The budget floor. The smallest measured state that holds the surface is **4,096 tokens
 with a 3,584-token window**; the identical total with a 3,072-token window does not hold it, which
 says the window rather than the total is what the surface needs.
 
@@ -267,10 +267,10 @@ receipt:
 
 ### 3.2 The compiler, and what its stages are worth
 
-A compiler contract is only worth stating if its stages pay for themselves.  Table 5 lists the
+A compiler contract is only worth stating if its stages pay for themselves.  Table 3 lists the
 stages, what each means, and what each is worth when measured.
 
-**Table 5:** The compiler's stages, their semantics, and what each is worth when measured.
+**Table 3:** The compiler's stages, their semantics, and what each is worth when measured.
 
 | stage | semantics | measured effect |
 |---|---|---|
@@ -340,10 +340,10 @@ the recorded patch, with an offline action-level rescoring as a stricter variant
 ### 4.1 The state is bounded, and quality does not decay with age
 
 
-Table 6 gives raw history against the compiled state's size and the fidelity delta at three
-session lengths, Table 7 the same along the turn axis, and Figure 1 plots both against age.
+Table 4 gives raw history against the compiled state's size and the fidelity delta at three
+session lengths, Table 5 the same along the turn axis, and Figure 4 plots both against age.
 
-**Table 6:** The state does not grow with age: raw history against the compiled state's size and
+**Table 4:** The state does not grow with age: raw history against the compiled state's size and
 fidelity on the same sessions.
 
 | raw history p50 | execution state p50 | fidelity delta |
@@ -352,7 +352,7 @@ fidelity on the same sessions.
 | 82,972 | 7,133-7,899 | +0.00 pp |
 | 155,574 | 8,203 | +1.43 pp |
 
-**Table 7:** The same measurement along the turn axis.
+**Table 5:** The same measurement along the turn axis.
 
 | turns p50 | raw history p50 | execution state p50 | fidelity delta |
 |---:|---:|---:|---:|
@@ -360,7 +360,7 @@ fidelity on the same sessions.
 | 58 | 84,617 | 7,887 | **+0.00 pp** |
 | 96 | 155,222 | 8,203 | +0.00 pp |
 
-**Figure 1:** The compiled state against session age, on the corpus and past it (the composed points
+**Figure 4:** The compiled state against session age, on the corpus and past it (the composed points
 reach a million tokens). The raw history spans 67K to 984K tokens across these points while the state
 stays between 6,598 and 12,299 tokens - and between 6,598 and 8,203 in the shipped configuration,
 the second series being a 12,288-token budget arm included for reference.
@@ -368,7 +368,7 @@ the second series being a 12,288-token budget arm included for reference.
 A 22-turn example with 67K of history fails badly (-46.9 pp); it is a singleton, reported as one, and
 it points at a limitation: a short session whose individual turns are enormous.
 
-**Table 7b:** The same law past the corpus, on histories composed out of whole real sessions
+**Table 6:** The same law past the corpus, on histories composed out of whole real sessions
 (`benchmarks/build_composed_long_sessions.py`).  Every column is measured: the history and turn
 counts are the corpus's, the state's tokens and bytes are CPU measurements of what a cold route
 transfers (`g2-state-size-*`), and the quality columns are the end task and the surface against a
@@ -410,7 +410,7 @@ transcripts are real, the million-token sessions are not.
 
 ### 4.2 The mobility law and the inversion
 
-Table 8 gives the two costs side by side.  The lookup term in it is now measured rather than
+Table 7 gives the two costs side by side.  The lookup term in it is now measured rather than
 extrapolated: on real transcripts concatenated into 143K, 301K, 530K and 1.07M-token histories, the
 durable index answers the runtime's query in **0.27 / 0.21 / 0.31 / 0.68 ms p50** (p95 1.35 ms) - and
 it is the *query* that sets the cost, not the history: the same million-token index answers an
@@ -419,7 +419,7 @@ last tool message carries 45K tokens pays 15 ms.  Against 53-203 ms of active-se
 is negligible either way, which is the point: the cold path's cost tracks what the query asks for,
 not how old the session is.
 
-**Table 8:** Mobility: rebuilding and prefilling the compiled state, against moving the session's
+**Table 7:** Mobility: rebuilding and prefilling the compiled state, against moving the session's
 full KV.
 
 | session | state | mobility (lookup + active prefill) | full-KV move |
@@ -460,9 +460,9 @@ is visible exactly where it should be: the NLL delta moves from -0.020 to -0.032
 
 Which makes the comparison a controlled one: the two designs spend the same budget and keep the
 same window, and differ only in what the remaining ~1.5K buys.  On the decision, that comparison
-is the last cell of Table 9:
+is the last cell of Table 8:
 
-**Table 9:** What the remainder of an 8,192-token budget buys, at three window sizes.
+**Table 8:** What the remainder of an 8,192-token budget buys, at three window sizes.
 
 | view (8,192 tokens) | window | remainder | fidelity | end-task F1 |
 |---|---:|---|---:|---:|
@@ -510,7 +510,7 @@ reused - so a receipt that claims to be a compaction can be checked rather than 
 Sessions per worker with 20 GiB usable HBM (state sizes measured; KV geometry measured for the 0.5B
 model, declared for 8B/70B classes):
 
-**Table 10:** Sessions per worker at 20 GiB of usable HBM: resident history against resident
+**Table 9:** Sessions per worker at 20 GiB of usable HBM: resident history against resident
 compiled state.
 
 | geometry | resident history, 128K | resident history, 1M | compiled state, 8,192 | compiled state, 4,096 |
@@ -526,16 +526,16 @@ every age.  Capacity planning stops depending on session age the same way placem
 
 ### 4.5 Routing
 
-**Figure 4** shows the phase diagram that replay produces.
+**Figure 5** shows the phase diagram that replay produces.
 
-**Figure 4:** The routing phase diagram: cells where the bounded state advances against the
+**Figure 5:** The routing phase diagram: cells where the bounded state advances against the
 history-resident baseline, by active-set size and by regime.
 
 Replay over measured G3 primitives (H2D 23.2-23.4 GB/s, active-set prefill 0.053/0.095/0.203/0.485 s
-at 2K/4K/8K/16K, lookup by history bucket), with declared arrival models and geometries.  Table 11
+at 2K/4K/8K/16K, lookup by history bucket), with declared arrival models and geometries.  Table 10
 gives the advancing cells:
 
-**Table 11:** Advancing cells by active-set size in the routing replay, over the five regimes.
+**Table 10:** Advancing cells by active-set size in the routing replay, over the five regimes.
 
 | active set | advancing cells |
 |---|---:|
@@ -632,7 +632,7 @@ the region, and the compiler that was supposed to produce that bound was measure
 
 ### 4.6 Recovery and rollout
 
-Table 12, in Appendix B, records what the runtime does under process loss and what reuse across
+Table 15, in Appendix B, records what the runtime does under process loss and what reuse across
 models costs.
 
 ---
@@ -658,9 +658,9 @@ materialises a *query-dependent execution view* bounded by the model's native wi
 workspace on a 24 GB consumer GPU for a 27B model, with DeepSWE task success improving from 43.8%
 under compaction-only context management to 48.4%.  Two things are shared and we do not claim them:
 the query-dependent view, and the observation that compaction is lossy.  Two things differ, and they
-are the paper's subject; Table 13 states them in objects and in costs.
+are the paper's subject; Table 11 states them in objects and in costs.
 
-**Table 13:** The two closest systems, compared in objects and in costs. The KVMem column is as
+**Table 11:** The two closest systems, compared in objects and in costs. The KVMem column is as
 reported in its paper.
 
 | | KVMem [2] | this paper |
@@ -712,7 +712,7 @@ specific rather than softened.
   that - but not free, and not the same as the 2 pp fidelity gate, which is measured against full
   history where full history still fits.
 * **Histories past 156K tokens are composed.**  The transcripts are real and the final turn's patch
-  is real, but a million-token session is twenty-five sessions concatenated (Table 7b); the corpus
+  is real, but a million-token session is twenty-five sessions concatenated (Table 6); the corpus
   has no session that long, and the composition is labelled in the rows, the receipts and the table.
 * **The 8B and 70B geometries are declared, not measured.**  The fabric, prefill and 0.5B KV numbers
   are measured on this card.
@@ -790,11 +790,11 @@ partial write; `benchmarks/check_scripts.py` checks that every script's promised
 `benchmarks/make_figures.py` regenerates the figures from the receipts.  The figures are stored as
 `figures/figN_*.csv` (the numbers, each row traceable to a receipt) and `figures/figN_*.svg` (the
 drawing), so a caption carries no path: figure 5 is a table-shaped CSV of the capacity numbers in
-Table 10 and has no drawing.
+Table 9 and has no drawing.
 
-Table 14 maps each claim to the receipt that backs it and to the script that produced it.
+Table 12 maps each claim to the receipt that backs it and to the script that produced it.
 
-**Table 14:** Each claim, the receipt that backs it, and the script that produced it.
+**Table 12:** Each claim, the receipt that backs it, and the script that produced it.
 
 | claim | receipt | script |
 |---|---|---|
@@ -896,7 +896,7 @@ load-bearing for a claim above.
 These carry evidence a reader checks once, not prose the argument depends on line by line; each is
 referenced from the section it belongs to.
 
-**Table 1:** Where a long session's tokens sit. The spans that dominate a session are a small
+**Table 13:** Where a long session's tokens sit. The spans that dominate a session are a small
 fraction of the turns that produced them - which is the whole reason a bounded state is possible.
 Measured by `benchmarks/g2_dead_state.py` (`artifacts/g2-dead-state-v1.json`).
 
@@ -908,7 +908,7 @@ Measured by `benchmarks/g2_dead_state.py` (`artifacts/g2-dead-state-v1.json`).
 | 141,168 | 65 | 56,514 | 80% | 92% | 8% |
 | 127,126 | 83 | 28,261 | 44% | 73% | 27% |
 
-**Table 3:** The stricter action-level end task: a continuation has to name the right kind of
+**Table 14:** The stricter action-level end task: a continuation has to name the right kind of
 command *and* target a file the recorded patch touched.
 
 | arm | instances | full-history action rate | active action rate | paired delta |
@@ -919,7 +919,7 @@ command *and* target a file the recorded patch touched.
 | raw retrieval, 8,192 | 48 | 0.042 | **0.125** | **+0.083 [0.000, +0.188]** |
 | plain recency, 8,192 | 24 | 0.042 | 0.042 | 0.000 [-0.125, +0.125] |
 
-**Table 12:** What the runtime does when it loses a worker, and what resuming on another model
+**Table 15:** What the runtime does when it loses a worker, and what resuming on another model
 costs.
 
 | operation | measured |
@@ -927,5 +927,5 @@ costs.
 | two-worker failover, owner SIGKILLed | fresh process rebuilds 8,192 tokens in 0.91-1.42 s (p50 1.387 s); recorded files named in 4/6 sessions; token accuracy identical to the killed owner's (0.593 both) |
 | model rollout | resumes on a model that never saw the session: end-task 0.137/0.145 against full history's 0.017/0.042 (Qwen2.5-0.5B/1.5B) |
 | data moved | ~32,455 bytes of state text against 0.38 GiB of KV the dissolved owner held at these 33K histories (12-128 GiB at 1M on the declared geometries) |
-| data moved, at any age | the state is 18-40 KB of text per bucket (14-64 KB per turn) at every history length measured, from 111K to 984K tokens (Table 7b), so what a recovering worker reads does not grow with the session either |
+| data moved, at any age | the state is 18-40 KB of text per bucket (14-64 KB per turn) at every history length measured, from 111K to 984K tokens (Table 6), so what a recovering worker reads does not grow with the session either |
 | cost | 0.55-1.04 s of active-set prefill against 6.31 s of re-prefill |

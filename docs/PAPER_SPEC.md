@@ -82,14 +82,14 @@ Model-agnostic durability is an enabling property, not a novelty claim by itself
 
 ## Main figures to earn, and the receipts that already populate them
 
-### Figure 1 - The session grows, the state that must move does not
+### Figure 4 - The session grows, the state that must move does not
 
 The paper's identity figure.  x: raw history (32K -> 1M, log).  Two families: history-sized state
 (full KV, full re-prefill) rising with age, and the measured execution state flat at 7-8K.
 Inset: the fidelity delta by history bucket (+0.00 / +0.00 / +1.43 pp at 64K / 83K / 156K).
 Receipts: `g2-killer-table-v3.json`, `g3-*`.
 
-### Figure 2 - Two metrics, two views (the frontier)
+### Figure 1 - Two metrics, two views (the frontier)
 
 One scatter at 8,192 tokens: fidelity delta (x) against end-task F1 (y) for every arm measured -
 recency, the window fractions, plain retrieval, the compiler, log replay, state-first, the
@@ -109,7 +109,7 @@ because only 6% of retrieved spans are file events, and plain retrieval beats th
 Receipts: `g2-compiler-consolidate-*`, `-materialize-*`, `-statefirst-*`, `-protectwhole-*`,
 `g2b-patch-localization-raw-b4096-n48.json`, `-compiled-b8192-n48.json`.
 
-### Figure 4 - The phase diagram with quality attached
+### Figure 5 - The phase diagram with quality attached
 
 Advancing cells by active set, with the quality criteria shown rather than assumed: 17/66 at
 2,048 (not admissible), 77/214 at 4,096, 18/52 at 6,144, **59/310 at the fidelity-admissible
@@ -117,16 +117,18 @@ Advancing cells by active set, with the quality criteria shown rather than assum
 within 2 pp, decision at least full history, decision at least raw retrieval).
 Receipts: `g4-quality-join-v3.json`.
 
-### Figure 5 - Capacity and recovery
+### The capacity and recovery figure, which the paper does not draw
 
-Sessions per worker under the two resource models (13.3 / 1.2 / 0.5 histories against 213 / 20 / 8
+This was planned as a figure and is carried by **Table 9** (sessions per worker) and **Table 15**
+(recovery and rollout) instead; a figure would be a drawing of two tables.  If it is drawn, it shows
+sessions per worker under the two resource models (13.3 / 1.2 / 0.5 histories against 213 / 20 / 8
 states at 128K on the 0.5B / 8B / 70B geometries), and recovery after a worker loss or a model
 revision: index rebuild 0.55-1.04 s against 6.31 s of re-prefill, ~33 KiB of state text against
 12-128 GiB of KV, end-task F1 0.137/0.145 against 0.017/0.042 on two models that never saw the
 sessions.
 Receipts: `g5-capacity-planning-v1.json`, `g5-failover-*.json`, `g3-*`.
 
-### Figure 6 - The metric lesson
+### Figure 2 - The metric lesson
 
 Teacher-forced next-token fidelity against the amount of the newest evidence kept verbatim: at
 parity (+0.29 pp) with 8,192 tokens of recency, at parity with 2.9K of window inside an 8K view,
@@ -250,10 +252,12 @@ Open items, in the order they matter:
    tables and 5 figures.  That is over an OSDI page budget, and the trimming pass should be
    deliberate rather than incremental - the obvious candidates are moving the corpus-description,
    action-level and recovery tables to the appendix, and cutting Section 5 by a third, since its two
-   compared systems are already carried by Table 13.
-7. **Float numbering.**  Figures and tables are numbered in this draft by the order they were
-   generated; in a LaTeX build they are renumbered by order of appearance.  Figure 5 is a
-   table-shaped CSV of the capacity numbers and has no drawing.
+   compared systems are already carried by Table 11.
+7. ~~Float numbering.~~  **Done.**  Tables and figures are now numbered by order of appearance in
+   `PAPER.md` (Tables 1-15, Figures 1-5), so the draft matches what a LaTeX build will produce, and
+   the cross-references in this file and in `REVIEW.md` were renumbered with it.  The capacity and
+   recovery figure is **not drawn**: the numbers are carried by Table 9 and Table 15, and a drawing
+   of two tables is not worth a page.
 8. **Configuration coverage.**  Receipts now record the flags that produced them and
    `check_scripts.py` compares each script's invocation against the configuration its receipt
    recorded (21 outputs, 0 disagreements); `--config-audit` lists the receipts that predate the
