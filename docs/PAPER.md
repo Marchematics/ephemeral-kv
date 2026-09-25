@@ -24,9 +24,12 @@ at the floor configuration.  The consequence is
 a phase change rather than a speedup: a session **32x older costs 2.4x less to move** (5.1x at a 4K
 state); one worker holds **32x more sessions**; recovery and a model revision rebuild the state from
 a durable index instead of moving 12-128 GiB of KV; and a replay over measured hardware primitives
-advances routing in **139 cells at states where fidelity holds** - 77 at 4,096 tokens, 59 at 8,192
-and 3 at 16,384 - across **all five regimes** the replay models, including a slow-worker hotspot, a
-worker loss, a flash crowd and a heavy-tailed session-size mix.
+advances routing in **157 cells at states where fidelity holds** - 77 at 4,096 tokens, 18 at 6,144,
+59 at 8,192 and 3 at 16,384 - across **all five regimes** the replay models, including a slow-worker
+hotspot, a worker loss, a flash crowd and a heavy-tailed session-size mix.  Both halves of the
+cluster gate clear, in different regimes: 117 of those cells on SLO goodput (median 1.61x) and 23 on
+the tail (>=30% p99, best +68.7%), every one of the 23 in the flash crowd, where a fleet-wide
+arrival burst evicts warm state everywhere at once.
 
 We also report what does not work, because it is the hypothesis this space reaches for first: a
 semantic compiler - dedup, collapse-each-file-to-its-latest-state, snippet re-selection, log replay
@@ -91,7 +94,7 @@ inside the 2 pp allowance against the full transcript, end-task score
    makes a footprint-based scheduler prefer exactly the wrong session.
 4. **The consequences are systemic**: 32x sessions per worker at the 4,096-token floor, lossless
    recovery on a fresh process (0.91-1.42 s, no KV transfer), and a routing phase change at the
-   4,096- and 8,192-token states where fidelity holds - 139 of 688 replay cells - across every
+   4,096- and 8,192-token states where fidelity holds - 157 of 724 replay cells - across every
    regime we model, including the slow-worker hotspot and a flash crowd.
 5. **A negative result with an exact attribution.**  The obvious way to shrink the state - a semantic
    compiler - does not pay here: it is tied or worse on the decision, and the two stages that
