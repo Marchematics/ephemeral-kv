@@ -125,7 +125,6 @@ examples, decision n=48 paired sessions, 26 scoreable):
 | full history | reference | 0.089 |
 | plain recency (newest spans whole, nothing else) | **+0.29 pp** | 0.154 |
 | **window 3-4K + consolidated far field** | **0.00 pp** | **0.161** |
-| model-written compaction of the older history + a 3K window | **-23.86 pp** | 0.191 |
 | window 3K + raw retrieval far field | -6.94 pp | 0.191 |
 | raw retrieval, no window | -6.94 pp | 0.191 (4,096: 0.243) |
 | evidence consolidation, no window | -5.44 pp | 0.139 |
@@ -319,28 +318,19 @@ them 5.899 s against 0.184 s - exactly backwards.
 ### 4.2b The baseline this space compares against: model-written compaction
 
 Other systems in this space report their gains *over* compaction-only context management, so the
-same baseline is measured here end to end: keep the newest 3,072 tokens verbatim, have the served
-model write a summary of everything older under the remaining budget (~5K tokens), and pack both
-into 8,192 (`--compile-mode compact`, `scripts/run_compaction.sh`).
+same baseline is measured here end to end: keep the newest 3,072 tokens verbatim, have a model
+write a summary of everything older under the remaining budget, and pack both into 8,192
+(`--compile-mode compact`, `scripts/run_compaction.sh`), with the summariser varied separately from
+the scorer (`--summarizer-model`).
 
-| view (8,192 tokens) | teacher-forced fidelity (n=44) | end-task F1 (n=48, paired) |
-|---|---:|---:|
-| **window + consolidated far field** | **0.00 pp** | 0.161 |
-| model-written compaction + window | **-23.86 pp** (NLL +1.534) | 0.191 |
-| plain retrieval at 4,096 | -25.00 pp | 0.243 |
-
-Compaction's *decision* is fine - 0.191 against the windowed arm's 0.161, paired +0.029 with a 95%
-CI of [-0.089, +0.146], and against plain retrieval at 4,096, -0.052 [-0.154, +0.047] - but its
-**fidelity is the worst of any arm measured that keeps the newest evidence whole**: -23.86 pp.  The
-mechanism is not lost evidence (the window is intact) but *inserted text*: a model-written summary
-of the session conditions the model's own continuation differently from the session itself, and the
-cost is the same order as the other arms that put non-verbatim text where history belongs
-(protected-spans-whole -20.33 pp, newest-span-only -25.36 pp).
-
-This is the paper's metric lesson in its sharpest form, and it is also why the claim here is about
-the *bound* rather than about compression: at one budget, keeping the evidence and retrieving the
-rest is at 0.00 pp while summarising it costs ~24 pp, and no amount of care in the summariser
-recovers the surface the model expects.
+*The numbers for this baseline are being re-measured.*  A first attempt reported -23.86 pp, but the
+receipt audit showed the arm had never called its summariser: a branch-placement bug meant the view
+was a malformed recency variant rather than a compaction, and the two published numbers were
+withdrawn.  The bug is fixed - the compaction branch is hoisted out of the consolidation gate, the
+window respects the same budget as every other arm, the summary is counted in the reported state,
+and every row records how many times the summariser was called, so a receipt that claims to be a
+compaction can be checked rather than trusted.  The corrected figures land here when the re-runs
+finish, and until then this subsection makes no claim.
 
 ### 4.3 Capacity
 

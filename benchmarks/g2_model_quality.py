@@ -85,6 +85,7 @@ def build_examples(
     """Build assistant-target examples without consulting the target during retrieval."""
     idx = DurableSpanIndex()
     history: list[dict] = []
+    summariser_calls = 0
     if token_counter is None:
         token_counter = lambda text: max(1, len(text.split()))
     out: list[Example] = []
@@ -137,6 +138,42 @@ def build_examples(
                     taken.sort(key=lambda sp: sp.turn)
                     active = "".join(f"<{sp.role}>\n{sp.text}\n" for sp in taken)
                     view = taken
+                elif compile_mode == "compact":
+                    # the de facto baseline for context overflow: keep the newest evidence
+                    # verbatim, summarise everything older with the model itself, and pack both
+                    # into the same budget.  `summarizer` is a text->text callable; without one
+                    # this mode degrades to recency rather than pretending to summarise.
+                    tail_budget = (tail_tokens if tail_tokens > 0
+                                   else int(token_budget * tail_fraction))
+                    # compaction respects the same budget as every other arm: the window takes
+                    # whole spans while they fit, and a span too large for the window is
+                    # represented by the summary instead of being blown into the view
+                    tail, tail_used, tail_ids = [], 0, set()
+                    for span in sorted(idx.spans, key=lambda sp: -sp.turn):
+                        cost = max(1, int(token_counter(span.text)))
+                        if tail_used + cost > tail_budget:
+                            continue
+                        tail_used += cost
+                        tail.append(span)
+                        tail_ids.add(span.span_id)
+                    tail.sort(key=lambda sp: sp.turn)
+                    older = [sp for sp in idx.spans if sp.span_id not in tail_ids]
+                    summary_budget = max(64, token_budget - tail_used)
+                    older_text = "".join(render_span(sp) for sp in older)
+                    if summarizer is not None and older_text.strip():
+                        summary = (summarizer(older_text, summary_budget) or "").strip()
+                        summariser_calls += 1
+                    else:
+                        summary = ""
+                    active = (f"<summary of earlier history>\n{summary}\n" if summary else "") + \
+                        "".join(render_span(sp) for sp in tail)
+                    # the summary is part of the view and must be counted as such: `view` drives
+                    # the reported state size, and an arm whose summary is free would look smaller
+                    # than it is
+                    view = tail
+                    if summary:
+                        view = tail + [Span(0, -1, "summary", summary,
+                                            max(1, int(token_counter(summary))))]
                 elif consolidate_view:
                     # retrieve generously, consolidate the evidence, then compile down: the
                     # point is that the *representation* changes, not that the ranking does
@@ -144,34 +181,7 @@ def build_examples(
                         query, token_budget=max(token_budget + 1,
                                                 int(token_budget * retrieve_multiplier)),
                         max_spans=max_spans, **options)
-                    if compile_mode == "compact":
-                        # the de facto baseline for context overflow: keep the newest evidence
-                        # verbatim, summarise everything older with the model itself, and pack both
-                        # into the same budget.  `summarizer` is a text->text callable; without one
-                        # this mode degrades to recency rather than pretending to summarise.
-                        tail_budget = (tail_tokens if tail_tokens > 0
-                                       else int(token_budget * tail_fraction))
-                        tail, tail_used, tail_ids = [], 0, set()
-                        for span in sorted(idx.spans, key=lambda sp: -sp.turn):
-                            cost = max(1, int(token_counter(span.text)))
-                            limit = max(tail_budget, cost)
-                            if tail_used + cost > limit:
-                                continue
-                            tail_used += cost
-                            tail.append(span)
-                            tail_ids.add(span.span_id)
-                        tail.sort(key=lambda sp: sp.turn)
-                        older = [sp for sp in idx.spans if sp.span_id not in tail_ids]
-                        summary_budget = max(64, token_budget - tail_used)
-                        older_text = "".join(render_span(sp) for sp in older)
-                        if summarizer is not None and older_text.strip():
-                            summary = (summarizer(older_text, summary_budget) or "").strip()
-                        else:
-                            summary = ""
-                        active = (f"<summary of earlier history>\n{summary}\n" if summary else "") + \
-                            "".join(render_span(sp) for sp in tail)
-                        view = tail
-                    elif compile_mode == "tail_state":
+                    if compile_mode == "tail_state":
                         # The tail is the working set.  Keep the most recent spans whole and in
                         # order, then spend what is left on the compiled far field.  This is the
                         # arm the controls point at: surface fidelity is conditioned on a
@@ -348,6 +358,9 @@ def build_examples(
         # whose history is a few thousand tokens (measured: sessions with max_isl >= 64K
         # still produced examples with 4K-16K histories, leaving the >=32K bucket empty).
         out = [ex for ex in out if ex.history_tokens_estimate >= min_history_tokens]
+    # expose summariser use so a receipt that claims to be a compaction baseline can be checked
+    for example in out:
+        object.__setattr__(example, "summariser_calls", summariser_calls)
     return out
 
 
@@ -691,6 +704,7 @@ def main(argv=None):
                         "history_tokens_estimate": ex.history_tokens_estimate,
                         "active_tokens_estimate": ex.active_tokens_estimate,
                         "turns": ex.turns,
+                        "summariser_calls": getattr(ex, "summariser_calls", 0),
                         "full": full,
                         "active": active,
                     }
