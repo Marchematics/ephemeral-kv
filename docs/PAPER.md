@@ -325,11 +325,27 @@ the scorer (`--summarizer-model`).
 
 The corrected measurement is at **fidelity parity**: 0.00 pp (NLL -0.020) with 223 summariser calls
 and 395 summary reuses across 48 examples, and a view of 6,650 tokens p50 - because the window is
-6,656 tokens of untouched newest evidence and *that* is what carries the surface.  Which is the
-useful form of the comparison: the two designs spend the same budget, keep the same window, and
-differ only in what the remaining ~1.5K buys - a model-written summary of the older history or
-retrieved evidence.  The decision half of that comparison is measured next (Section 4.2b continues
-in the end-task table), and until it lands this subsection claims only the fidelity line.
+6,656 tokens of untouched newest evidence and *that* is what carries the surface.  A **stronger
+summariser does not change it**: rewriting the same summaries with Qwen2.5-1.5B while the scorer
+stays Llama-3.2-1B also gives 0.00 pp (NLL -0.020), so the answer to "your summariser was weak" is
+that the summariser is not what the surface depends on.
+
+Which makes the comparison a controlled one: the two designs spend the same budget and keep the
+same window, and differ only in what the remaining ~1.5K buys.  Measured on the decision, that
+difference is decisive:
+
+| view (8,192 tokens) | window | remainder | fidelity | end-task F1 (n=48) |
+|---|---:|---|---:|---:|
+| window + consolidated retrieval | 6,656 | 1.5K retrieved | 0.00 pp | **0.089** |
+| compaction | 6,656 | 0.5K summary | 0.00 pp | (measuring) |
+| **window + consolidated retrieval (shipped)** | **4,096** | **4.1K retrieved** | **0.00 pp** | **0.161** |
+| plain retrieval, no window | 0 | 4,096 retrieved | -25.00 pp | 0.243 |
+| full history | - | - | reference | 0.089 |
+
+At a 6,656-token window the decision falls to the full-history level (0.089), because the window has
+consumed the budget the decision needs; at a 4,096-token window it is 0.161 at the same fidelity.
+That is the trade-off the two laws describe, measured along the window axis at a fixed budget, and
+it is why the shipped view keeps the *smallest* window that still holds the surface.
 
 For the record, an earlier version of this baseline reported -23.86 pp and was **withdrawn**: the
 arm had never called its summariser, because a branch-placement bug left the "compaction" view a
