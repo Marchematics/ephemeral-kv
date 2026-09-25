@@ -508,6 +508,29 @@ the receipts.
 | the routing phase change at an admissible state | `g4-quality-join-v2.json` | `scripts/run_g4_{grid2,geometry,pressure,hotspot}.sh` |
 | capacity and recovery | `g5-capacity-planning-v1.json`, `g5-failover-two-workers-samemodel-v1.json` | `benchmarks/g5_*.py` |
 
+### A.1 How these numbers are kept honest
+
+Four checks run against the repository rather than against the prose:
+
+* **value audit** - `benchmarks/paper_numbers.py` re-derives every headline number from the
+  receipts and asserts it (27 checks, including that the routing cells which clear a strict
+  retrieval-parity bar are exactly zero, and that the stricter end task's interval contains zero);
+* **receipt audit** - `benchmarks/check_receipts.py` reports any cited receipt that is missing, and
+  any whose payload is a *partial* write (the harnesses write incrementally, so a killed run leaves
+  a partial artifact at its final path);
+* **semantic audit** - receipts record facts about what the arm actually did (for example
+  `summariser_calls` per row), and the audit asserts them, because a value check cannot catch a
+  receipt that does not do what its name claims.  This is not hypothetical: an earlier version of
+  the compaction baseline in this paper reported a plausible number while never calling its
+  summariser at all, and was withdrawn when the semantic check exposed it;
+* **figure regeneration** - `benchmarks/make_figures.py` and `make_svg_figures.py` rebuild every
+  figure from the receipts, and re-running them leaves the tree unchanged.
+
+The runner scripts that produced each family of receipts are in `scripts/`, so the path from a
+claim to its evidence is a claim -> receipt -> script triple, and the paper states which of the
+three things that triple cannot cover: extrapolated rows, declared geometries, simulated clusters,
+and unmeasured task success.
+
 What is *not* here is as deliberate: the 1M lookup row is extrapolated (no public trace is that
 long), the 8B/70B geometries are declared rather than measured, the fleet-level scheduler is a replay
 over measured primitives rather than a deployment, and task success on a benchmark like DeepSWE is
