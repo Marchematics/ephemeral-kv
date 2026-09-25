@@ -26,10 +26,10 @@
       "active_tokens": 4096,
       "cells": 198,
       "advance": 63,
-      "arm": "window 3,072 + consolidated far field at a 4,096-token total (tail_state)",
-      "fidelity_pp": -2.4,
+      "arm": "window 3,584 + consolidated far field at a 4,096-token total",
+      "fidelity_pp": -0.96,
       "decision_f1": 0.117,
-      "fidelity_admissible": false,
+      "fidelity_admissible": true,
       "decision_admissible": true,
       "decision_parity_admissible": false
     },
@@ -58,7 +58,7 @@
   ],
   "summary": {
     "advancing_cells_total": 134,
-    "advancing_cells_fidelity_admissible": 54,
+    "advancing_cells_fidelity_admissible": 117,
     "advancing_cells_decision_admissible": 134,
     "advancing_cells_decision_parity": 0,
     "sizes_without_quality_points": []

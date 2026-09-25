@@ -168,7 +168,10 @@ def main(argv=None) -> int:
     # quality point and silently dropped its two advancing cells
     row16384 = next(r for r in join["rows"] if r["active_tokens"] == 16384)
     check("admissible region across sizes",
-          join["summary"]["advancing_cells_fidelity_admissible"], 54, 0)
+          join["summary"]["advancing_cells_fidelity_admissible"], 117, 0)
+    results.append(("the 4,096 column is admissible at the measured floor",
+                    bool(row4096.get("fidelity_admissible")),
+                    f"fidelity point {row4096.get('fidelity_pp')} pp"))
     check("advancing cells at 16384 (fidelity-admissible)", row16384["advance"], 2, 0)
     results.append(("every active size has a quality point",
                     not join["summary"]["sizes_without_quality_points"],
@@ -201,7 +204,10 @@ def main(argv=None) -> int:
     # the join's 4,096 point must be that arm, not an arm that replaces the window: the first
     # version of the points file scored this column at -25 pp, which overstated the distance to
     # admissibility by a factor of ten and contradicted C11
-    check("join 4096 fidelity point is the best measured state", row4096["fidelity_pp"], -2.4, TOL)
+    check("join 4096 fidelity point is the best measured state", row4096["fidelity_pp"], -0.96, TOL)
+    check("best 4096-token state with the wider window",
+          100 * (bucket_stats("artifacts/g2-compiler-window3584-b4096-v1.json")
+                 .get("32K-128K", {}).get("token_accuracy_delta_p50") or 0.0), -0.96, TOL_PP)
     # and the no-window retrieval row of Table 9, whose fidelity and decision come from the
     # retrieval-only arm at that budget rather than from an arm that caps the newest span
     lexical = bucket_stats("artifacts/g2-compiler-lexical-b4096-n48.json").get("32K-128K") or {}

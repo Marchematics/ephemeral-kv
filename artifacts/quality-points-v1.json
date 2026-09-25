@@ -22,16 +22,16 @@
     },
     {
       "active_tokens": 4096,
-      "arm": "window 3,072 + consolidated far field at a 4,096-token total (tail_state)",
-      "fidelity_pp": -2.4,
+      "arm": "window 3,584 + consolidated far field at a 4,096-token total",
+      "fidelity_pp": -0.96,
       "decision_f1": 0.117,
       "receipts": {
-        "fidelity": "artifacts/g2-compiler-window3k-b4096-v1.json",
+        "fidelity": "artifacts/g2-compiler-window3584-b4096-v1.json",
         "decision": "artifacts/g2b-patch-localization-window3k-b4096-n48.json",
-        "fidelity_alt": "artifacts/g2-compiler-tailquery-cap0.75-b4096-v1.json",
-        "decision_alt": "artifacts/g2b-patch-localization-tailquery-cap0.75-b4096-v1.json"
+        "decision_pending": "artifacts/g2b-patch-localization-window3584-b4096-n48.json",
+        "fidelity_alt": "artifacts/g2-compiler-window3k-b4096-v1.json"
       },
-      "note": "the windowed arm supersedes the tail-query point this file was first built with: at this size the windowed state is the best measured fidelity (-2.40 pp against the tail-query arm's -25.00 pp), and it is 0.4 pp outside the tolerance rather than 23 pp.  It is still not admissible, which is what the paper's C11 says"
+      "note": "the window is what carries the surface: at this total a 3,072-token window scores -2.40 pp and a 3,584-token one -0.96 pp, which is the difference between this column being admissible and not.  The decision is still read from the 3,072-window arm (0.117) until the 3,584-window decision arm lands."
     },
     {
       "active_tokens": 8192,
