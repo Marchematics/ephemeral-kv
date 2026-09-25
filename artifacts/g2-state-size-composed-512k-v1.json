@@ -1,0 +1,377 @@
+{
+  "schema": "ephemeral-kv-state-size-v1",
+  "kind": "measured_primitive",
+  "what": "tokens and bytes of the shipped compiled state (what a cold route transfers), measured through the harness's own view builder with no model loaded, plus the CPU wall time of that builder - index build, scan and view - which is an upper bound on the CPU side of a cold route, since the runtime reads a stored index",
+  "config": {
+    "compile_mode": "tail_state",
+    "jsonl": "data/sessions-composed-512k.jsonl",
+    "max_examples": 2,
+    "min_history_tokens": 500000,
+    "model": "/root/qcc/models/Llama-3.2-1B-Instruct",
+    "repeats": 1,
+    "tail_tokens": 4096,
+    "token_budget": 8192
+  },
+  "rows": [
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 500015,
+      "state_tokens": 7298,
+      "state_bytes": 26851,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 919
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 500777,
+      "state_tokens": 6846,
+      "state_bytes": 25614,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 921
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 501960,
+      "state_tokens": 7140,
+      "state_bytes": 25485,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 923
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 505514,
+      "state_tokens": 6244,
+      "state_bytes": 24664,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 925
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 505777,
+      "state_tokens": 8143,
+      "state_bytes": 30619,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 927
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 505877,
+      "state_tokens": 8121,
+      "state_bytes": 29379,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 929
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 506792,
+      "state_tokens": 7592,
+      "state_bytes": 27406,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 931
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 507163,
+      "state_tokens": 6948,
+      "state_bytes": 24358,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 933
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 508000,
+      "state_tokens": 7655,
+      "state_bytes": 27132,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 935
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 508446,
+      "state_tokens": 5813,
+      "state_bytes": 19424,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 937
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 509277,
+      "state_tokens": 7643,
+      "state_bytes": 26788,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 939
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 509654,
+      "state_tokens": 4588,
+      "state_bytes": 15283,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 941
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 509900,
+      "state_tokens": 6079,
+      "state_bytes": 21533,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 943
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 510059,
+      "state_tokens": 6158,
+      "state_bytes": 21957,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 945
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 510211,
+      "state_tokens": 7216,
+      "state_bytes": 26051,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 947
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 510511,
+      "state_tokens": 6146,
+      "state_bytes": 22015,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 949
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 510663,
+      "state_tokens": 7197,
+      "state_bytes": 26147,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 951
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 511279,
+      "state_tokens": 7015,
+      "state_bytes": 25615,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 953
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 511789,
+      "state_tokens": 5992,
+      "state_bytes": 22275,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 955
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 512583,
+      "state_tokens": 6896,
+      "state_bytes": 26428,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 957
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 513024,
+      "state_tokens": 7062,
+      "state_bytes": 27888,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 959
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 513701,
+      "state_tokens": 6943,
+      "state_bytes": 27854,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 961
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 514211,
+      "state_tokens": 6975,
+      "state_bytes": 28058,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 963
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 514423,
+      "state_tokens": 8234,
+      "state_bytes": 32882,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 965
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 514855,
+      "state_tokens": 6801,
+      "state_bytes": 27410,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 967
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 515583,
+      "state_tokens": 6275,
+      "state_bytes": 25471,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 969
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 516077,
+      "state_tokens": 6690,
+      "state_bytes": 26710,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 971
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 516533,
+      "state_tokens": 7010,
+      "state_bytes": 28191,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 973
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 517072,
+      "state_tokens": 6985,
+      "state_bytes": 27696,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 975
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 517872,
+      "state_tokens": 6843,
+      "state_bytes": 27389,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 977
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 518324,
+      "state_tokens": 5939,
+      "state_bytes": 24014,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 979
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 518445,
+      "state_tokens": 8144,
+      "state_bytes": 30040,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 981
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 518848,
+      "state_tokens": 7933,
+      "state_bytes": 28942,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 983
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 519311,
+      "state_tokens": 7497,
+      "state_bytes": 27367,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 985
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 519696,
+      "state_tokens": 7137,
+      "state_bytes": 25797,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 987
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 521335,
+      "state_tokens": 6977,
+      "state_bytes": 23220,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 989
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 521709,
+      "state_tokens": 6756,
+      "state_bytes": 22510,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 991
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 522046,
+      "state_tokens": 6903,
+      "state_bytes": 23911,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 993
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 522244,
+      "state_tokens": 7159,
+      "state_bytes": 24919,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 995
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 522374,
+      "state_tokens": 7218,
+      "state_bytes": 25044,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 997
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 522557,
+      "state_tokens": 7163,
+      "state_bytes": 24759,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 999
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 523069,
+      "state_tokens": 7047,
+      "state_bytes": 25296,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 1001
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 523449,
+      "state_tokens": 6514,
+      "state_bytes": 22577,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 1003
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 530401,
+      "state_tokens": 7791,
+      "state_bytes": 26460,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 1005
+    },
+    {
+      "session_id": "composed::512k::Project-MONAI__MONAI::0",
+      "history_tokens": 530466,
+      "state_tokens": 7659,
+      "state_bytes": 28933,
+      "cpu_path_ms_p50": 387874.3,
+      "turns": 1007
+    }
+  ]
+}

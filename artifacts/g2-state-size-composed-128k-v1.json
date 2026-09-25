@@ -1,0 +1,129 @@
+{
+  "schema": "ephemeral-kv-state-size-v1",
+  "kind": "measured_primitive",
+  "what": "tokens and bytes of the shipped compiled state (what a cold route transfers), measured through the harness's own view builder with no model loaded, plus the CPU wall time of that builder - index build, scan and view - which is an upper bound on the CPU side of a cold route, since the runtime reads a stored index",
+  "config": {
+    "compile_mode": "tail_state",
+    "jsonl": "data/sessions-composed-128k.jsonl",
+    "max_examples": 3,
+    "min_history_tokens": 130000,
+    "model": "/root/qcc/models/Llama-3.2-1B-Instruct",
+    "repeats": 1,
+    "tail_tokens": 4096,
+    "token_budget": 8192
+  },
+  "rows": [
+    {
+      "session_id": "composed::128k::0b01001001__spectree-64::0",
+      "history_tokens": 130052,
+      "state_tokens": 6625,
+      "state_bytes": 53176,
+      "cpu_path_ms_p50": 36753.2,
+      "turns": 278
+    },
+    {
+      "session_id": "composed::128k::0b01001001__spectree-64::0",
+      "history_tokens": 131004,
+      "state_tokens": 6571,
+      "state_bytes": 38551,
+      "cpu_path_ms_p50": 36753.2,
+      "turns": 280
+    },
+    {
+      "session_id": "composed::128k::0b01001001__spectree-64::0",
+      "history_tokens": 131387,
+      "state_tokens": 5939,
+      "state_bytes": 44792,
+      "cpu_path_ms_p50": 36753.2,
+      "turns": 282
+    },
+    {
+      "session_id": "composed::128k::0b01001001__spectree-64::0",
+      "history_tokens": 133275,
+      "state_tokens": 5707,
+      "state_bytes": 43232,
+      "cpu_path_ms_p50": 36753.2,
+      "turns": 284
+    },
+    {
+      "session_id": "composed::128k::0b01001001__spectree-64::0",
+      "history_tokens": 137396,
+      "state_tokens": 6130,
+      "state_bytes": 52103,
+      "cpu_path_ms_p50": 36753.2,
+      "turns": 286
+    },
+    {
+      "session_id": "composed::128k::0b01001001__spectree-64::0",
+      "history_tokens": 138695,
+      "state_tokens": 7051,
+      "state_bytes": 65677,
+      "cpu_path_ms_p50": 36753.2,
+      "turns": 288
+    },
+    {
+      "session_id": "composed::128k::0b01001001__spectree-64::0",
+      "history_tokens": 140300,
+      "state_tokens": 6880,
+      "state_bytes": 35296,
+      "cpu_path_ms_p50": 36753.2,
+      "turns": 290
+    },
+    {
+      "session_id": "composed::128k::0b01001001__spectree-64::0",
+      "history_tokens": 141033,
+      "state_tokens": 5772,
+      "state_bytes": 30412,
+      "cpu_path_ms_p50": 36753.2,
+      "turns": 292
+    },
+    {
+      "session_id": "composed::128k::0b01001001__spectree-64::0",
+      "history_tokens": 141246,
+      "state_tokens": 7286,
+      "state_bytes": 45788,
+      "cpu_path_ms_p50": 36753.2,
+      "turns": 294
+    },
+    {
+      "session_id": "composed::128k::0b01001001__spectree-64::0",
+      "history_tokens": 141400,
+      "state_tokens": 6334,
+      "state_bytes": 44713,
+      "cpu_path_ms_p50": 36753.2,
+      "turns": 296
+    },
+    {
+      "session_id": "composed::128k::0b01001001__spectree-64::0",
+      "history_tokens": 141652,
+      "state_tokens": 7935,
+      "state_bytes": 30604,
+      "cpu_path_ms_p50": 36753.2,
+      "turns": 298
+    },
+    {
+      "session_id": "composed::128k::0b01001001__spectree-64::0",
+      "history_tokens": 142204,
+      "state_tokens": 6660,
+      "state_bytes": 26134,
+      "cpu_path_ms_p50": 36753.2,
+      "turns": 300
+    },
+    {
+      "session_id": "composed::128k::0b01001001__spectree-64::0",
+      "history_tokens": 142963,
+      "state_tokens": 7021,
+      "state_bytes": 38973,
+      "cpu_path_ms_p50": 36753.2,
+      "turns": 302
+    },
+    {
+      "session_id": "composed::128k::0b01001001__spectree-64::0",
+      "history_tokens": 143123,
+      "state_tokens": 5385,
+      "state_bytes": 37231,
+      "cpu_path_ms_p50": 36753.2,
+      "turns": 304
+    }
+  ]
+}
