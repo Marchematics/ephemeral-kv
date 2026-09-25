@@ -1,0 +1,105 @@
+{
+  "schema": "ephemeral-kv-g2d-action-summary-v1",
+  "kind": "derived_measurement",
+  "source_receipt": "artifacts/g2d-action-turns-state4096-v1.json",
+  "summary": {
+    "action_turns": 48,
+    "sessions": 24,
+    "history_tokens_p50": 39653,
+    "arms": {
+      "full": {
+        "label": "full transcript",
+        "rows": 48,
+        "emits_an_action": 0.625,
+        "tool_match": 0.9,
+        "target_match": 0.6842105263157895,
+        "exact_match": 0.43333333333333335
+      },
+      "active": {
+        "label": "bounded state (3,584-token window + consolidated far field at a 4,096-token total)",
+        "rows": 48,
+        "emits_an_action": 0.375,
+        "tool_match": 0.8333333333333334,
+        "target_match": 0.3333333333333333,
+        "exact_match": 0.16666666666666666
+      },
+      "retrieval": {
+        "label": "plain lexical retrieval at 4,096",
+        "rows": 48,
+        "emits_an_action": 0.08333333333333333,
+        "tool_match": 0.75,
+        "target_match": 0.5,
+        "exact_match": 0.25
+      }
+    },
+    "comparisons": {
+      "active_vs_full_emits": {
+        "n": 48,
+        "mean_diff": -0.25,
+        "ci95": [
+          -0.4167,
+          -0.0625
+        ],
+        "includes_zero": false,
+        "wins": 5,
+        "losses": 17
+      },
+      "active_vs_retrieval_emits": {
+        "n": 48,
+        "mean_diff": 0.2916666666666667,
+        "ci95": [
+          0.1458,
+          0.4375
+        ],
+        "includes_zero": false,
+        "wins": 16,
+        "losses": 2
+      },
+      "active_vs_full_tool": {
+        "n": 13,
+        "mean_diff": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "includes_zero": true,
+        "wins": 0,
+        "losses": 0
+      },
+      "active_vs_full_target": {
+        "n": 6,
+        "mean_diff": -0.16666666666666666,
+        "ci95": [
+          -0.5,
+          0.0
+        ],
+        "includes_zero": true,
+        "wins": 0,
+        "losses": 1
+      },
+      "active_vs_retrieval_tool": {
+        "n": 2,
+        "mean_diff": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "includes_zero": true,
+        "wins": 0,
+        "losses": 0
+      },
+      "active_vs_retrieval_target": {
+        "n": 1,
+        "mean_diff": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "includes_zero": true,
+        "wins": 0,
+        "losses": 0
+      }
+    }
+  },
+  "reading": "three arms on the same mid-session turn.  The bounded state beats plain retrieval decisively on whether an executable action is emitted at all, and trails the full transcript there; conditional on emitting one, the two are close.  That split is the result, and reporting only a blended rate would hide half of it"
+}

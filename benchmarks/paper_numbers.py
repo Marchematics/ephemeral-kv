@@ -524,6 +524,42 @@ def main(argv=None) -> int:
                         f"{len(defined['Table'])} tables and {len(defined['Figure'])} figures, "
                         f"dangling: {dangling or 'none'}"))
 
+    # --- the mid-session action measurement: the end task's only executable form, and the one
+    # result in the paper that is deliberately two-sided.  Both halves are asserted, because a check
+    # that carried only the win over retrieval would report the paper as stronger than it is.
+    action = load("artifacts/g2d-action-summary-v1.json")["summary"]
+    arms = action["arms"]
+    check("mid-session turns", action["action_turns"], 48, 0)
+    check("mid-session sessions", action["sessions"], 24, 0)
+    check("mid-session history p50", action["history_tokens_p50"], 39653, 5)
+    check("emit rate, full transcript", round(arms["full"]["emits_an_action"], 3), 0.625, TOL)
+    check("emit rate, bounded state", round(arms["active"]["emits_an_action"], 3), 0.375, TOL)
+    check("emit rate, plain retrieval", round(arms["retrieval"]["emits_an_action"], 3), 0.083, TOL)
+    check("same-file rate, full transcript",
+          round(arms["full"]["target_match"], 3), 0.684, TOL)
+    emit_full = action["comparisons"]["active_vs_full_emits"]
+    emit_raw = action["comparisons"]["active_vs_retrieval_emits"]
+    check("bounded vs full, emits", round(emit_full["mean_diff"], 3), -0.25, TOL)
+    check("bounded vs full, emits: losses", emit_full["losses"], 17, 0)
+    check("bounded vs retrieval, emits", round(emit_raw["mean_diff"], 3), 0.292, TOL)
+    check("bounded vs retrieval, emits: wins", emit_raw["wins"], 16, 0)
+    results.append(("the action metric is reported two-sided",
+                    not emit_full["includes_zero"] and not emit_raw["includes_zero"]
+                    and emit_full["mean_diff"] < 0 < emit_raw["mean_diff"],
+                    f"regresses against the transcript ({emit_full['mean_diff']:+.3f}) and beats "
+                    f"retrieval ({emit_raw['mean_diff']:+.3f}), both intervals excluding zero"))
+    # ...and the mechanism, which is what makes it a design finding rather than a score
+    composition = load("artifacts/g2d-view-composition-v1.json")["summary"]
+    seen = composition["action_examples_in_view_p50"]
+    check("prior actions in the full view (p50)", seen["full"], 44, 0)
+    check("prior actions in the bounded view (p50)", seen["active"], 6, 0)
+    check("prior actions in the retrieval view (p50)", seen["retrieval"], 1, 0)
+    check("turns whose retrieval view shows no action",
+          composition["turns_whose_retrieval_view_shows_no_action"], 23, 0)
+    results.append(("the emit gap is attributable to what the view shows",
+                    seen["full"] > seen["active"] > seen["retrieval"],
+                    f"prior actions per view: {seen['full']} / {seen['active']} / {seen['retrieval']}"))
+
     # --- the figures must be *reproducible*, not merely present: regenerate every one of them from
     # the receipts in a temporary directory and require the tracked files to be identical.  This is
     # the data path asserted rather than documented - and because make_figures fails on a missing

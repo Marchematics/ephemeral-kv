@@ -59,7 +59,12 @@ against a checked-in receipt, and the CPU-only path in
 * **Compaction is equivalent, not worse.**  Measured under the same budget and window, with the
   summary in every scored context; the paper claims no win over it.
 * **Task success is unmeasured.**  The end task is next-turn file localisation against the recorded
-  patch, plus an offline action-level rescoring.
+  patch, plus an offline action-level rescoring.  Its **executable** form - 48 mid-session turns,
+  three arms parsed into tool invocations - is measured and is deliberately two-sided: the bounded
+  state **beats plain retrieval decisively** (+0.292, CI [+0.146, +0.438]) and **regresses against
+  the full transcript** (-0.250, CI [-0.417, -0.063]), because the views carry a median of 44, 6 and
+  1 prior actions respectively.  A view ranked for *evidence* does not show the model the format it
+  is being asked to produce.
 * **Past 156K tokens the histories are composed** out of whole real sessions, and the 8B/70B
   geometries are declared rather than measured.  Both are labelled wherever they appear.
 

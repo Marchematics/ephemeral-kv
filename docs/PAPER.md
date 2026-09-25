@@ -203,6 +203,38 @@ better**, and the absolute rates are low because the metric demands both an edit
 right file.  We report it as a bound our claim must clear rather than as a result: the stronger
 metric neither confirms nor refutes the weaker one, and task success remains unmeasured.
 
+**The same question asked of a mid-session action, and the answer is two-sided.**  Every
+continuation above was generated at the *last* turn of a session, and on this corpus that turn is
+the agent submitting - measured, 48 of 48, with no file target - so the end task has never scored
+the decision that matters, the next action in the middle of a session.  Measuring that
+(`benchmarks/g2d_action_turns.py`, 48 turns over 24 sessions, history p50 39,653, all three arms
+generated from the same turn and parsed into a tool invocation) splits the claim in a way a single
+number would have hidden:
+
+| arm (4,096-token budget) | emits an executable action | same tool | same file |
+|---|---:|---:|---:|
+| full transcript | **0.625** | 0.900 | 0.684 |
+| **bounded state (shipped)** | **0.375** | 0.833 | 0.333 |
+| plain lexical retrieval | **0.083** | 0.750 | 0.500 |
+
+Against **plain retrieval the bounded state wins decisively**: 16 wins to 2 losses, **+0.292, 95% CI
+[+0.146, +0.438]** - retrieval answers with prose rather than a tool call in 44 of 48 turns.  Against
+**the full transcript it regresses**: 5 wins to 17 losses, **-0.250, CI [-0.417, -0.063]**.  So the
+"does not regress, and ideally beats retrieval" criterion is **half met**, and which half depends on
+the comparison - the bounded state is the only one of the three that is both usable at 4K and
+capable of acting, and it does not act as reliably as the transcript.
+
+**Why, measured rather than guessed.**  The three views differ in what they show by an order of
+magnitude, and it is not the evidence: counting the prior *actions* each view contains at the scored
+turns (`benchmarks/g2d_view_composition.py`) gives a median of **44 for the full transcript, 6 for
+the bounded state, and 1 for retrieval**, with **23 of 48** retrieval views containing no action at
+all.  A ranking built for evidence selects tool output and file contents, because that is what the
+query terms match; prior assistant actions are not evidence and do not rank.  So a view assembled
+only from ranked evidence is not context management with a quality cost - it removes the format the
+continuation is supposed to be in, and the model answers in prose.  This also names the gap the
+bounded state has left: it keeps 6 actions where the transcript keeps 44, and closing it is a
+question about *which* turns the window holds, not about how many tokens it holds.
+
 **The compiler does not rescue the floor; the window does.**  The one remaining place a state
 compiler could have paid is the size the system actually runs at, where the far field has least room
 and materialised state is most attractive.  Measured there, log replay into materialised state

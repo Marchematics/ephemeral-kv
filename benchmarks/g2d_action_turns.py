@@ -170,8 +170,11 @@ def summarize(rows: list[dict]) -> dict:
         present = [r for r in rows if arm in r]
         if not present:
             continue
+        # only the keys the rows actually carry: this list was copied from the localisation harness,
+        # which scores an F1 over mentioned files that an action comparison does not produce, and
+        # the missing key crashed the payload write *after* every generation had completed
         out[arm] = {key: mean([r[arm][key] for r in present])
-                    for key in ("parseable", "tool", "target", "exact", "f1")}
+                    for key in ("parseable", "tool", "target", "exact")}
         out[arm]["n_tool"] = sum(1 for r in present if r[arm]["tool"] is not None)
         out[arm]["n_target"] = sum(1 for r in present if r[arm]["target"] is not None)
     return out
@@ -231,10 +234,23 @@ def main(argv=None) -> int:
     p.add_argument("--min-free-mib", type=int, default=9000,
                    help="free device memory required before each generation; the card is shared, so "
                         "the harness waits for room instead of dying on a co-tenant's allocation")
+    p.add_argument("--from-checkpoint", action="store_true",
+                   help="assemble the receipt from an existing checkpoint without generating "
+                        "anything: the generations are already recorded, and rebuilding every view "
+                        "to re-derive them costs an hour of CPU for no new measurement")
     p.add_argument("--checkpoint", default="",
                    help="append each scored row here as it completes (default: <out>.partial.jsonl) "
                         "and resume from it, so an hour of generation is not lost to one OOM")
     args = p.parse_args(argv)
+
+    checkpoint = Path(args.checkpoint or (args.out + ".partial.jsonl"))
+
+    if args.from_checkpoint:
+        if not checkpoint.exists():
+            raise SystemExit(f"--from-checkpoint: {checkpoint} does not exist")
+        rows = [json.loads(line) for line in checkpoint.read_text().splitlines() if line.strip()]
+        rows.sort(key=lambda r: (str(r.get("session_id")), r.get("turn_index") or 0))
+        return _write_payload(args, rows, checkpoint)
 
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -244,7 +260,6 @@ def main(argv=None) -> int:
     model = AutoModelForCausalLM.from_pretrained(args.model, dtype=torch.bfloat16)
     model.to(args.device).eval()
 
-    checkpoint = Path(args.checkpoint or (args.out + ".partial.jsonl"))
     done: set[tuple] = set()
     if checkpoint.exists():
         for line in checkpoint.read_text().splitlines():
@@ -354,6 +369,10 @@ def main(argv=None) -> int:
             if (prior.get("session_id"), prior.get("turn_index")) not in seen:
                 rows.append(prior)
     rows.sort(key=lambda r: (str(r.get("session_id")), r.get("turn_index") or 0))
+    return _write_payload(args, rows, checkpoint)
+
+
+def _write_payload(args, rows, checkpoint) -> int:
     summary = summarize(rows)
     payload = {
         "schema": "ephemeral-kv-g2d-action-turns-v1",
