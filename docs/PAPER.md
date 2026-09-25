@@ -176,6 +176,16 @@ command (`str_replace_editor`, `apply_patch`, `sed -i`, `cat >`, `patch`, ...) *
 the recorded patch touched (`g2b_action_metric.py`, `artifacts/g2b-action-metric-v1.json`);
 Table 3 reports it for every arm:
 
+Read the other way, the same arms are a frontier, and it is the honest answer to "does the bounded
+state beat retrieval": of the twelve arms measured at this budget that hold fidelity, the bounded
+state's score highest - **0.179** (n=24) and 0.165 (the shipped view, n=96) against full history's
+0.089 and compaction's 0.122 - and every arm that scores *higher* pays for it in fidelity:
+evidence consolidation 0.292 at -5.44 pp, state-first 0.242 at -15.38 pp, the collapsing compiler
+0.237 at -13.90 pp, log replay 0.231 at -7.21 pp, protect-whole 0.211 at -20.33 pp, and raw
+retrieval 0.191 at -6.94 pp.  So the claim is not that
+a bounded view decides better than retrieval, which it does not; it is that among the views a
+fidelity-gated system may actually use, this is the one that decides best.
+
 **Table 3:** The stricter action-level end task: a continuation has to name the right kind of
 command *and* target a file the recorded patch touched.
 

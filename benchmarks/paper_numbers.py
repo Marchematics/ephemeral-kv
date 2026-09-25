@@ -298,6 +298,39 @@ def main(argv=None) -> int:
             detail += f" (make_figures exit {rebuilt.returncode}, svg exit {drawn.returncode})"
         results.append(("figures regenerate byte-identically from the receipts", ok, detail))
 
+    # --- the arm frontier: the bounded state is the best *fidelity-admissible* decision, and every
+    # arm above it pays in fidelity.  These are the numbers the paper's frontier sentence quotes
+    def arm_decision(path):
+        rows = [r for r in load(path)["rows"] if r.get("recorded_files")]
+        return statistics.mean(r["active"]["f1"] for r in rows), len(rows)
+
+    top, top_n = arm_decision(
+        "artifacts/g2b-patch-localization-tailstate-compiledfar-tf0.35-b8192-v1.json")
+    check("best fidelity-admissible decision (tf0.35, n=24)", round(top, 3), 0.179, TOL)
+    results.append(("... and its instance count", top_n == 24, f"got {top_n}"))
+    # fidelity and decision are asserted *per arm*, because reading them from two different arms is
+    # how this paragraph was first written wrong: the 0.292 decision belongs to the no-collapse arm
+    # (-5.44 pp), not to the collapsing one (-13.90 pp)
+    for name, decision_receipt, want_fid, want_dec in (
+            ("artifacts/g2-compiler-dedup-b8192-v1.json",
+             "artifacts/g2b-patch-localization-raw-b8192-n48.json", -6.94, 0.191),
+            ("artifacts/g2-compiler-consolidate-b8192-nopath-v1.json",
+             "artifacts/g2b-patch-localization-consolidate-b8192-v1.json", -5.44, 0.292),
+            ("artifacts/g2-compiler-statefirst-b8192-v1.json",
+             "artifacts/g2b-patch-localization-statefirst-b8192-v1.json", -15.38, 0.242),
+            ("artifacts/g2-compiler-consolidate-b8192-v1.json",
+             "artifacts/g2b-patch-localization-b8192-v1.json", -13.90, 0.237),
+            ("artifacts/g2-compiler-materialize-b8192-v1.json",
+             "artifacts/g2b-patch-localization-materialize-b8192-v1.json", -7.21, 0.231),
+            ("artifacts/g2-compiler-protectwhole-b8192-v1.json",
+             "artifacts/g2b-patch-localization-protectwhole-b8192-v1.json", -20.33, 0.211)):
+        stats_ = bucket_stats(name).get("32K-128K") or {}
+        check(f"{Path(name).stem[:30]} fidelity pp",
+              100 * (stats_.get("token_accuracy_delta_p50") or 0.0), want_fid, TOL_PP)
+        if decision_receipt:
+            dec, n = arm_decision(decision_receipt)
+            check(f"{Path(decision_receipt).stem[:30]} decision", round(dec, 3), want_dec, TOL)
+
     # --- C3 (stricter end task): the action-level rescoring must stay a bound, not a win
     action = load("artifacts/g2b-action-metric-v1.json")["rows"]
     joint_action = next(r for r in action if r["arm"].startswith("windowcompiler-b8192-n96"))
