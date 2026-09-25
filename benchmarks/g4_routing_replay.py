@@ -187,16 +187,40 @@ class KvTier:
 
 def build_turns(sessions: int, turns_per_session: int, *, seed: int, gap_model: str,
                 active_tokens: int,
-                history_choices: tuple[int, ...] = HISTORY_CHOICES) -> list[Turn]:
+                history_choices: tuple[int, ...] = HISTORY_CHOICES,
+                history_skew: float = 0.0,
+                burst: dict | None = None) -> list[Turn]:
     """A declared arrival/gap model: the public corpus has no timestamps.
 
     `bursty` alternates a short tool gap (the agent is iterating) with a long think gap,
     which is where sticky routing looks best and where mobility is most tempting.
+
+    Two regime knobs change the *workload* rather than the routing policy:
+
+    * `history_skew > 0` draws session sizes from a Zipf-like distribution over the sorted
+      choices instead of uniformly.  Real fleets are not uniform: most coding sessions are
+      short and a few run for hours, so the KV payload a mover has to shift is dominated by a
+      handful of sessions - which is exactly the regime a law of the form `cost ~ history`
+      is worst at and a state that does not grow with age is best at.
+    * `burst` compresses a share of the sessions into a short arrival window.  A flash crowd
+      evicts warm state on every worker at once, so cold routes happen under contention
+      rather than one at a time, which is the regime where a cheap cold route is worth most.
     """
     rng = random.Random(seed)
+    ordered = sorted(history_choices)
+    weights = [1.0 / ((i + 1) ** history_skew) for i in range(len(ordered))] \
+        if history_skew > 0 else None
+    burst = burst or {}
+    burst_at = float(burst.get("at", 0.0))
+    burst_window = float(burst.get("window", 0.0))
+    burst_share = float(burst.get("share", 0.0))
+    burst_sessions = int(round(sessions * burst_share))
     turns: list[Turn] = []
     for session in range(sessions):
-        target = rng.choice(history_choices)
+        if weights is None:
+            target = rng.choice(history_choices)
+        else:
+            target = rng.choices(ordered, weights=weights, k=1)[0]
         # a session's history grows with its own turns: turn 0 is a short prompt, not the
         # whole eventual transcript.  Charging every first turn a full-history recompute
         # made placement cost dominate every policy that can migrate (measured: p50 57 s
@@ -204,9 +228,15 @@ def build_turns(sessions: int, turns_per_session: int, *, seed: int, gap_model: 
         # model, not of the cost law).
         history = 2048
         time = rng.random() * 2.0
+        in_burst = session < burst_sessions
+        if in_burst:
+            time = burst_at + rng.random() * max(burst_window, 1e-6)
         for turn in range(turns_per_session):
             turns.append(Turn(session, time, history, active_tokens))
-            if gap_model == "bursty":
+            if in_burst:
+                # a flash crowd arrives together but still iterates at the normal cadence
+                gap = rng.expovariate(1 / 2.0)
+            elif gap_model == "bursty":
                 gap = rng.expovariate(1 / 0.4) if turn % 2 == 0 else rng.expovariate(1 / 6.0)
             else:
                 gap = rng.expovariate(1 / 2.0)
@@ -375,6 +405,19 @@ def main(argv=None) -> int:
                    help="service-rate multiplier for the slow worker (0.35 is the regime the "
                         "earlier receipts used; 0.1 is a hotspot)")
     p.add_argument("--gap-model", choices=["poisson", "bursty"], default="bursty")
+    p.add_argument("--regimes", default="balanced,slow_worker,worker_failure",
+                   help="comma-separated regimes to replay.  The first three are the "
+                        "worker-behaviour regimes; `burst` (a flash crowd) and `size_skew` "
+                        "(a heavy-tailed session-size mix) are workload-shaped and opt-in, so "
+                        "receipts that predate them are unchanged and the grid gains cells "
+                        "rather than repeating them")
+    p.add_argument("--burst-share", type=float, default=0.5,
+                   help="share of sessions arriving inside the burst window (`burst` regime)")
+    p.add_argument("--burst-window", type=float, default=4.0,
+                   help="seconds the flash crowd's first turns are spread over")
+    p.add_argument("--history-skew", type=float, default=1.2,
+                   help="Zipf exponent over the sorted history choices (`size_skew` regime); "
+                        "0 is the uniform mix")
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--kv-bytes-per-token", type=int, default=0,
                    help="override the measured KV geometry (12,288 B/token on the G3 model).  "
@@ -413,10 +456,30 @@ def main(argv=None) -> int:
         "worker_failure": {"fail_at": statistics.median(t.arrival for t in turns),
                            "fail_worker": 1},
     }
+    # the workload-shaped regimes change the arrival or size distribution rather than a worker's
+    # behaviour, so each replays its own turn stream at the same seed.  They are opt-in: a receipt
+    # that does not ask for them is byte-identical to the grid measured before they existed, and
+    # the phase summary adds their cells instead of duplicating the ones already there.
+    regime_turns = {name: turns for name in regimes}
+    selected = [r.strip() for r in str(args.regimes).split(",") if r.strip()]
+    if "burst" in selected:
+        regimes["burst"] = {}
+        regime_turns["burst"] = build_turns(
+            args.sessions, args.turns_per_session, seed=args.seed, gap_model=args.gap_model,
+            active_tokens=args.active_tokens, history_choices=history_choices,
+            burst={"at": statistics.median(t.arrival for t in turns),
+                   "window": args.burst_window, "share": args.burst_share})
+    if "size_skew" in selected:
+        regimes["size_skew"] = {}
+        regime_turns["size_skew"] = build_turns(
+            args.sessions, args.turns_per_session, seed=args.seed, gap_model=args.gap_model,
+            active_tokens=args.active_tokens, history_choices=history_choices,
+            history_skew=args.history_skew)
+    regimes = {name: kwargs for name, kwargs in regimes.items() if name in selected}
     by_regime = {}
     for name, kwargs in regimes.items():
         by_regime[name] = {
-            policy: route(turns, costs, workers=args.workers, policy=policy,
+            policy: route(regime_turns[name], costs, workers=args.workers, policy=policy,
                           turn_service_s=args.turn_service_s, escape_s=args.escape_s,
                           warm_capacity=args.warm_capacity,
                           tier_capacity=args.tier_capacity, **kwargs)

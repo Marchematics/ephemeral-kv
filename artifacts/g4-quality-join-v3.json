@@ -1,0 +1,77 @@
+{
+  "schema": "ephemeral-kv-g4-quality-join-v1",
+  "kind": "derived_join",
+  "criteria": {
+    "fidelity_tolerance_pp": 2.0,
+    "decision_slack": 0.0,
+    "floors": {
+      "full_history_f1": 0.045,
+      "raw_retrieval_f1": 0.237,
+      "floors_note": "full history = feeding the whole transcript (0.045 on the 24 paired sessions); raw retrieval = dedup + snippet at 8,192 (0.237)."
+    }
+  },
+  "rows": [
+    {
+      "active_tokens": 2048,
+      "cells": 66,
+      "advance": 17,
+      "arm": "newest span + compiled far field (tail_query cap 0.9)",
+      "fidelity_pp": -27.92,
+      "decision_f1": 0.179,
+      "fidelity_admissible": false,
+      "decision_admissible": true,
+      "decision_parity_admissible": false
+    },
+    {
+      "active_tokens": 4096,
+      "cells": 214,
+      "advance": 77,
+      "arm": "window 3,584 + consolidated far field at a 4,096-token total",
+      "fidelity_pp": -0.96,
+      "decision_f1": 0.134,
+      "fidelity_admissible": true,
+      "decision_admissible": true,
+      "decision_parity_admissible": false
+    },
+    {
+      "active_tokens": 6144,
+      "cells": 52,
+      "advance": 18,
+      "arm": "verbatim 3,072-token window + consolidated far field at a 6,144-token total",
+      "fidelity_pp": 0.0,
+      "decision_f1": 0.1496,
+      "fidelity_admissible": true,
+      "decision_admissible": true,
+      "decision_parity_admissible": false
+    },
+    {
+      "active_tokens": 8192,
+      "cells": 310,
+      "advance": 59,
+      "arm": "verbatim window + compiled far field (tail_state tf 0.5): the only measured arm that holds both metrics at this size",
+      "fidelity_pp": 0.0,
+      "decision_f1": 0.161,
+      "fidelity_admissible": true,
+      "decision_admissible": true,
+      "decision_parity_admissible": false
+    },
+    {
+      "active_tokens": 16384,
+      "cells": 82,
+      "advance": 3,
+      "arm": "retrieval only, no window, at a 16,384-token budget (dedup + snippet)",
+      "fidelity_pp": -1.94,
+      "decision_f1": 0.142,
+      "fidelity_admissible": true,
+      "decision_admissible": true,
+      "decision_parity_admissible": false
+    }
+  ],
+  "summary": {
+    "advancing_cells_total": 174,
+    "advancing_cells_fidelity_admissible": 157,
+    "advancing_cells_decision_admissible": 174,
+    "advancing_cells_decision_parity": 0,
+    "sizes_without_quality_points": []
+  }
+}

@@ -31,10 +31,13 @@ against a checked-in receipt, and the CPU-only path in
 * **Placement stops depending on age.**  A session 32x older costs **2.4x less to move** (5.1x at a
   4K state), and one worker holds **32x more sessions** (427 / 40 / 16 per worker for 0.5B / 8B /
   70B geometries) - the same number whether the sessions are 64K tokens or a million.
-* **Routing has a phase change at an admissible state.**  Of 624 replay cells, **117 advance at a
-  state whose measured quality point passes** - 63 at the 4,096-token floor, 52 at 8,192, 2 at
-  16,384 - and **all 117 clear the 1.5x SLO-goodput bar** (79 with a finite ratio, median 1.61x).
-  None advances through the tail: the best p99 improvement is 26%, under the 30% bar.
+* **Routing has a phase change at an admissible state.**  Of 724 replay cells, **157 advance at a
+  state whose measured quality point passes** - 77 at the 4,096-token floor, 18 at 6,144, 59 at
+  8,192, 3 at 16,384 - across **all five regimes** the replay models: balanced, slow-worker hotspot,
+  worker loss, a flash crowd and a heavy-tailed session-size mix.  **117 clear the 1.5x SLO-goodput
+  bar** with a finite ratio (median 1.61x, max 5.06x) and 40 face a baseline that completes no work
+  at all; **23 clear the 30% p99 bar** (best +68.7%), every one of them in the flash-crowd regime,
+  where all workers evict at once and a history-sized cold route queues behind the spike.
 * **Recovery moves state, not history.**  A killed worker's replacement rebuilds 8,192 tokens in
   0.91-1.42 s with identical token accuracy, reading ~32 KB instead of the 0.38 GiB of KV the owner
   held; the durable object also resumes on a **different** model.

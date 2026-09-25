@@ -80,7 +80,7 @@ FIGURES = {
         "source": "the end-task ladder, paired on the same instances",
     },
     "fig4_phase_diagram": {
-        "receipts": ["artifacts/g4-quality-join-v2.json"],
+        "receipts": ["artifacts/g4-quality-join-v3.json"],
         "columns": ["active_tokens", "cells", "advance", "fidelity_pp", "decision_f1",
                     "fidelity_admissible", "decision_admissible"],
         "source": "the routing replay joined with the measured quality points",
@@ -247,7 +247,7 @@ def main(argv=None) -> int:
     emit("fig3_compiler_ablation", rows, FIGURES["fig3_compiler_ablation"]["columns"],
          FIGURES["fig3_compiler_ablation"]["source"], FIGURES["fig3_compiler_ablation"]["receipts"])
 
-    join = Path("artifacts/g4-quality-join-v2.json")
+    join = Path("artifacts/g4-quality-join-v3.json")
     if join.exists():
         payload = json.loads(join.read_text())
         emit("fig4_phase_diagram", payload["rows"], FIGURES["fig4_phase_diagram"]["columns"],

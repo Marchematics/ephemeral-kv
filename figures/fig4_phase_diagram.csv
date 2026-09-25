@@ -1,7 +1,8 @@
 # source: the routing replay joined with the measured quality points
-# receipts: g4-quality-join-v2.json
+# receipts: g4-quality-join-v3.json
 active_tokens,cells,advance,fidelity_pp,decision_f1,fidelity_admissible,decision_admissible
 2048,66,17,-27.92,0.179,False,True
-4096,198,63,-0.96,0.134,True,True
-8192,294,52,0.0,0.161,True,True
-16384,66,2,-1.94,0.142,True,True
+4096,214,77,-0.96,0.134,True,True
+6144,52,18,0.0,0.1496,True,True
+8192,310,59,0.0,0.161,True,True
+16384,82,3,-1.94,0.142,True,True

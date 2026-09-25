@@ -258,6 +258,62 @@ def main(argv=None) -> int:
     results.append(("plain retrieval, no window, 4096 instances",
                     len(raw_f1) == 48, f"got {len(raw_f1)}, want 48"))
 
+    # --- C7, second measurement: the grid with the two workload regimes and the 6,144 column.
+    # The paper's headline region is this one.  Two things have to hold for the widening to mean
+    # anything: the cells measured before it must reproduce exactly (the grid grew rather than
+    # changed), and the new regimes must carry cells whose measured quality point passes.
+    phase_v3 = load("artifacts/g4-all-phase-summary-v3.json")
+    phase_v2 = load("artifacts/g4-all-phase-summary-v2.json")
+    join_v3 = load("artifacts/g4-quality-join-v3.json")
+    key = lambda r: (r["receipt"], r["regime"])
+    old_cells = {key(r): (r["decision"], r["goodput_ratio"], r["p99_reduction"])
+                 for r in phase_v2["rows"]}
+    new_cells = {key(r): (r["decision"], r["goodput_ratio"], r["p99_reduction"])
+                 for r in phase_v3["rows"]}
+    check("grid cells (widened)", phase_v3["cells"], 724, 0)
+    check("grid advances (widened)", phase_v3["advances"], 174, 0)
+    check("admissible advances (widened)",
+          join_v3["summary"]["advancing_cells_fidelity_admissible"], 157, 0)
+    check("legacy cells lost when the grid was rebuilt",
+          sum(1 for k in old_cells if k not in new_cells), 0, 0)
+    check("legacy cells changed when the grid was rebuilt",
+          sum(1 for k in old_cells if k in new_cells and old_cells[k] != new_cells[k]), 0, 0)
+    check("sizes with no measured quality point",
+          len(join_v3["summary"]["sizes_without_quality_points"]), 0, 0)
+    v3_rows = {r["active_tokens"]: r for r in join_v3["rows"]}
+    for size, cells, advance in ((4096, 214, 77), (6144, 52, 18), (8192, 310, 59), (16384, 82, 3)):
+        check(f"widened column {size} cells", v3_rows[size]["cells"], cells, 0)
+        check(f"widened column {size} admissible advances", v3_rows[size]["advance"], advance, 0)
+    admissible = [r for r in phase_v3["rows"]
+                  if r["decision"] == "advance"
+                  and v3_rows[r["active_tokens"]]["fidelity_admissible"]]
+    finite = [r["goodput_ratio"] for r in admissible
+              if r["goodput_ratio"] not in (None, float("inf"))]
+    check("widened region: finite goodput ratios", len(finite), 117, 0)
+    check("widened region: goodput ratio p50", round(statistics.median(finite), 2), 1.61, 1e-2)
+    check("widened region: best goodput ratio", round(max(finite), 2), 5.06, 1e-2)
+    check("widened region: baselines that complete nothing",
+          sum(1 for r in admissible if r["goodput_ratio"] == float("inf")), 40, 0)
+    # the second half of the cluster gate: the flash crowd is where a cheap cold route shows up in
+    # the tail, and every cell clearing the 30% bar has to be attributable to that regime
+    tail = [r for r in admissible if (r["p99_reduction"] or -9) >= 0.30]
+    check("widened region: cells clearing the 30% p99 bar", len(tail), 23, 0)
+    check("widened region: p99-clearing cells outside the burst regime",
+          sum(1 for r in tail if r["regime"] != "burst"), 0, 0)
+    check("widened region: best p99 reduction",
+          round(max(r["p99_reduction"] for r in admissible), 2), 0.69, 1e-2)
+    regimes = {}
+    for r in admissible:
+        regimes[r["regime"]] = regimes.get(r["regime"], 0) + 1
+    check("widened region: regimes represented", len(regimes), 5, 0)
+    for regime, count in (("burst", 24), ("size_skew", 6), ("worker_failure", 83),
+                          ("slow_worker", 25), ("balanced", 19)):
+        check(f"widened region: {regime} cells", regimes.get(regime, 0), count, 0)
+    results.append(("both cluster-gate routes clear",
+                    len(finite) >= 1 and len(tail) >= 1,
+                    f"goodput bar in capacity/worker-loss, p99 bar in the flash crowd "
+                    f"({len(tail)} cells, best {max(r['p99_reduction'] for r in admissible):.0%})"))
+
     # --- C8: capacity
     capacity = load("artifacts/g5-capacity-planning-v1.json")["rows"]
     eight_b_state = next(r for r in capacity

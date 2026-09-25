@@ -1,7 +1,7 @@
 {
   "schema": "ephemeral-kv-quality-points-v1",
   "kind": "measured_quality_points",
-  "note": "One measured point per active size, each naming the best arm at that size for each metric. Read from the receipts named in the point; no interpolation between sizes.",
+  "note": "One measured point per active size, each naming the best arm at that size for each metric. Read from the receipts named in the point; no interpolation between sizes. The 6,144 point was added when the column's cells were folded into the main grid: it had been measured and reported as its own capacity grid, and leaving it out made the join drop a column that passes.",
   "fidelity_tolerance_pp": 2.0,
   "decision_slack": 0.0,
   "floors": {
@@ -31,6 +31,17 @@
         "fidelity_alt": "artifacts/g2-compiler-window3k-b4096-v1.json"
       },
       "note": "the window is what carries the surface: at this total a 3,072-token window scores -2.40 pp and a 3,584-token one -0.96 pp, which is the difference between this column being admissible and not.  The decision at the floor is 0.134 on 48 instances against full history's 0.089"
+    },
+    {
+      "active_tokens": 6144,
+      "arm": "verbatim 3,072-token window + consolidated far field at a 6,144-token total",
+      "fidelity_pp": 0.0,
+      "decision_f1": 0.1496,
+      "receipts": {
+        "fidelity": "artifacts/g2-compiler-window3k-b6144-v1.json",
+        "decision": "artifacts/g2b-patch-localization-window3k-b6144-n48.json"
+      },
+      "note": "the second admissible column, and the one that first moved the floor: a 3,072-token window scores -2.40 pp at a 4,096-token total and 0.00 pp at 6,144, which is the measurement that showed the surface tracks the window rather than the budget.  The decision is 0.150 against full history's 0.089 on the same 48 instances."
     },
     {
       "active_tokens": 8192,

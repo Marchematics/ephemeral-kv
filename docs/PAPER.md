@@ -24,8 +24,9 @@ at the floor configuration.  The consequence is
 a phase change rather than a speedup: a session **32x older costs 2.4x less to move** (5.1x at a 4K
 state); one worker holds **32x more sessions**; recovery and a model revision rebuild the state from
 a durable index instead of moving 12-128 GiB of KV; and a replay over measured hardware primitives
-advances routing in **117 cells at states where fidelity holds** - 63 at 4,096 tokens, 52 at 8,192
-and 2 at 16,384 - in all three regimes the replay models.
+advances routing in **139 cells at states where fidelity holds** - 77 at 4,096 tokens, 59 at 8,192
+and 3 at 16,384 - across **all five regimes** the replay models, including a slow-worker hotspot, a
+worker loss, a flash crowd and a heavy-tailed session-size mix.
 
 We also report what does not work, because it is the hypothesis this space reaches for first: a
 semantic compiler - dedup, collapse-each-file-to-its-latest-state, snippet re-selection, log replay
@@ -90,8 +91,8 @@ inside the 2 pp allowance against the full transcript, end-task score
    makes a footprint-based scheduler prefer exactly the wrong session.
 4. **The consequences are systemic**: 32x sessions per worker at the 4,096-token floor, lossless
    recovery on a fresh process (0.91-1.42 s, no KV transfer), and a routing phase change at the
-   4,096- and 8,192-token states where fidelity holds - 117 of 624 replay cells - in every regime we
-   model, including the slow-worker hotspot.
+   4,096- and 8,192-token states where fidelity holds - 139 of 688 replay cells - across every
+   regime we model, including the slow-worker hotspot and a flash crowd.
 5. **A negative result with an exact attribution.**  The obvious way to shrink the state - a semantic
    compiler - does not pay here: it is tied or worse on the decision, and the two stages that
    actually "compile state" are the ones that hurt.  The window and retrieval are what carry quality.
@@ -531,45 +532,57 @@ Replay over measured G3 primitives (H2D 23.2-23.4 GB/s, active-set prefill 0.053
 at 2K/4K/8K/16K, lookup by history bucket), with declared arrival models and geometries.  Table 11
 gives the advancing cells:
 
-**Table 11:** Advancing cells by active-set size in the routing replay, over the four regimes.
+**Table 11:** Advancing cells by active-set size in the routing replay, over the five regimes.
 
 | active set | advancing cells |
 |---|---:|
 | 2,048 | 17/66 (fidelity -27.92 pp: not admissible) |
-| **4,096 (fidelity-admissible)** | **63/198** |
-| **8,192 (fidelity-admissible)** | **52/294** |
-| **16,384 (fidelity-admissible)** | **2/66** |
+| **4,096 (fidelity-admissible)** | **77/214** |
+| **6,144 (fidelity-admissible)** | **18/52** |
+| **8,192 (fidelity-admissible)** | **59/310** |
+| **16,384 (fidelity-admissible)** | **3/82** |
 
-134 of 624 cells advance, and **117** of them sit in a column whose measured quality point passes:
+174 of 724 cells advance, and **157** of them sit in a column whose measured quality point passes:
 the **4,096** column, where a 3,584-token window holds the surface at -0.96 pp (the 3,072-token
-window that scores -2.40 pp at the same total is what kept this column out before), the 8,192 column,
-and the 16,384 column whose retrieval-only point is -1.94 pp with a 0.142 decision.  The 4,096 and
-8,192 columns cover all three regimes the replay models (balanced, slow-worker - the hotspot, a
-worker at a tenth of the service rate - and worker-loss).  It is admissible because its fidelity holds
-(0.00 pp); its decision is a tie with plain retrieval, so the cells that advance there do so on cost,
-and a strict decision-parity bar clears none of them.  The balanced and slow-worker wins are the
-capacity-pressure regime: a warm cache holding a fraction of the fleet and no cluster KV store, so
-the baseline's alternative is a full re-prefill (1.6-14.3 s) against 0.203 s of rematerialisation.
-Against a tier that can move KV, the wins are worker loss plus the 1M-history mixes.
+window that scores -2.40 pp at the same total is what kept this column out before), the **6,144**
+column where the same 3,072-token window holds 0.00 pp, the 8,192 column, and the 16,384 column
+whose retrieval-only point is -1.94 pp with a 0.142 decision.  Together the four admissible columns
+cover **all five regimes the replay models**: balanced, slow-worker - the hotspot, a worker at a
+tenth of the service rate - worker-loss, a **flash crowd** (half the sessions arriving inside a 4 s
+window, so warm state is evicted fleet-wide at once and cold routes happen under contention), and a
+**heavy-tailed size mix** (session sizes Zipf(1.2) over the same choices, so most sessions are 32K
+and a few are 262K/1M - the mix a `cost ~ history` model is worst at).  The 8,192 column is
+admissible because its fidelity holds (0.00 pp); its decision is a tie with plain retrieval, so the
+cells that advance there do so on cost, and a strict decision-parity bar clears none of them.  The
+balanced and slow-worker wins are the capacity-pressure regime: a warm cache holding a fraction of
+the fleet and no cluster KV store, so the baseline's alternative is a full re-prefill (1.6-14.3 s)
+against 0.203 s of rematerialisation.  Against a tier that can move KV, the wins are worker loss
+plus the 1M-history mixes.
 
-**How much, not just where.**  Across the **117** admissible cells, **79** clear the 1.5x SLO-goodput
-bar that defines an advance with a finite ratio (median **1.61x**) and **38** face a strongest
-baseline that completes *no* work, so their ratio is unbounded rather than large.  By column: at
-4,096 the 63 cells run at median **1.57x** (max 2.19x; balanced 8 cells 1.61x, slow-worker 11 1.63x,
-worker-loss 44 1.50x), and at 8,192 the 52 cells at median **1.72x** (max 5.06x, balanced 2.15x).
-**No cell in either column advances through the p99 route** - the best reduction in the region is
-+26%, under the 30% bar - so this is a throughput result, and the paper says so rather than implying
-a tail improvement it did not measure: where the baseline stalls, the ephemeral policy's own p99 is
-worse in absolute terms, because a baseline that completes nothing still has a p99.
+**How much, not just where.**  Across the **157** admissible cells, **117** clear the 1.5x
+SLO-goodput bar that defines an advance with a finite ratio (median **1.61x**, max 5.06x) and **40**
+face a strongest baseline that completes *no* work, so their ratio is unbounded rather than large.
+By column: at 4,096 the 77 cells run at median **1.61x** (max 3.00x; balanced 8 cells 1.61x,
+slow-worker 11 1.63x, worker-loss 44 1.50x, flash crowd 8 1.89x, size mix 6 1.69x), and at 8,192 the
+59 cells at median **1.72x** (max 5.06x, balanced 2.15x).  **23 cells also clear the 30% p99 bar**,
+and they are all in the flash-crowd regime - 8 at 4,096, 8 at 6,144, 6 at 8,192 and 1 at 16,384 -
+where the best reduction in the region is **+68.7%**.  That is the regime a cheap cold route is worth
+most in the tail: under a burst every worker is evicting at once, so a baseline that must move or
+re-prefill the history queues behind the same fleet-wide spike, while rematerialising 4-8K tokens
+does not.  Outside the burst regime the region is a throughput result, and the paper says so rather
+than implying a tail improvement it did not measure: where the baseline stalls, the ephemeral
+policy's own p99 is worse in absolute terms, because a baseline that completes nothing still has a
+p99.
 
-**What the region's size was waiting on.**  The columns differ by cell count: 4,096 advances in 63
-cells of 198 against the 8,192 column's 52 of 294, so moving the system to a 4,096-token state
-widens the region from 52 to 115 cells at *half* the state size - and capacity and mobility improve
+**What the region's size was waiting on.**  The columns differ by cell count: 4,096 advances in 77
+cells of 214 against the 8,192 column's 59 of 310, so moving the system to a 4,096-token state
+widens the region from 59 to 136 cells at *half* the state size - and capacity and mobility improve
 with it.  That needed one measurement, and it was the window rather than the budget: the same
 4,096-token total with a 3,584-token window scores **-0.96 pp** and puts the column inside the
-allowance, so the region is **117 cells** (with the 16,384 column's 2) and the state is 4-8K.  Its
-decision at that size is **0.134** on 48 instances against full history's 0.089 - a win over the
-transcript, still short of plain retrieval's parity bar, which is why the strict count stays zero.  The
+allowance, so the region is **157 cells** (with the 6,144 column's 18 and the 16,384 column's 3) and
+the state is 4-8K.  Its decision at that size is **0.134** on 48 instances against full history's
+0.089 - a win over the transcript, still short of plain retrieval's parity bar, which is why the
+strict count stays zero.  The
 same 3,072-token window holds 0.00 pp once the total is 6,144, which is why the earlier reading put
 the floor at 6,144.  The stricter bar is a second, larger target: decision parity
 with plain retrieval at the same budget means reaching its floor of 0.237-0.243 F1, where the best
@@ -762,7 +775,7 @@ Table 14 maps each claim to the receipt that backs it and to the script that pro
 | the 1M lookup is measured, and query-driven rather than history-driven | `g2-index-lookup-composed-1m-v1.json` | `benchmarks/g2_index_lookup.py` |
 | the dead-state concentration does not extrapolate to composed lengths | `g2-dead-state-composed-1m-v1.json` | `benchmarks/g2_dead_state.py` |
 | lexical evidence mass grows with session length | `g2-evidence-mass-composed-1m-v1.json` | `benchmarks/g2_evidence_mass.py` |
-| 117 of 624 replay cells sit at an admissible state, all clearing 1.5x goodput | `g4-quality-join-v2.json`, `g4-all-phase-summary-v2.json` | `scripts/run_g4_join.sh` |
+| 157 of 724 replay cells sit at an admissible state, 117 of them clearing 1.5x goodput and 23 clearing 30% p99 | `g4-quality-join-v3.json`, `g4-all-phase-summary-v3.json`, `g4b-burst-*-v1.json` | `scripts/run_g4_join.sh`, `scripts/run_g4_regimes.sh` |
 | the compiler does not rescue the 4,096-token floor | `g2-compiler-window3k-farmaterialize-b4096-v1.json`, `g2-compiler-window3584-b4096-v1.json` | `scripts/run_floor_3584.sh` |
 
 ### A.2 How these numbers are kept honest

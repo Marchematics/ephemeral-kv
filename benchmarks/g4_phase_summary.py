@@ -20,18 +20,34 @@ from pathlib import Path
 def main(argv=None) -> int:
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     p.add_argument("--glob", default="artifacts/g4-*.json")
+    p.add_argument("--exclude", action="append", default=[],
+                   help="glob of receipts to leave out of the grid (repeatable).  The grid is a "
+                        "declared set of cells, not every replay file on disk: the 6,144-token "
+                        "column is reported as its own capacity grid, and folding it in silently "
+                        "would move every count in the paper")
     p.add_argument("--out", required=True)
     args = p.parse_args(argv)
 
+    skipped = [name for pattern in args.exclude for name in glob.glob(pattern)]
     rows = []
     for path in sorted(glob.glob(args.glob)):
+        if path in skipped:
+            continue
         payload = json.loads(Path(path).read_text())
         if payload.get("schema") != "ephemeral-kv-g4-routing-replay-v1":
             continue
         if "verdict" not in payload:
             continue          # receipts from before the gate was evaluated in-artifact
         config, verdicts = payload["config"], payload["verdict"]
-        for regime in ("balanced", "slow_worker", "worker_failure"):
+        # The regimes a receipt contributes are the ones it was *asked* to compute.  Reading
+        # every table it happens to carry would double-count: a receipt run for the two
+        # workload regimes also reports its balanced table, which is the same cell as the
+        # balanced receipt at the same configuration.  Receipts that predate the flag
+        # computed the three worker-behaviour regimes, which is the default.
+        declared = config.get("regimes")
+        names = ([r.strip() for r in str(declared).split(",") if r.strip()] if declared
+                 else ["balanced", "slow_worker", "worker_failure"])
+        for regime in names:
             table = (payload["balanced"] if regime == "balanced"
                      else payload["by_regime"].get(regime))
             if not table or regime not in verdicts:

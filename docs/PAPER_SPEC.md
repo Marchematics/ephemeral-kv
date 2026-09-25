@@ -112,10 +112,10 @@ Receipts: `g2-compiler-consolidate-*`, `-materialize-*`, `-statefirst-*`, `-prot
 ### Figure 4 - The phase diagram with quality attached
 
 Advancing cells by active set, with the quality criteria shown rather than assumed: 17/66 at
-2,048, 63/198 at 4,096, **36/246 at the fidelity-admissible 8,192**, 2/66 at 16,384; and the same
-cells annotated by which criterion they clear (fidelity within 2 pp, decision at least full
-history, decision at least raw retrieval).
-Receipts: `g4-quality-join-v1.json`.
+2,048 (not admissible), 77/214 at 4,096, 18/52 at 6,144, **59/310 at the fidelity-admissible
+8,192**, 3/82 at 16,384; and the same cells annotated by which criterion they clear (fidelity
+within 2 pp, decision at least full history, decision at least raw retrieval).
+Receipts: `g4-quality-join-v3.json`.
 
 ### Figure 5 - Capacity and recovery
 
@@ -198,7 +198,7 @@ now carries what was measured, what its scope is, and whether the gate is met.
 | 1c end task | no regression vs full history | 96 paired sessions: the shipped view 0.165 against plain retrieval's 0.169, paired **+0.013, 95% CI [-0.068, +0.092]**; at 6,144 the decision is 0.150 against full history's 0.089; a stricter action-level rescoring is a bound (every interval includes zero, no arm measurably better) | **met as no-regression**; "better than retrieval" is not claimed |
 | 2 G3 law | 128K -> 1M grows <= 1.25x at fixed active demand | active prefill depends only on the active count; lookup is **measured** at 1M on composed histories (0.68 ms p50 at 1,086K tokens, query-driven rather than history-driven), and the H2D payload grows with the session by construction | **met, with composed histories past 156K** |
 | 3 G3 inversion | 1M/2K cheaper than 32K/16K | 1M with a 4,096-token state: 0.0954 s; with 8,192: 0.2031 s; 32K with the pre-compiler 16,384-token view: 0.4855 s; a session 32x older is 2.4x (5.1x) cheaper, and the footprint estimate ranks the two backwards | **met** |
-| 4 G4 consequence | >= 1.5x goodput or >= 30% p99 in several regimes | **134 of 624 cells advance, 117 at a fidelity-admissible state**: **63 at the 4,096-token floor**, 52 at 8,192, 2 at 16,384, across balanced, slow-worker (the hotspot) and worker-loss; **all 117 clear the 1.5x SLO-goodput bar** (79 with a finite ratio, median 1.61x; the other 38 against a baseline that completes no work) and none needs the p99 route (best +26%); a strict retrieval-parity bar clears **0** cells | **met with the scope stated** |
+| 4 G4 consequence | >= 1.5x goodput or >= 30% p99 in several regimes | **174 of 724 cells advance, 157 at a fidelity-admissible state**: **77 at the 4,096-token floor**, **18 at 6,144**, 59 at 8,192, 3 at 16,384, across **all five regimes the replay models** - balanced, slow-worker (the hotspot), worker loss, a flash crowd (half the sessions arriving in a 4 s window) and a heavy-tailed session-size mix (Zipf(1.2)).  **Both routes now clear, in different regimes**: 117 cells clear the 1.5x SLO-goodput bar with a finite ratio (median 1.61x, max 5.06x) and 40 face a baseline that completes no work, while **23 cells clear the 30% p99 bar (best +68.7%), all of them in the flash-crowd regime**, where every worker evicts at once.  A strict retrieval-parity bar clears **0** cells | **met, both routes, with the scope stated** |
 | 5 G5 ownership | worker loss transfers no history-sized object | process-level kill: a fresh worker rebuilds 8,192 tokens in 0.91-1.42 s with identical token accuracy and 32,455 bytes read; the state is 18-40 KB of text at every measured age (111K-984K tokens); model rollout keeps the decision on two foreign models (0.137/0.145 against 0.017/0.042) | **met** |
 | 6 honest boundary | a region where the baseline wins, measured | balanced load with every session resident against a KV-moving tier does not advance; the 2,048 and 16,384 columns barely advance (17 and 2 cells) and the 2,048 column is not fidelity-admissible; the decision advantage vanishes into a tie at 64K-96K histories | **met** |
 | 7 deeper: `dM/dL ~ 0` | state flat in age with quality flat | state **4,588-8,439 tokens across an 8.9x range of raw history and 45x of turns** (composed past 156K), transfer 18-40 KB, lookup 0.27-0.68 ms, and paired against a resident 131K-window reference the accuracy gap is **-0.38 / -3.26 / -4.91 / -3.35 pp at 145K / 278K / 514K / 984K** - flat in the state, the transfer and the lookup, and a few points (not growing further) on the surface; the end task does not degrade at all (0.077 / 0.165 / 0.122 / 0.167); **and** the lexical evidence mass does grow with age (395K of 764K tokens still match the query), so the bound is a design choice validated by quality, not an intrinsic ceiling | **met, with the caveat** |
@@ -231,7 +231,15 @@ Open items, in the order they matter:
    name without a reference is worse than no name.
 2. **Task success on a benchmark like DeepSWE.**  The end task here is file-level localisation of the
    next turn plus an offline action-level rescoring, which is weaker evidence than task success, and
-   Section 6 says so.
+   Section 6 says so.  An **executable** version of the end task - parse the continuation as a tool
+   call and compare it with the recorded next action - was built and is a documented dead end at
+   this scope (`benchmarks/g2c_action_reproduction.py`, `artifacts/g2c-action-final-turn-window3584-n48.json`):
+   the receipts generate at the session's last turn, and that turn is a session-ending submission in
+   **48 of 48** rows (47 `submit`, one task tracker) with no file target, so there is nothing to
+   compare against and the tool rate only asks whether a model that is finishing also emits a
+   `submit` call (it does not: 8.7% full history, 7.4% bounded).  An action-reproduction result needs
+   a harness that generates at **mid-session** action turns - the editor call that changes a file -
+   which is a different measurement, not a re-scoring of the receipts that exist.
 3. **The 8B/70B capacity geometries are declared**, from published KV geometries, rather than
    measured on those models; the 0.5B geometry is measured.
 4. **The routing consequence is a replay, not a cluster**: the primitives (H2D bandwidth, lookup,
