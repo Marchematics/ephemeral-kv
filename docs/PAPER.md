@@ -323,14 +323,20 @@ write a summary of everything older under the remaining budget, and pack both in
 (`--compile-mode compact`, `scripts/run_compaction.sh`), with the summariser varied separately from
 the scorer (`--summarizer-model`).
 
-*The numbers for this baseline are being re-measured.*  A first attempt reported -23.86 pp, but the
-receipt audit showed the arm had never called its summariser: a branch-placement bug meant the view
-was a malformed recency variant rather than a compaction, and the two published numbers were
-withdrawn.  The bug is fixed - the compaction branch is hoisted out of the consolidation gate, the
-window respects the same budget as every other arm, the summary is counted in the reported state,
-and every row records how many times the summariser was called, so a receipt that claims to be a
-compaction can be checked rather than trusted.  The corrected figures land here when the re-runs
-finish, and until then this subsection makes no claim.
+The corrected measurement is at **fidelity parity**: 0.00 pp (NLL -0.020) with 223 summariser calls
+and 395 summary reuses across 48 examples, and a view of 6,650 tokens p50 - because the window is
+6,656 tokens of untouched newest evidence and *that* is what carries the surface.  Which is the
+useful form of the comparison: the two designs spend the same budget, keep the same window, and
+differ only in what the remaining ~1.5K buys - a model-written summary of the older history or
+retrieved evidence.  The decision half of that comparison is measured next (Section 4.2b continues
+in the end-task table), and until it lands this subsection claims only the fidelity line.
+
+For the record, an earlier version of this baseline reported -23.86 pp and was **withdrawn**: the
+arm had never called its summariser, because a branch-placement bug left the "compaction" view a
+malformed recency variant.  The bug is fixed - the branch is hoisted out of the consolidation gate,
+the window respects the same budget as every other arm, the summary is counted in the reported
+state, and every row records how many times the summariser was called and how often a summary was
+reused - so a receipt that claims to be a compaction can be checked rather than trusted.
 
 ### 4.3 Capacity
 

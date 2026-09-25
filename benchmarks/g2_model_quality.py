@@ -86,6 +86,8 @@ def build_examples(
     idx = DurableSpanIndex()
     history: list[dict] = []
     summariser_calls = 0
+    summary_reuses = 0
+    summary_cache: dict = {}
     if token_counter is None:
         token_counter = lambda text: max(1, len(text.split()))
     out: list[Example] = []
@@ -118,6 +120,8 @@ def build_examples(
                 # and at 12,288 - the split stayed proportional.
                 tail_tokens = int(options.pop("tail_tokens", 0))
                 summary_tokens = int(options.pop("summary_tokens", 1536))
+                summary_input_tokens = int(options.pop("summary_input_tokens", 8192))
+                summary_stride = int(options.pop("summary_stride", 8))
                 tail_cap = float(options.pop("tail_cap", 0.5))
                 far_compiler = str(options.pop("far_compiler", "consolidate"))
                 if compile_mode == "recency":
@@ -163,10 +167,28 @@ def build_examples(
                     # generating a summary as large as the remaining budget is neither what
                     # production compaction does nor affordable to measure
                     summary_budget = max(64, min(summary_tokens, token_budget - tail_used))
-                    older_text = "".join(render_span(sp) for sp in older)
+                    # incremental compaction, as a serving stack would do it: summarise the newest
+                    # `summary_input_tokens` of the older history, and reuse the summary while the
+                    # older set has not grown by `summary_stride` spans.  Summarising the whole
+                    # older history once per turn costs hours and is not what production does.
+                    recent_older, used_older = [], 0
+                    for span in reversed(older):
+                        cost = max(1, int(token_counter(span.text)))
+                        if used_older + cost > summary_input_tokens:
+                            break
+                        used_older += cost
+                        recent_older.append(span)
+                    recent_older.reverse()
+                    older_text = "".join(render_span(sp) for sp in recent_older)
+                    key = (len(older) // max(1, summary_stride), tail_used // 512)
                     if summarizer is not None and older_text.strip():
-                        summary = (summarizer(older_text, summary_budget) or "").strip()
-                        summariser_calls += 1
+                        if key in summary_cache:
+                            summary = summary_cache[key]
+                            summary_reuses += 1
+                        else:
+                            summary = (summarizer(older_text, summary_budget) or "").strip()
+                            summary_cache[key] = summary
+                            summariser_calls += 1
                     else:
                         summary = ""
                     active = (f"<summary of earlier history>\n{summary}\n" if summary else "") + \
@@ -365,6 +387,7 @@ def build_examples(
     # expose summariser use so a receipt that claims to be a compaction baseline can be checked
     for example in out:
         object.__setattr__(example, "summariser_calls", summariser_calls)
+        object.__setattr__(example, "summary_reuses", summary_reuses)
     return out
 
 
@@ -545,7 +568,12 @@ def verdict_by_bucket(by_bucket: dict) -> dict:
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     p.add_argument("--jsonl", required=True)
-    p.add_argument("--summary-tokens", type=int, default=1536,
+    p.add_argument("--summary-input-tokens", type=int, default=8192,
+                   help="newest tokens of the older history handed to the summariser")
+    p.add_argument("--summary-stride", type=int, default=8,
+                   help="re-summarise once the older set has grown by this many spans "
+                        "(incremental compaction, as a serving stack does)")
+    p.add_argument("--summary-tokens", type=int, default=512,
                    help="size of the model-written summary in compact mode; the rest of the "
                         "budget stays verbatim (a realistic compaction, and affordable to measure)")
     p.add_argument("--summarizer-model", default="",
@@ -691,6 +719,8 @@ def main(argv=None):
                           "tail_fraction": args.tail_fraction,
                           "tail_tokens": args.tail_tokens,
                           "summary_tokens": args.summary_tokens,
+                          "summary_input_tokens": args.summary_input_tokens,
+                          "summary_stride": args.summary_stride,
                           "tail_cap": args.tail_cap,
                           "far_compiler": args.far_compiler,
                           "keep_earlier_verbatim": args.keep_earlier_verbatim},
@@ -713,6 +743,7 @@ def main(argv=None):
                         "active_tokens_estimate": ex.active_tokens_estimate,
                         "turns": ex.turns,
                         "summariser_calls": getattr(ex, "summariser_calls", 0),
+                        "summary_reuses": getattr(ex, "summary_reuses", 0),
                         "full": full,
                         "active": active,
                     }
