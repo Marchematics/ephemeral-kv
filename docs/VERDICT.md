@@ -19,7 +19,7 @@ What is measured for that abstraction:
 | the state that must move is bounded and does not grow with session age | raw history 64,401 / 82,972 / 155,574 -> state 7.1-8.2K, fidelity delta +0.00 / +0.00 / +1.43 pp (`g2-killer-table-v3.json`) |
 | therefore session age stops predicting placement cost | 1M history with an 8,192-token state: 0.2031 s; with 4,096: 0.0954 s; against 0.4855 s for a 32K history carrying the 16,384-token raw view that fidelity needed before the bound - a session 32x older is 2.4x (5.1x) cheaper to move (`g2-killer-table-v3.json`, G3 primitives) |
 | most of the durable footprint is state that is never needed again | five spans hold 73-96% of a long session's tokens; the turn-by-turn content is 4-27% (median 8%) (`g2-dead-state-v1.json`) |
-| the changed cost law moves the routing decision at a quality-admissible state | 118/576 replay cells advance; **36 at the 8,192-token state**, in all three regimes (balanced 5, slow worker 6, worker loss 25) (`g4-quality-join-v1.json`) |
+| the changed cost law moves the routing decision at a quality-admissible state | **134/624** replay cells advance; **117 of them at a state whose measured quality point passes** - 63 at the 4,096-token floor, 52 at 8,192, 2 at 16,384 - across balanced, slow-worker and worker-loss (`g4-quality-join-v2.json`) |
 
 ## 2. What is *not* claimed, because it was measured false
 
@@ -39,7 +39,7 @@ What is measured for that abstraction:
 | semantic compiler 16K -> <=8K | 4-8K | fidelity: the 8,192 view is at parity, but through the window, not the compiler (the compiler alone is -5.44 pp) | **met by the view, not by the compiler** |
 | fidelity vs full history | <=2 pp | +0.29 pp (recency), 0.00 pp (2.9-4.9K window) | **met** |
 | real agent task not regressing, ideally > raw retrieval | no regression | all arms beat full history (0.089 -> 0.139-0.243); against raw retrieval the compiler *loses* | **no regression met; "better than raw" failed** |
-| G4 winning region wider than 4/48, not only the 2K extreme | material widening | 4/48 -> 118/576, with 36 cells at the quality-admissible 8,192 across all three regimes | **met** (the widening came from the grid's missing axes - active-set granularity, session scale, model geometry, capacity pressure - not from the compiler) |
+| G4 winning region wider than 4/48, not only the 2K extreme | material widening | 4/48 -> **117 of 624** cells at a quality-admissible state (63 at the 4,096-token floor, 52 at 8,192, 2 at 16,384), across all three regimes, every one clearing the 1.5x goodput bar | **met** (the widening came from the grid's missing axes - active-set granularity, session scale, model geometry, capacity pressure - not from the compiler) |
 | cluster consequence >=1.5x goodput or >=30% p99 in several regimes | two or more regimes | capacity-pressure regime: goodput x2-5, p99 +6-26% in balanced and slow-worker; worker-loss cells advance against a KV-moving tier; balanced with all sessions resident and a KV-moving tier does not advance | **met with a stated scope** |
 
 ## 4. The deeper criterion

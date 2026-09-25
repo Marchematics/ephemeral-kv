@@ -30,7 +30,7 @@ common review outcome for a systems paper: a headline the artifacts do not suppo
 | "32x older costs 2.4x less to move (5.1x at 4K)" | `g2-killer-table-v4.json` inversion rows, from G3 measured primitives |
 | "one worker holds 16x more sessions" | `g5-capacity-planning-v1.json` |
 | "recovery and a model revision rebuild from a durable index instead of moving 12-128 GiB" | `g5-failover-two-workers-samemodel-v1.json`, `g5-failover-Qwen2.5-*.json` |
-| "54 cells at a quality-admissible state (52 at 8,192 across all three replay regimes - balanced, slow-worker and worker-loss - and 2 at 16,384), every one of them clearing the 1.5x goodput bar" | `g4-quality-join-v2.json`, `g4-all-phase-summary-v2.json` |
+| "117 cells at a quality-admissible state - 63 at the 4,096-token floor, 52 at 8,192 and 2 at 16,384, across balanced, slow-worker and worker-loss - every one of them clearing the 1.5x goodput bar" | `g4-quality-join-v2.json`, `g4-all-phase-summary-v2.json`, `g2-compiler-window3584-b4096-v1.json` |
 | "a semantic compiler does not beat plain retrieval" | `g2b-patch-localization-raw-b4096-n96.json` against `-compiled-b8192-n48.json`; equal-budget ties in §4.3 |
 | "collapsing a file costs 8.5 pp; snippet re-selection 20 pp" | `g2-compiler-consolidate-b8192-v1.json` against `-nopath-v1.json`; `g2-compiler-protectwhole-b8192-v1.json` |
 | "teacher-forced fidelity is saturated by keeping the newest evidence whole" | `g2-compiler-recency-b8192-v1.json` (+0.29 pp), its own figure 6 |
