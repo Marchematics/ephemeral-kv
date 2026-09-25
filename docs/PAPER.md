@@ -545,6 +545,11 @@ Four checks run against the repository rather than against the prose:
   receipt that does not do what its name claims.  This is not hypothetical: an earlier version of
   the compaction baseline in this paper reported a plausible number while never calling its
   summariser at all, and was withdrawn when the semantic check exposed it;
+* **script audit** - `benchmarks/check_scripts.py` reads every reproduction script, extracts the
+  `--out` paths it promises and reports which exist, which are partial, and which are missing;
+  arms superseded by a later variant are listed with the reason, so anything else missing is an
+  arm that never produced its receipt.  This is the check that answers "did this experiment
+  actually run", which a queue cannot answer while it is still waiting;
 * **figure regeneration** - `benchmarks/make_figures.py` and `make_svg_figures.py` rebuild every
   figure from the receipts, and re-running them leaves the tree unchanged.
 
