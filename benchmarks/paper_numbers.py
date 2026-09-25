@@ -298,6 +298,19 @@ def main(argv=None) -> int:
             detail += f" (make_figures exit {rebuilt.returncode}, svg exit {drawn.returncode})"
         results.append(("figures regenerate byte-identically from the receipts", ok, detail))
 
+    # --- C5's lookup term: measured on composed histories, and query-driven rather than
+    # history-driven - which is the abstraction's own claim, so it is asserted rather than narrated
+    lookup_1m = load("artifacts/g2-index-lookup-composed-1m-v1.json")["rows"]
+    check("1M composed history, spans", round(statistics.median(r["spans"] for r in lookup_1m)), 2055, 400)
+    lookup_p50 = [r["lookup_ms_p50"] for r in lookup_1m]
+    results.append(("1M lookup under 5 ms p50 on every example",
+                    max(lookup_p50) < 5.0, f"max {max(lookup_p50):.2f} ms"))
+    small = [r["lookup_ms_p50"] for r in lookup_1m if r["query_tokens"] < 100]
+    large = [r["lookup_ms_p50"] for r in lookup_1m if r["query_tokens"] >= 300]
+    results.append(("lookup cost tracks the query, not the history",
+                    bool(small) and bool(large) and max(small) < min(large),
+                    f"small queries {small}, large queries {large}"))
+
     # --- the arm frontier: the bounded state is the best *fidelity-admissible* decision, and every
     # arm above it pays in fidelity.  These are the numbers the paper's frontier sentence quotes
     def arm_decision(path):

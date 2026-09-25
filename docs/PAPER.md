@@ -366,7 +366,14 @@ it points at a limitation: a short session whose individual turns are enormous.
 
 ### 4.2 The mobility law and the inversion
 
-Table 8 gives the two costs side by side.
+Table 8 gives the two costs side by side.  The lookup term in it is now measured rather than
+extrapolated: on real transcripts concatenated into 143K, 301K, 530K and 1.07M-token histories, the
+durable index answers the runtime's query in **0.27 / 0.21 / 0.31 / 0.68 ms p50** (p95 1.35 ms) - and
+it is the *query* that sets the cost, not the history: the same million-token index answers an
+11-token query in 0.40 ms and a 388-token query in 3.8 ms, while a real 141K-token session whose
+last tool message carries 45K tokens pays 15 ms.  Against 53-203 ms of active-set prefill the term
+is negligible either way, which is the point: the cold path's cost tracks what the query asks for,
+not how old the session is.
 
 **Table 8:** Mobility: rebuilding and prefilling the compiled state, against moving the session's
 full KV.
@@ -613,7 +620,10 @@ carries quality is the window and retrieval, and what carries mobility is the bo
 * **The regime scope of the routing result is stated with it.**  Balanced and slow-worker wins
   assume a fleet whose warm cache holds a fraction of its sessions and no cluster KV store;
   against a KV-moving tier they reduce to worker loss and the 1M mixes.
-* **The 1M lookup row is extrapolation.**  No public trace is that long; the receipt says so.
+* **The 1M lookup is measured, but on composed history.**  No public trace is that long, so the
+  lookup is measured on real transcripts concatenated into million-token histories
+  (`g2-index-lookup-composed-1m-v1.json`): p50 **0.4-4.4 ms** depending on query size, against
+  53-203 ms of active-set prefill.  What is still composed is the *session*, not the measurement.
 * **The 8B and 70B geometries are declared, not measured.**  The fabric, prefill and 0.5B KV numbers
   are measured on this card.
 * **We do not claim `|E_q|` is intrinsically bounded.**  Lexical evidence mass grows with session
@@ -745,13 +755,13 @@ partial-receipt check, the semantic checks (`summariser_calls`), and queues that
 
 The runner scripts that produced each family of receipts are in `scripts/`, so the path from a
 claim to its evidence is a claim -> receipt -> script triple, and the paper states which of the
-three things that triple cannot cover: extrapolated rows, declared geometries, simulated clusters,
-and unmeasured task success.  `docs/REPRODUCING.md` gives the CPU-only path that re-derives every
+four things that triple cannot cover: histories composed out of real sessions, declared hardware
+geometries, a simulated cluster replay, and unmeasured task success.  `docs/REPRODUCING.md` gives the CPU-only path that re-derives every
 number and figure here from the receipts, the rules that derive the corpora from the downloaded
 corpus, and the cold-start drill that checks the repository is self-contained.
 
-What is *not* here is as deliberate: the 1M lookup row is extrapolated (no public trace is that
-long), the 8B/70B geometries are declared rather than measured, the fleet-level scheduler is a replay
+What is *not* here is as deliberate: the 1M lookup is measured on composed histories rather than on
+a real million-token session (no public trace is that long), the 8B/70B geometries are declared rather than measured, the fleet-level scheduler is a replay
 over measured primitives rather than a deployment, and task success on a benchmark like DeepSWE is
 not measured at all.  Those four sentences are the paper's honest perimeter, and none of them is
 load-bearing for a claim above.

@@ -35,4 +35,11 @@ for bucket in 128k 256k 512k 1m; do
   /root/qcc/venv/bin/python benchmarks/g2_dead_state.py \
     --jsonl "data/sessions-composed-${bucket}.jsonl" \
     --out "artifacts/g2-dead-state-composed-${bucket}-v1.json"
+  # the lookup term of the mobility law, measured where the G3 receipt says it has to be
+  /root/qcc/venv/bin/python benchmarks/g2_index_lookup.py \
+    --jsonl "data/sessions-composed-${bucket}.jsonl" --max-examples 4 --repeats 20 \
+    --out "artifacts/g2-index-lookup-composed-${bucket}-v1.json"
 done
+# and the real long sessions, as the comparison point
+/root/qcc/venv/bin/python benchmarks/g2_index_lookup.py --jsonl data/sessions-64k.jsonl \
+  --max-examples 8 --repeats 20 --out artifacts/g2-index-lookup-real64k-v1.json
