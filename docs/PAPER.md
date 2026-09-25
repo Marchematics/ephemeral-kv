@@ -238,7 +238,10 @@ the allowance (-0.96 pp, NLL +0.049 against the narrower window's +0.129) - bett
 than the 3,072-token window at a 6,144-token total (+0.061), which is the whole point: **the surface
 tracks how much newest evidence is kept whole, not how large the budget is.**  And above 4,096 more
 budget does not improve either metric, which is why the paper's state is **4-8K** rather than as
-large as the machine will hold.
+large as the machine will hold.  The margin is worth stating: the 4,096-token floor spends half the
+2 pp allowance (-0.96 pp), where the 6,144-token arm spends none of it, so a deployment that wants
+the whole allowance in reserve should run the 6,144-token configuration - the paper reports both and
+the routing consequence is computed at the size each implies.
 
 ### 2.3 The metric cannot see the difference
 
