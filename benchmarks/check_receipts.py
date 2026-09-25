@@ -21,7 +21,9 @@ DOCS = ("docs/CLAIMS.md", "docs/VERDICT.md", "docs/DRAFT.md", "docs/PLAN.md",
 # The figure generator is a citing document too: it names the receipts each figure is built from,
 # and a figure whose input is untracked cannot be regenerated in a clone even though the figure's
 # own CSV is committed.
-FIGURE_SOURCES = ("benchmarks/make_figures.py",)
+# The value audit is a citing document too: a receipt that only `paper_numbers.py` reads was
+# untracked unnoticed, and the cold-start drill found it by crashing on the file instead.
+FIGURE_SOURCES = ("benchmarks/make_figures.py", "benchmarks/paper_numbers.py")
 # receipts that exist only as part of an external run (models, corpora, GPU sweeps) or that are
 # deliberately not tracked; listing them here is the documented-omission mechanism
 OPTIONAL_PREFIXES = ("data/", "models/")
@@ -41,6 +43,10 @@ def main(argv=None) -> int:
         match = re.search(r"\{([^{}]*)\}", token)
         if not match:
             return [token]
+        if "," not in match.group(1):
+            # a *placeholder*, not a family: `artifacts/x-{bucket}-v1.json` in an f-string is a
+            # template, while `artifacts/x-b{4096,6144}-v1.json` is a citation of two receipts
+            return []
         return [expansion for alternative in match.group(1).split(",")
                 for expansion in expand(token[:match.start()] + alternative + token[match.end():])]
 
@@ -60,7 +66,9 @@ def main(argv=None) -> int:
         if not path.exists():
             continue
         text = path.read_text()
-        found = list(first.findall(text))
+        # a quoted path in a tool is a literal receipt unless it contains a brace: those are
+        # f-string templates (`f"artifacts/x-{bucket}-v1.json"`), not citations
+        found = [item for item in first.findall(text) if "{" not in item]
         if second is not None:
             for candidate in second.findall(text):
                 for name_ in expand(candidate):
