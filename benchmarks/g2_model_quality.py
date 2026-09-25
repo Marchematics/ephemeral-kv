@@ -84,6 +84,7 @@ def render_message(msg: dict) -> str:
 def build_examples(
     messages: list[dict],
     *,
+    session_id: str | None = None,
     token_budget: int,
     max_spans: int = 64,
     min_history_spans: int = 8,
@@ -417,6 +418,7 @@ def build_examples(
         # the summary's tokens *in this example's view*: a compact arm whose summaries are called
         # but never reach a view is not a compaction arm, and only this number shows that
         object.__setattr__(example, "summary_tokens_in_view", summary_in_view)
+        object.__setattr__(example, "session_id", session_id)
     return out
 
 
@@ -731,6 +733,7 @@ def main(argv=None):
 
             examples = build_examples(
                 messages,
+                session_id=row.get("session_id"),
                 token_budget=args.token_budget,
                 summarizer=_summarise if args.compile_mode == "compact" else None,
                 max_spans=args.max_spans,
@@ -768,6 +771,10 @@ def main(argv=None):
                 )
                 rows.append(
                     {
+                        # the session this row came from: without it, two arms' receipts can only be
+                        # paired by row order, and pairing them by a missing key silently compares
+                        # arbitrary rows (a bug this repository shipped once)
+                        "session_id": getattr(ex, "session_id", None),
                         "history_tokens_estimate": ex.history_tokens_estimate,
                         "active_tokens_estimate": ex.active_tokens_estimate,
                         "turns": ex.turns,

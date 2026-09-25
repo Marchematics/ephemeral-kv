@@ -224,7 +224,8 @@ def main(argv=None) -> int:
                 return tokenizer.decode(out[0][input_ids.shape[1]:], skip_special_tokens=True)
 
             examples = build_examples(
-                messages, token_budget=args.token_budget,
+                messages, session_id=row.get("session_id"),
+                token_budget=args.token_budget,
                 summarizer=_summarise if args.compile_mode == "compact" else None,
                 min_history_tokens=args.min_history_tokens,
                 compiler={"recency_spans": args.recency_spans,
@@ -260,6 +261,7 @@ def main(argv=None) -> int:
             # the sharper comparison and does not depend on the model volunteering files
             next_turn_files = mentioned_files(example.target)
             rows.append({
+                "session_id": getattr(example, "session_id", None),
                 "instance_id": meta.get("instance_id"),
                 "resolved": meta.get("resolved"),
                 "history_tokens": example.history_tokens_estimate,
