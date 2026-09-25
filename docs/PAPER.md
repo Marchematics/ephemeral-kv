@@ -592,6 +592,17 @@ with plain retrieval at the same budget means reaching its floor of 0.237-0.243 
 fidelity-admissible arms sit at 0.161-0.179, a gap of 0.06-0.08.  We report both targets rather than
 treating the region's current width as a property of the workload.
 
+**Where the width came from, stated because it is not where one would expect.**  The region was 4 of
+48 cells on the first grid and is **157 of 724** here, and none of that came from the compiler: the
+compiler does not change the state's size, and it loses on the decision.  It came from three axes
+the grid was missing - active-set sizes between 2,048 and 16,384 (the 4,096 and 6,144 columns are
+where two thirds of the region is), session histories past 262K, and model geometries whose KV
+payload makes a history-sized move infeasible - and from two workload regimes, a flash crowd and a
+heavy-tailed size mix, that the earlier three did not model; all 624 cells measured before those two
+regimes exist reproduce exactly, so this is added measurement rather than a re-reading.  The
+distinction matters for anyone deciding what to build next: the bound on the state is what widens
+the region, and the compiler that was supposed to produce that bound was measured and did not.
+
 ### 4.6 Recovery and rollout
 
 Table 12, in Appendix B, records what the runtime does under process loss and what reuse across
