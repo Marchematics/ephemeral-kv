@@ -61,7 +61,15 @@ def main(argv=None) -> int:
                              check=False).stdout.split()
     uncited = sorted(name for name in tracked if name not in cited)
 
+    # A receipt that exists only in the working directory is invisible to a reader: the cold-start
+    # drill (clone the repository elsewhere and run this) is what exposed that class.
+    untracked = sorted(name for name in cited
+                       if Path(name).exists() and name not in tracked)
     print(f"cited receipts: {len(cited)}   tracked artifacts: {len(tracked)}")
+    if untracked:
+        print(f"\nCITED BUT UNTRACKED ({len(untracked)}) - present here, absent from a clone:")
+        for name in untracked:
+            print(f"  {name}   <- {', '.join(sorted(cited[name]))}")
     if partial:
         print(f"\nCITED BUT PARTIAL ({len(partial)}) - a killed run wrote these; re-run before use:")
         for name in partial:

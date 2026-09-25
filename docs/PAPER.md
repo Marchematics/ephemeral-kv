@@ -563,9 +563,12 @@ Four checks run against the repository rather than against the prose:
 * **value audit** - `benchmarks/paper_numbers.py` re-derives every headline number from the
   receipts and asserts it - including that the routing cells which clear a strict
   retrieval-parity bar are exactly zero, and that the stricter end task's interval contains zero;
-* **receipt audit** - `benchmarks/check_receipts.py` reports any cited receipt that is missing, and
-  any whose payload is a *partial* write (the harnesses write incrementally, so a killed run leaves
-  a partial artifact at its final path);
+* **receipt audit** - `benchmarks/check_receipts.py` reports any cited receipt that is missing, any
+  whose payload is a *partial* write (the harnesses write incrementally, so a killed run leaves a
+  partial artifact at its final path), and any that exists only in the working directory;
+* **cold-start drill** - the same audit run in a fresh clone, which is how the untracked class was
+  found: four receipts the ledger cited existed only locally, so a reader could not have checked
+  those claims;
 * **semantic audit** - receipts record facts about what the arm actually did (for example
   `summariser_calls` per row), and the audit asserts them, because a value check cannot catch a
   receipt that does not do what its name claims.  This is not hypothetical: an earlier version of
