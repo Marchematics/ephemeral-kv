@@ -627,8 +627,10 @@ carries quality is the window and retrieval, and what carries mobility is the bo
 * **The 8B and 70B geometries are declared, not measured.**  The fabric, prefill and 0.5B KV numbers
   are measured on this card.
 * **We do not claim `|E_q|` is intrinsically bounded.**  Lexical evidence mass grows with session
-  length on these traces; the bound is chosen, and its validity is the measured quality flatness at
-  that budget.
+  length on these traces - 11K tokens at 51K-token histories, 46K at 103K, 195K at 321K, and **395K**
+  of 764K at the long end (`g2-evidence-mass-composed-1m-v1.json`) - so at a million tokens more
+  than half the history still shares terms with the query.  The bound is chosen, and its validity is
+  the measured quality flatness at that budget, not a ceiling the corpus imposes.
 * **We do not claim a semantic compiler beats retrieval.**  It does not, on 48 paired sessions
   (-0.104, CI [-0.208, -0.007]) or at equal budget (raw 0.191 against compiled 0.139 at 8,192).
 * **We do not claim fidelity and the decision prefer the same *rendering*.**  They prefer the same

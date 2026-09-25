@@ -298,6 +298,17 @@ def main(argv=None) -> int:
             detail += f" (make_figures exit {rebuilt.returncode}, svg exit {drawn.returncode})"
         results.append(("figures regenerate byte-identically from the receipts", ok, detail))
 
+    # --- the evidence-mass caveat, measured at the long end: more than half of a 764K-token history
+    # still shares terms with the query, so the bound is a design choice rather than a ceiling
+    mass_long = load("artifacts/g2-evidence-mass-composed-1m-v1.json")["by_history_bucket"]
+    long_bucket = next((v for k, v in mass_long.items() if v.get("n")), None)
+    check("long-history bucket: history tokens p50", round(long_bucket["history_p50"]), 763515, 2000)
+    check("long-history bucket: relevant tokens p50",
+          round(long_bucket["relevant_tokens_p50"]), 394863, 2000)
+    results.append(("more than half a 764K history still matches the query",
+                    long_bucket["relevant_tokens_p50"] / long_bucket["history_p50"] > 0.5,
+                    f"{100 * long_bucket['relevant_tokens_p50'] / long_bucket['history_p50']:.0f}%"))
+
     # --- C5's lookup term: measured on composed histories, and query-driven rather than
     # history-driven - which is the abstraction's own claim, so it is asserted rather than narrated
     lookup_1m = load("artifacts/g2-index-lookup-composed-1m-v1.json")["rows"]
