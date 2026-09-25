@@ -548,6 +548,14 @@ Four checks run against the repository rather than against the prose:
 * **figure regeneration** - `benchmarks/make_figures.py` and `make_svg_figures.py` rebuild every
   figure from the receipts, and re-running them leaves the tree unchanged.
 
+Two failure modes were found while building this and are worth naming, because both produced
+*plausible-looking* evidence rather than errors.  A killed duplicate run left a **partial artifact
+at its final path** (16 of 48 rows), and a value audit cannot see that - the numbers it checks are
+real, just few.  And two arms were reported as queued for two rounds while **never having started**,
+because one harness did not accept a flag they passed and the runner scripts had no `set -e`: an
+experiment that never starts looks exactly like one that is still running.  The defences are the
+partial-receipt check, the semantic checks (`summariser_calls`), and queues that stop on failure.
+
 The runner scripts that produced each family of receipts are in `scripts/`, so the path from a
 claim to its evidence is a claim -> receipt -> script triple, and the paper states which of the
 three things that triple cannot cover: extrapolated rows, declared geometries, simulated clusters,
