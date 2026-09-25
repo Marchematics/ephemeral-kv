@@ -408,11 +408,14 @@ medians of paired differences with a per-example spread of -26 to +2 pp).  The c
 honest limit: the transcripts are real, the million-token sessions are not.
 
 **The session keeps growing; the state that must move does not.**  The quality side of these same
-buckets has a shape that matters more than its level: paired against a *resident* view that uses the
-model's whole 131,072-token window (`g2-composed-{128k,256k}-reference131k-v1.json` against
-`g2-composed-{128k,256k}-state8192-v1.json`), the bounded state's teacher-forced accuracy is
-**2.41 pp** behind at 145K histories and **2.50 pp** behind at 278K - the gap does not grow with the session, the same
-way the state and its transfer cost do not.  The reference there is not full history: past 131K
+buckets is mixed, and it is reported as measured: the end task holds or improves with age (0.077 at
+145K, 0.165 at 278K, 0.122 at 514K, 0.167 at 984K - variation that tracks each bucket's ground-truth
+set rather than its length), while the surface gives up a few points against a *resident* view that
+uses the model's whole 131,072-token window
+(`g2-composed-{128k,256k,512k,1m}-reference131k-v1.json` against
+`g2-composed-{128k,256k,512k,1m}-state8192-v1.json`): **0.38 pp** behind at 145K histories,
+**3.26 pp** at 278K, **4.91 pp** at 514K and **3.35 pp** at 984K - medians of paired differences,
+with a per-example spread of -26 to +2 pp.  The reference there is not full history: past 131K
 tokens a resident system cannot serve the whole transcript at all, so the comparison is against the
 strongest view it *can* serve, which is why the number is reported separately from the 2 pp
 allowance the real-corpus measurements meet.  The composition is the honest limit throughout: the
@@ -703,11 +706,13 @@ carries quality is the window and retrieval, and what carries mobility is the bo
   lookup is measured on real transcripts concatenated into million-token histories
   (`g2-index-lookup-composed-1m-v1.json`): p50 **0.4-4.4 ms** depending on query size, against
   53-203 ms of active-set prefill.  What is still composed is the *session*, not the measurement.
-* **Short of the corpus, the state trails a large-context reference by ~2.5 pp.**  Past 131K tokens a
-  resident system cannot serve the whole transcript, so the comparison is against the strongest view
-  it *can* serve, and there the bounded state's teacher-forced accuracy is 2.41 pp behind at 145K and
-  2.50 pp behind at 278K (Table 7b).  Flat in age, but not free: the state is a *bounded* view, and on
-  the surface it gives up a couple of points to whatever the machine can hold.
+* **Past the corpus, the state trails a large-context reference by a few points.**  Against the
+  strongest view a resident system can serve - the newest tokens that fit its 131,072-token window -
+  the bounded state is 0.38 pp behind at 145K histories, 3.26 pp at 278K, 4.91 pp at 514K and 3.35 pp
+  at 984K (medians of paired differences; per-example spread -26 to +2 pp).  Small at the corpus's own
+  scale, a few points once the history is several times the reference's window, and not growing after
+  that - but not free, and not the same as the 2 pp fidelity gate, which is measured against full
+  history where full history still fits.
 * **Histories past 156K tokens are composed.**  The transcripts are real and the final turn's patch
   is real, but a million-token session is twenty-five sessions concatenated (Table 7b); the corpus
   has no session that long, and the composition is labelled in the rows, the receipts and the table.

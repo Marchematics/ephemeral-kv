@@ -468,7 +468,7 @@ def main(argv=None) -> int:
 
     # --- Table 7b's quality columns: the end task does not degrade with age, and the floor
     # configuration's state is measured at the long end as well
-    for bucket, want in (("128k", 0.077), ("512k", 0.122), ("1m", 0.167)):
+    for bucket, want in (("128k", 0.077), ("256k", 0.165), ("512k", 0.122), ("1m", 0.167)):
         rows = [r for r in load(f"artifacts/g2b-patch-localization-composed-{bucket}-b8192-v1.json")["rows"]
                 if r.get("recorded_files")]
         check(f"composed {bucket}: end-task F1", round(statistics.mean(r["active"]["f1"] for r in rows), 3),
