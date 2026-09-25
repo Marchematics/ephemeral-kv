@@ -233,8 +233,9 @@ because that is what the query terms match, and prior assistant actions are not 
 rank.  That correlation suggests a mechanism - the model needs to see the action format to produce
 one - and the mechanism is **false**, which we know because we implemented it.  A window that keeps
 the newest span and then spends the rest on the most recent **action-bearing** spans
-(`--compile-mode action_window`) raises the action count in the view from a median of 6 to **13**,
-and *lowers* the emit rate: on the 30 turns the two rules share so far, **0.167 against 0.367**,
+(`--compile-mode action_window`) raises the action count the view holds - asserted by a test on the
+mode rather than argued, `tests/test_g2_model_quality.py::test_action_window_shows_more_actions_than_recency` -
+and it *lowers* the emit rate: on the 30 turns the two rules share so far, **0.167 against 0.367**,
 paired **-0.200, 95% CI [-0.367, -0.033]**, 1 win to 7 losses
 (`artifacts/g2d-window-comparison-v1.json`, with the full-transcript arm reproducing byte-identically
 across the two runs, so the difference is the window rule and nothing else).  Showing the model more

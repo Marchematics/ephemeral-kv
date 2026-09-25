@@ -64,8 +64,9 @@ against a checked-in receipt, and the CPU-only path in
   state **beats plain retrieval decisively** (+0.292, CI [+0.146, +0.438]) and **regresses against
   the full transcript** (-0.250, CI [-0.417, -0.063]).  The views carry a median of 44, 6 and 1
   prior actions respectively, which looks like the mechanism - and the intervention says it is not:
-  a window that spends its budget on recent action-bearing spans raises the count from 6 to 13 and
-  *lowers* the emit rate, 0.167 against 0.367 (paired -0.200, CI [-0.367, -0.033]).  More examples
+  a window that spends its budget on recent action-bearing spans holds more prior actions (asserted
+  by a test on the mode) and *lowers* the emit rate, 0.167 against 0.367 (paired -0.200,
+  CI [-0.367, -0.033]).  More examples
   of the format while displacing recent evidence makes the model less likely to act; what a
   continuation needs is a coherent recent turn.
 * **Past 156K tokens the histories are composed** out of whole real sessions, and the 8B/70B
