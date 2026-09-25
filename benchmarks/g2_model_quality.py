@@ -80,6 +80,7 @@ def build_examples(
     min_history_tokens: int = 0,
     compiler: dict | None = None,
     token_counter=None,
+    summarizer=None,
 ) -> list[Example]:
     """Build assistant-target examples without consulting the target during retrieval."""
     idx = DurableSpanIndex()
@@ -143,7 +144,34 @@ def build_examples(
                         query, token_budget=max(token_budget + 1,
                                                 int(token_budget * retrieve_multiplier)),
                         max_spans=max_spans, **options)
-                    if compile_mode == "tail_state":
+                    if compile_mode == "compact":
+                        # the de facto baseline for context overflow: keep the newest evidence
+                        # verbatim, summarise everything older with the model itself, and pack both
+                        # into the same budget.  `summarizer` is a text->text callable; without one
+                        # this mode degrades to recency rather than pretending to summarise.
+                        tail_budget = (tail_tokens if tail_tokens > 0
+                                       else int(token_budget * tail_fraction))
+                        tail, tail_used, tail_ids = [], 0, set()
+                        for span in sorted(idx.spans, key=lambda sp: -sp.turn):
+                            cost = max(1, int(token_counter(span.text)))
+                            limit = max(tail_budget, cost)
+                            if tail_used + cost > limit:
+                                continue
+                            tail_used += cost
+                            tail.append(span)
+                            tail_ids.add(span.span_id)
+                        tail.sort(key=lambda sp: sp.turn)
+                        older = [sp for sp in idx.spans if sp.span_id not in tail_ids]
+                        summary_budget = max(64, token_budget - tail_used)
+                        older_text = "".join(render_span(sp) for sp in older)
+                        if summarizer is not None and older_text.strip():
+                            summary = (summarizer(older_text, summary_budget) or "").strip()
+                        else:
+                            summary = ""
+                        active = (f"<summary of earlier history>\n{summary}\n" if summary else "") + \
+                            "".join(render_span(sp) for sp in tail)
+                        view = tail
+                    elif compile_mode == "tail_state":
                         # The tail is the working set.  Keep the most recent spans whole and in
                         # order, then spend what is left on the compiled far field.  This is the
                         # arm the controls point at: surface fidelity is conditioned on a
@@ -543,7 +571,7 @@ def main(argv=None):
                         "the end instead (tail_query mode)")
     p.add_argument("--compile-mode", default="consolidate",
                    choices=("consolidate", "materialize", "state_first", "recency",
-                            "tail_state", "tail_query"),
+                            "tail_state", "tail_query", "compact"),
                    help="`consolidate` picks among the retrieved views; `materialize` replays "
                         "the log's file events and keeps the current state")
     p.add_argument("--no-collapse-paths", action="store_true",
@@ -592,9 +620,26 @@ def main(argv=None):
                 messages = messages_from_row(row)
             except ValueError:
                 continue
+            def _summarise(text: str, budget: int, _model=model, _tok=tokenizer) -> str:
+                """The model summarises its own older history, greedily and within the budget."""
+                import torch
+
+                prompt = ("Summarise the earlier part of this coding session for the next turn. "
+                          "Keep file paths, decisions, errors and open problems; drop chatter.\n\n"
+                          + text)
+                keep = max(256, args.max_length - 512)
+                ids = _tok.encode(prompt, add_special_tokens=False)[-keep:]
+                input_ids = torch.tensor([ids], dtype=torch.long, device=args.device)
+                with torch.inference_mode():
+                    out = _model.generate(input_ids=input_ids, max_new_tokens=int(budget),
+                                          do_sample=False,
+                                          pad_token_id=_tok.eos_token_id)
+                return _tok.decode(out[0][input_ids.shape[1]:], skip_special_tokens=True)
+
             examples = build_examples(
                 messages,
                 token_budget=args.token_budget,
+                summarizer=_summarise if args.compile_mode == "compact" else None,
                 max_spans=args.max_spans,
                 min_history_tokens=args.min_history_tokens,
                 compiler={"recency_spans": args.recency_spans,

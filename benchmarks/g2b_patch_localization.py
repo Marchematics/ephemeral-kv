@@ -162,7 +162,7 @@ def main(argv=None) -> int:
                         "the end instead (tail_query mode)")
     p.add_argument("--compile-mode", default="consolidate",
                    choices=("consolidate", "materialize", "state_first", "recency",
-                            "tail_state", "tail_query"))
+                            "tail_state", "tail_query", "compact"))
     p.add_argument("--no-collapse-paths", action="store_true",
                    help="ablation: keep every view of a file instead of its latest state")
     p.add_argument("--dedup-spans", action=argparse.BooleanOptionalAction, default=False,
@@ -199,8 +199,23 @@ def main(argv=None) -> int:
             recorded = patch_files_from_messages(messages)
             if not recorded:
                 continue
+            def _summarise(text: str, budget: int) -> str:
+                import torch
+
+                prompt = ("Summarise the earlier part of this coding session for the next turn. "
+                          "Keep file paths, decisions, errors and open problems; drop chatter.\n\n"
+                          + text)
+                keep = max(256, args.max_length - 512)
+                ids = tokenizer.encode(prompt, add_special_tokens=False)[-keep:]
+                input_ids = torch.tensor([ids], dtype=torch.long, device=args.device)
+                with torch.inference_mode():
+                    out = model.generate(input_ids=input_ids, max_new_tokens=int(budget),
+                                         do_sample=False, pad_token_id=tokenizer.eos_token_id)
+                return tokenizer.decode(out[0][input_ids.shape[1]:], skip_special_tokens=True)
+
             examples = build_examples(
                 messages, token_budget=args.token_budget,
+                summarizer=_summarise if args.compile_mode == "compact" else None,
                 min_history_tokens=args.min_history_tokens,
                 compiler={"recency_spans": args.recency_spans,
                           "recency_fraction": args.recency_fraction,
