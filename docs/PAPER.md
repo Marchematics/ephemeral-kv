@@ -696,6 +696,11 @@ carries quality is the window and retrieval, and what carries mobility is the bo
   lookup is measured on real transcripts concatenated into million-token histories
   (`g2-index-lookup-composed-1m-v1.json`): p50 **0.4-4.4 ms** depending on query size, against
   53-203 ms of active-set prefill.  What is still composed is the *session*, not the measurement.
+* **Short of the corpus, the state trails a large-context reference by ~2.5 pp.**  Past 131K tokens a
+  resident system cannot serve the whole transcript, so the comparison is against the strongest view
+  it *can* serve, and there the bounded state's teacher-forced accuracy is 2.41 pp behind at 145K and
+  2.50 pp behind at 278K (Table 7b).  Flat in age, but not free: the state is a *bounded* view, and on
+  the surface it gives up a couple of points to whatever the machine can hold.
 * **Histories past 156K tokens are composed.**  The transcripts are real and the final turn's patch
   is real, but a million-token session is twenty-five sessions concatenated (Table 7b); the corpus
   has no session that long, and the composition is labelled in the rows, the receipts and the table.
