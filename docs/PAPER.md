@@ -318,8 +318,9 @@ them 5.899 s against 0.184 s - exactly backwards.
 ### 4.2b The baseline this space compares against: model-written compaction
 
 Other systems in this space report their gains *over* compaction-only context management, so the
-same baseline is measured here end to end: keep the newest 3,072 tokens verbatim, have a model
-write a summary of everything older under the remaining budget, and pack both into 8,192
+same baseline is measured here end to end: keep the newest 6,656 tokens verbatim, have a model
+write a 512-token summary of everything older (incrementally, as a serving stack would), and pack
+both into 8,192
 (`--compile-mode compact`, `scripts/run_compaction.sh`), with the summariser varied separately from
 the scorer (`--summarizer-model`).
 
@@ -331,8 +332,8 @@ stays Llama-3.2-1B also gives 0.00 pp (NLL -0.020), so the answer to "your summa
 that the summariser is not what the surface depends on.
 
 Which makes the comparison a controlled one: the two designs spend the same budget and keep the
-same window, and differ only in what the remaining ~1.5K buys.  Measured on the decision, that
-difference is decisive:
+same window, and differ only in what the remaining ~1.5K buys.  On the decision, that comparison
+is the last cell of this table:
 
 | view (8,192 tokens) | window | remainder | fidelity | end-task F1 (n=48) |
 |---|---:|---|---:|---:|
