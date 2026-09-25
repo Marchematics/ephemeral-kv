@@ -233,8 +233,10 @@ file contents, because that is what the query terms match, and prior assistant a
 evidence and do not rank.  That correlation suggests a mechanism - the model needs to see the action
 format to produce one - so we implemented it rather than asserting it.  A window that keeps the
 newest span and then spends the rest on the most recent **action-bearing** spans
-(`--compile-mode action_window`, with a test asserting it holds more prior actions than the recency
-rule) does not raise the emit rate: over the 48 turns the two rules share, **0.229 against 0.375**,
+(`--compile-mode action_window`) does not raise the emit rate.  It does change what the view holds -
+its median prior-action count is **12 against the recency rule's 6**, measured on the same turns
+(`artifacts/g2d-view-composition-actionwindow-v1.json`) - and over the 48 turns the two rules share
+the emit rate is **0.229 against 0.375**,
 paired **-0.146, 95% CI [-0.313, +0.021]**, 5 wins to 12 losses
 (`artifacts/g2d-window-comparison-v1.json`; the full-transcript arm reproduces byte-identically
 across the two runs, so the difference is the window rule and nothing else).  The direction is

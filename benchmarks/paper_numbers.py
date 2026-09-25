@@ -579,6 +579,16 @@ def main(argv=None) -> int:
     # The intervention does not support the mechanism, and the honest form of that is a *direction*
     # with an interval that includes zero - not a claim in either direction.  Asserting significance
     # here would be asserting something the measurement does not say.
+    window_composition = load("artifacts/g2d-view-composition-actionwindow-v1.json")["summary"]
+    seen2 = window_composition["action_examples_in_view_p50"]
+    check("action-window composition: turns", window_composition["turns"], 48, 0)
+    check("prior actions in the action window (p50)", seen2["active"], 12, 0)
+    check("prior actions in the recency window (p50)", seen["active"], 6, 0)
+    results.append(("the intervention changed what the view holds, and did not help",
+                    seen2["active"] > seen["active"] and moved["mean_diff"] < 0,
+                    f"prior actions {seen['active']} -> {seen2['active']}, emit rate "
+                    f"{arms['recency_window']['emits_an_action']:.3f} -> "
+                    f"{arms['action_window']['emits_an_action']:.3f}"))
     results.append(("the composition counts are a correlate, not a confirmed mechanism",
                     moved["mean_diff"] < 0,
                     f"a window holding more prior actions emits fewer of them "
