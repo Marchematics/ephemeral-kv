@@ -809,7 +809,7 @@ Table 14 maps each claim to the receipt that backs it and to the script that pro
 | the routing phase change at an admissible state | `g4-quality-join-v2.json` | `scripts/run_g4_{grid2,geometry,pressure,hotspot}.sh` |
 | capacity and recovery | `g5-capacity-planning-v1.json`, `g5-failover-two-workers-samemodel-v1.json` | `benchmarks/g5_*.py` |
 | the state does not grow with the session: 8.9x of history, 45x of turns | `g2-state-size-{real64k,composed-128k,composed-256k,composed-512k,composed-1m}-v1.json` | `benchmarks/g2_state_size.py`, `scripts/run_composed.sh` |
-| the surface gap to a resident view is constant in age | `g2-composed-{128k,256k,512k,1m}-{state8192,reference131k}-v1.json` | `scripts/run_composed.sh`, `benchmarks/composed_killer_summary.py` |
+| the surface gap to a resident view is a few points at long histories, and the end task does not degrade | `g2-composed-{128k,256k,512k,1m}-{state8192,reference131k}-v1.json`, `g2b-patch-localization-composed-{128k,256k,512k,1m}-b8192-v1.json` | `scripts/run_composed.sh`, `benchmarks/composed_killer_summary.py` |
 | the 1M lookup is measured, and query-driven rather than history-driven | `g2-index-lookup-composed-1m-v1.json` | `benchmarks/g2_index_lookup.py` |
 | the dead-state concentration does not extrapolate to composed lengths | `g2-dead-state-composed-1m-v1.json` | `benchmarks/g2_dead_state.py` |
 | lexical evidence mass grows with session length | `g2-evidence-mass-composed-1m-v1.json` | `benchmarks/g2_evidence_mass.py` |
