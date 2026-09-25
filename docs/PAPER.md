@@ -23,9 +23,10 @@ axis, from 40 to 96 turns).  The consequence is a phase change rather than a spe
 path; one worker holds **16x more sessions**; recovery and a model revision rebuild the state from a
 durable index instead of moving 12-128 GiB of KV; and a replay against measured hardware primitives
 advances routing in **54 cells at the states where fidelity holds** - 52 of them at 8,192 tokens,
-2 at 16,384 (the decision there is a tie with the best retrieval baseline, not a win) - across
-balanced, hotspot and worker-loss regimes, where the original grid advanced in four cells at a 2K
-corner that no quality measurement supported.
+2 at 16,384 (the decision there is a tie with the best retrieval baseline, not a win) - across the three
+regimes the replay models - balanced, slow-worker (a worker at a tenth of the service rate) and
+worker-loss - where the original grid advanced in four cells at a 2K corner that no quality
+measurement supported.
 
 We also report what does not work, because it is the hypothesis this space reaches for first.  A
 semantic compiler - content dedup, collapse-each-file-to-its-latest-state, snippet re-selection, log
@@ -457,11 +458,11 @@ gives the advancing cells:
 | **16,384 (fidelity-admissible)** | **2/66** |
 
 134 of 624 cells advance, and **54** of them sit in a column whose measured quality point passes:
-the 8,192 column, which covers balanced, hotspot (a worker at a tenth of the service rate),
-slow-worker and worker-loss regimes, and the 16,384 column, whose retrieval-only point is -1.94 pp
-with a 0.142 decision.  It is admissible because its fidelity holds
+the 8,192 column, which covers all three regimes the replay models (balanced, slow-worker - the
+hotspot, a worker at a tenth of the service rate - and worker-loss), and the 16,384 column, whose
+retrieval-only point is -1.94 pp with a 0.142 decision.  It is admissible because its fidelity holds
 (0.00 pp); its decision is a tie with plain retrieval, so the cells that advance there do so on cost,
-and a strict decision-parity bar clears none of them.  The balanced/hotspot/slow-worker wins are the
+and a strict decision-parity bar clears none of them.  The balanced and slow-worker wins are the
 capacity-pressure regime: a warm cache holding a fraction of the fleet and no cluster KV store, so
 the baseline's alternative is a full re-prefill (1.6-14.3 s) against 0.203 s of rematerialisation.
 Against a tier that can move KV, the wins are worker loss plus the 1M-history mixes.
@@ -588,8 +589,8 @@ carries quality is the window and retrieval, and what carries mobility is the bo
 * **The decision advantage is a moderate-length phenomenon.**  At 64K-96K histories the bounded view,
   the compiler and the full transcript are one indistinguishable cluster (0.123 / 0.111 / 0.113);
   the metric separates arms at ~33K and does not beyond that.
-* **The regime scope of the routing result is stated with it.**  Balanced, hotspot and slow-worker
-  wins assume a fleet whose warm cache holds a fraction of its sessions and no cluster KV store;
+* **The regime scope of the routing result is stated with it.**  Balanced and slow-worker wins
+  assume a fleet whose warm cache holds a fraction of its sessions and no cluster KV store;
   against a KV-moving tier they reduce to worker loss and the 1M mixes.
 * **The 1M lookup row is extrapolation.**  No public trace is that long; the receipt says so.
 * **The 8B and 70B geometries are declared, not measured.**  The fabric, prefill and 0.5B KV numbers
