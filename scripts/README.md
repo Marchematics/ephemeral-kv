@@ -17,6 +17,16 @@ the paper cites.  They are numbered by the family they belong to rather than in 
   which active sizes the region may claim);
 * `run_figure_inputs.sh` - the decision arms figure 3 is drawn from and the equal-budget references
   around them, reconstructed from each receipt's own `config` block;
+* `run_floor_3584.sh` - the arms that moved the state floor from 6,144 to 4,096 tokens: a
+  3,584-token window inside a 4,096-token total holds the surface (-0.96 pp) where a 3,072-token
+  window at the same total does not (-2.40 pp).  This is what put the state on the routing replay's
+  4,096-token column, whose 63 advancing cells took the admissible region from 54 to 117;
+* `run_g4_size6144.sh` - the 6,144-token column, kept as the configuration a deployment would run
+  when it wants the whole 2 pp fidelity allowance in reserve;
+* `run_composed.sh`, `run_killer_composed.sh` - the composed long histories (145K-1.07M tokens) and
+  the killer table over them: state tokens and bytes, the decision, and the fidelity reference.  A
+  composed session is real transcripts concatenated, which is labelled in the corpus and the
+  receipts because a million-token session is not something the corpus contains;
 * `run_remaining.sh`, `run_longhist2.sh` - the equal-budget references and the long-history column.
 
 They assume the corpora under `data/` (not in the repository: 734 MB - 2.3 GB of public agent

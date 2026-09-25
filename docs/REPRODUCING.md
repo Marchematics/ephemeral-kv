@@ -94,7 +94,9 @@ instances, same flags, same output paths - grouped by experiment:
 | `run_joint_n96.sh` | the central quality claim at 96 paired instances | ~2 h |
 | `run_compaction.sh` | the model-written compaction baseline | ~3 h |
 | `run_window_plus_compiler.sh` | the window/budget split, the equal-budget references | ~3 h |
-| `run_g4_*.sh`, `run_g4_join.sh` | the routing replay grids (figure 4) and the join with the measured quality points | minutes each |
+| `run_g4_*.sh`, `run_g4_join.sh` | the routing replay grids (figure 4), the 6,144-token column, and the join with the measured quality points | minutes each |
+| `run_floor_3584.sh` | the window sweep that fixed the state floor at 4,096 tokens | ~1 h |
+| `run_composed.sh`, `run_killer_composed.sh` | the composed long histories and the killer table over them | 1-2 h |
 | `run_figure_inputs.sh` | the decision arms figure 3 is drawn from, and the equal-budget references | 1-2 h each |
 | `run_remaining.sh`, `run_longhist2.sh` | equal-budget references, the long-history column | 1-2 h each |
 
