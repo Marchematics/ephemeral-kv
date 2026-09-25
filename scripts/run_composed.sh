@@ -19,7 +19,7 @@
 set -x
 cd "$(dirname "$0")/.." || exit 1
 export PYTHONPATH="$PWD"
-while pgrep -f "^/root/qcc/venv/bin/python benchmarks/g2" > /dev/null; do sleep 20; done
+while pgrep -f "^/root/qcc/venv/bin/python benchmarks/g2_model_quality.py|^/root/qcc/venv/bin/python benchmarks/g2b_patch_localization.py" > /dev/null; do sleep 20; done
 
 /root/qcc/venv/bin/python benchmarks/build_composed_long_sessions.py
 /root/qcc/venv/bin/python benchmarks/build_composed_long_sessions.py --verify

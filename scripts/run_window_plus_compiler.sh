@@ -14,7 +14,7 @@ export PYTHONPATH="$PWD"
 # match only the interpreter running the harness: a pattern like "g2_model_quality.py"
 # also matches the shell that launched this script (its command line carries the heredoc
 # text), which deadlocks the wait
-while pgrep -f "^/root/qcc/venv/bin/python benchmarks/g2" > /dev/null; do sleep 20; done
+while pgrep -f "^/root/qcc/venv/bin/python benchmarks/g2_model_quality.py|^/root/qcc/venv/bin/python benchmarks/g2b_patch_localization.py" > /dev/null; do sleep 20; done
 
 g2=(--token-budget 8192 --min-history-tokens 32768 --dedup-spans --consolidate
     --retrieve-multiplier 2 --provenance-terms 8 --max-spans 128 --recency-fraction 0.6

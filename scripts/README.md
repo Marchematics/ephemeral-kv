@@ -22,8 +22,10 @@ the paper cites.  They are numbered by the family they belong to rather than in 
 They assume the corpora under `data/` (not in the repository: 734 MB - 2.3 GB of public agent
 traces) and the model checkpoints named inside each script.  Two environment facts are worth
 knowing before running them: the GPU is shared, so a script waits for other harness processes with
-`pgrep -f "^/root/qcc/venv/bin/python benchmarks/g2"` (an unanchored pattern also matches the
-shell that launched the script, which deadlocks the wait), and the harnesses write their artifact
+`pgrep -f "…benchmarks/g2_model_quality.py|…benchmarks/g2b_patch_localization.py"` - anchored to
+the two GPU harnesses, because an unanchored pattern matches the launching shell (deadlocking the
+wait) and a broader one also matches the CPU-only harnesses, which then serialise the GPU queue
+behind measurements that do not use it, and the harnesses write their artifact
 incrementally, so a killed run leaves a *partial* receipt at the final path - `benchmarks/`
 `check_receipts.py` reports any cited receipt whose payload is partial.
 
