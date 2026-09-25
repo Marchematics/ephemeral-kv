@@ -178,12 +178,23 @@ def main(argv=None) -> int:
     # the measured state floor: a 3,584-token window inside a 4,608-token total holds the surface,
     # while the same 3,072-token window at a smaller total does not - which is what makes the
     # headline state 4.6-8K rather than 6-8K
-    floor = bucket_stats("artifacts/g2-compiler-window3584-b4608-v1.json").get("32K-128K") or {}
-    check("4,608-token state (window 3,584) fidelity pp",
-          100 * (floor.get("token_accuracy_delta_p50") or 0.0), 0.0, TOL_PP)
+    # the measured floor: the same 4,096-token total holds the surface with a 3,584-token window
+    # (-0.96 pp) and fails it with a 3,072-token one (-2.40 pp) - so the window is what carries it
+    floor = bucket_stats("artifacts/g2-compiler-window3584-b4096-v1.json").get("32K-128K") or {}
+    check("4,096-token state (window 3,584) fidelity pp",
+          100 * (floor.get("token_accuracy_delta_p50") or 0.0), -0.96, TOL_PP)
     floor_view = statistics.median(row["active_tokens_estimate"]
-                                   for row in load("artifacts/g2-compiler-window3584-b4608-v1.json")["rows"])
-    check("4,608-token state view p50", round(floor_view), 4350, 20)
+                                   for row in load("artifacts/g2-compiler-window3584-b4096-v1.json")["rows"])
+    check("4,096-token state view p50", round(floor_view), 4004, 20)
+    wider = bucket_stats("artifacts/g2-compiler-window3584-b4608-v1.json").get("32K-128K") or {}
+    check("4,608-token state (window 3,584) fidelity pp",
+          100 * (wider.get("token_accuracy_delta_p50") or 0.0), 0.0, TOL_PP)
+    narrow = bucket_stats("artifacts/g2-compiler-window3k-b4096-v1.json").get("32K-128K") or {}
+    results.append(("the window, not the total, carries the surface at 4,096",
+                    100 * (floor.get("token_accuracy_delta_p50") or 0.0)
+                    > 100 * (narrow.get("token_accuracy_delta_p50") or 0.0) + 1.0,
+                    f"window 3,584: {100 * (floor.get('token_accuracy_delta_p50') or 0.0):+.2f} pp vs "
+                    f"window 3,072: {100 * (narrow.get('token_accuracy_delta_p50') or 0.0):+.2f} pp"))
     window3k = bucket_stats("artifacts/g2-compiler-window3k-b4096-v1.json").get("32K-128K") or {}
     check("best 4096-token state fidelity pp",
           100 * (window3k.get("token_accuracy_delta_p50") or 0.0), -2.40, TOL_PP)
