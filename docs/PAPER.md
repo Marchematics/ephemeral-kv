@@ -76,8 +76,9 @@ local KV          = a disposable artifact    (dropped on eviction, rebuilt in 0.
 
 and the paper's contributions are its measured consequences:
 
-1. **A bounded execution state holds the turn.**  8,192 tokens, fidelity at parity with the full
-   transcript, end-task score statistically tied with the best retrieval baseline measured.
+1. **A bounded execution state holds the turn.**  8,192 tokens shipped, with a *measured* floor of
+   6,144 (4,096 scores -2.40 pp): fidelity at parity with the full transcript, end-task score
+   statistically tied with the best retrieval baseline measured.
 2. **The state does not grow with the session, at a budget whose validity is measured.**  `dM/dL ~ 0`
    on the fidelity and state-size axes across a 2.4x growth in history and on the turn axis - and,
    separately, the *evidence mass* that shares rare query terms does grow with age (22K tokens at
@@ -91,6 +92,8 @@ and the paper's contributions are its measured consequences:
 5. **A negative result with an exact attribution.**  The obvious way to shrink the state - a semantic
    compiler - does not pay here: it is tied or worse on the decision, and the two stages that
    actually "compile state" are the ones that hurt.  The window and retrieval are what carry quality.
+   Compaction, the baseline this space uses, is measured separately and is **equivalent** rather than
+   worse (Section 4.2b), so the paper claims no win over it either.
 6. **A metric lesson.**  Teacher-forced next-token fidelity is saturated by the newest evidence on
    these traces and therefore cannot compare systems; the end task can, and we report both for every
    arm.
