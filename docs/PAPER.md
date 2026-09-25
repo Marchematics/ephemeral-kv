@@ -353,8 +353,10 @@ fidelity on the same sessions.
 | 58 | 84,617 | 7,887 | **+0.00 pp** |
 | 96 | 155,222 | 8,203 | +0.00 pp |
 
-**Figure 1:** The compiled state against session age. Raw history grows by 2.4x across these
-sessions while the state stays inside its bound and the fidelity delta stays inside the allowance.
+**Figure 1:** The compiled state against session age, on the corpus and past it (the composed points
+reach a million tokens). The raw history spans 67K to 984K tokens across these points while the state
+stays between 6,598 and 12,299 tokens - and between 6,598 and 8,203 in the shipped configuration,
+the second series being a 12,288-token budget arm included for reference.
 
 A 22-turn example with 67K of history fails badly (-46.9 pp); it is a singleton, reported as one, and
 it points at a limitation: a short session whose individual turns are enormous.

@@ -6,31 +6,39 @@
 <line x1="90" y1="470.0" x2="690" y2="470.0" stroke="#dddddd"/>
 <text x="82" y="474.0" font-size="11" text-anchor="end" fill="#111111">0.0</text>
 <line x1="90" y1="365.0" x2="690" y2="365.0" stroke="#dddddd"/>
-<text x="82" y="369.0" font-size="11" text-anchor="end" fill="#111111">24327.39</text>
+<text x="82" y="369.0" font-size="11" text-anchor="end" fill="#111111">282811.59</text>
 <line x1="90" y1="260.0" x2="690" y2="260.0" stroke="#dddddd"/>
-<text x="82" y="264.0" font-size="11" text-anchor="end" fill="#111111">48654.77</text>
+<text x="82" y="264.0" font-size="11" text-anchor="end" fill="#111111">565623.19</text>
 <line x1="90" y1="155.0" x2="690" y2="155.0" stroke="#dddddd"/>
-<text x="82" y="159.0" font-size="11" text-anchor="end" fill="#111111">72982.16</text>
+<text x="82" y="159.0" font-size="11" text-anchor="end" fill="#111111">848434.78</text>
 <line x1="90" y1="50.0" x2="690" y2="50.0" stroke="#dddddd"/>
-<text x="82" y="54.0" font-size="11" text-anchor="end" fill="#111111">97309.55</text>
+<text x="82" y="54.0" font-size="11" text-anchor="end" fill="#111111">1131246.38</text>
 <line x1="90.0" y1="50" x2="90.0" y2="470" stroke="#dddddd"/>
-<text x="90.0" y="486" font-size="11" text-anchor="middle" fill="#111111">7885.0</text>
+<text x="90.0" y="486" font-size="11" text-anchor="middle" fill="#111111">6596.0</text>
 <line x1="240.0" y1="50" x2="240.0" y2="470" stroke="#dddddd"/>
-<text x="240.0" y="486" font-size="11" text-anchor="middle" fill="#111111">8430.2</text>
+<text x="240.0" y="486" font-size="11" text-anchor="middle" fill="#111111">7463.5</text>
 <line x1="390.0" y1="50" x2="390.0" y2="470" stroke="#dddddd"/>
-<text x="390.0" y="486" font-size="11" text-anchor="middle" fill="#111111">8975.5</text>
+<text x="390.0" y="486" font-size="11" text-anchor="middle" fill="#111111">8331.0</text>
 <line x1="540.0" y1="50" x2="540.0" y2="470" stroke="#dddddd"/>
-<text x="540.0" y="486" font-size="11" text-anchor="middle" fill="#111111">9520.8</text>
+<text x="540.0" y="486" font-size="11" text-anchor="middle" fill="#111111">9198.5</text>
 <line x1="690.0" y1="50" x2="690.0" y2="470" stroke="#dddddd"/>
 <text x="690.0" y="486" font-size="11" text-anchor="middle" fill="#111111">10066.0</text>
 <line x1="90" y1="470" x2="690" y2="470" stroke="#111111"/>
 <line x1="90" y1="50" x2="90" y2="470" stroke="#111111"/>
-<circle cx="154.9" cy="125.7" r="5" fill="#3b6ea5"/>
-<text x="163.9" y="129.7" font-size="10" fill="#111111">24-48 turns (hist 80K, -1.43</text>
-<circle cx="90.6" cy="104.8" r="5" fill="#3b6ea5"/>
-<text x="99.6" y="108.8" font-size="10" fill="#111111">48-96 turns (hist 85K, 0.0 p</text>
-<circle cx="689.4" cy="125.7" r="5" fill="#3b6ea5"/>
-<text x="698.4" y="129.7" font-size="10" fill="#111111">24-48 turns (hist 80K, -2.33</text>
-<circle cx="666.6" cy="104.8" r="5" fill="#3b6ea5"/>
-<text x="675.6" y="108.8" font-size="10" fill="#111111">48-96 turns (hist 85K, 0.26 </text>
+<circle cx="353.7" cy="440.4" r="5" fill="#3b6ea5"/>
+<text x="362.7" y="444.4" font-size="10" fill="#111111">24-48 turns (hist 80K, -1.43</text>
+<circle cx="313.2" cy="438.6" r="5" fill="#3b6ea5"/>
+<text x="322.2" y="442.6" font-size="10" fill="#111111">48-96 turns (hist 85K, 0.0 p</text>
+<circle cx="689.7" cy="440.4" r="5" fill="#3b6ea5"/>
+<text x="698.7" y="444.4" font-size="10" fill="#111111">24-48 turns (hist 80K, -2.33</text>
+<circle cx="675.3" cy="438.6" r="5" fill="#3b6ea5"/>
+<text x="684.3" y="442.6" font-size="10" fill="#111111">48-96 turns (hist 85K, 0.26 </text>
+<circle cx="90.3" cy="417.8" r="5" fill="#3b6ea5"/>
+<text x="99.3" y="421.8" font-size="10" fill="#111111">composed 141K (hist 141K)</text>
+<circle cx="189.9" cy="364.4" r="5" fill="#3b6ea5"/>
+<text x="198.9" y="368.4" font-size="10" fill="#111111">composed 285K (hist 285K)</text>
+<circle cx="161.6" cy="279.1" r="5" fill="#3b6ea5"/>
+<text x="170.6" y="283.1" font-size="10" fill="#111111">composed 514K (hist 514K)</text>
+<circle cx="166.6" cy="104.8" r="5" fill="#3b6ea5"/>
+<text x="175.6" y="108.8" font-size="10" fill="#111111">composed 984K (hist 984K)</text>
 </svg>

@@ -367,6 +367,23 @@ def main(argv=None) -> int:
               round(statistics.mean(r["full"]["f1"] for r in rows), 3), 0.089, TOL)
 
     # --- the figures must carry the same numbers as the receipts (data path: receipt -> CSV -> SVG)
+    # figure 1 carries the composed series too - the law past the corpus - so the CSV's last rows
+    # must be the composed state measurements, with an empty fidelity column
+    fig1 = Path("figures/fig1_state_vs_age.csv")
+    if fig1.exists():
+        rows = [r for r in read_csv_rows(fig1) if r["bucket"].startswith("composed")]
+        results.append(("figure 1 carries the composed series", len(rows) == 4,
+                        f"{len(rows)} composed rows"))
+        if rows:
+            last = rows[-1]
+            check("figure 1's last composed point: history p50",
+                  round(float(last["raw_history_p50"])), 983692, 2)
+            check("figure 1's last composed point: state p50",
+                  round(float(last["state_p50"])), 7039, 30)
+            results.append(("figure 1's composed rows carry no full-history fidelity",
+                            all(not r["fidelity_delta_pp"] for r in rows),
+                            "empty by design: the reference there is a resident window"))
+
     fig3 = Path("figures/fig3_compiler_ablation.csv")
     if fig3.exists():
         rows = read_csv_rows(fig3)

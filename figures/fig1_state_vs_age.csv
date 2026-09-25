@@ -9,3 +9,7 @@ bucket,raw_history_p50,state_p50,fidelity_delta_pp,n
 24-48 turns,79769,10064,-2.33,21
 48-96 turns,84617,9981,0.26,25
 >96 turns,155222,12299,0.0,1
+composed 141K,140666.5,6598.0,,14
+composed 285K,284518,7174,,47
+composed 514K,514211,7010,,45
+composed 984K,983692.5,7039.0,,174

@@ -163,11 +163,12 @@ def main(argv=None) -> int:
 
     path = directory / "fig1_state_vs_age.csv"
     if path.exists():
-        rows = [r for r in read_csv(path) if int(r["n"]) >= 5]
+        rows = [r for r in read_csv(path) if int(float(r["n"])) >= 5]
         # one series: turn bucket on x, state on y, with the history it corresponds to as a label
         data = [{"bucket": r["bucket"], "state": r["state_p50"], "history": r["raw_history_p50"],
-                 "label": f"{r['bucket']} (hist {int(r['raw_history_p50'])/1000:.0f}K, "
-                          f"{r['fidelity_delta_pp']} pp)"} for r in rows]
+                 "label": f"{r['bucket']} (hist {float(r['raw_history_p50'])/1000:.0f}K"
+                          + (f", {r['fidelity_delta_pp']} pp)" if r["fidelity_delta_pp"] else ")")}
+                for r in rows]
         svg = scatter(data, "state", "history", "label",
                       "Figure 1 - the session grows, the state that must move does not",
                       "execution state (tokens)", "raw history (tokens)")

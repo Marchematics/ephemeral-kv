@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import statistics
 import sys
 from pathlib import Path
 
@@ -183,6 +184,24 @@ def main(argv=None) -> int:
                                  "state_p50": entry["state_p50"],
                                  "fidelity_delta_pp": entry["acc_delta_pp_p50"],
                                  "n": entry["n"], "bucket": label})
+        # and the same law past the corpus: the composed state-size measurements, where the
+        # history runs to a million tokens.  Their fidelity column is empty on purpose - the
+        # surface reference there is a resident window, not the full transcript, so the number
+        # would not be the quantity this figure's column means.
+        for label, path in (("composed 141K", "artifacts/g2-state-size-composed-128k-v1.json"),
+                            ("composed 285K", "artifacts/g2-state-size-composed-256k-v1.json"),
+                            ("composed 514K", "artifacts/g2-state-size-composed-512k-v1.json"),
+                            ("composed 984K", "artifacts/g2-state-size-composed-1m-v1.json")):
+            source = Path(path)
+            if not source.exists():
+                missing.append(path)
+                continue
+            measured = json.loads(source.read_text())["rows"]
+            rows.append({"bucket": label,
+                         "raw_history_p50": statistics.median(r["history_tokens"] for r in measured),
+                         "state_p50": statistics.median(r["state_tokens"] for r in measured),
+                         "fidelity_delta_pp": "",
+                         "n": len(measured)})
         emit("fig1_state_vs_age", rows, FIGURES["fig1_state_vs_age"]["columns"],
              FIGURES["fig1_state_vs_age"]["source"], FIGURES["fig1_state_vs_age"]["receipts"])
     else:
