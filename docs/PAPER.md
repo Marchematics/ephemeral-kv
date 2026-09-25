@@ -572,10 +572,23 @@ and they are all in the flash-crowd regime - 8 at 4,096, 8 at 6,144, 6 at 8,192 
 where the best reduction in the region is **+68.7%**.  That is the regime a cheap cold route is worth
 most in the tail: under a burst every worker is evicting at once, so a baseline that must move or
 re-prefill the history queues behind the same fleet-wide spike, while rematerialising 4-8K tokens
-does not.  Outside the burst regime the region is a throughput result, and the paper says so rather
-than implying a tail improvement it did not measure: where the baseline stalls, the ephemeral
-policy's own p99 is worse in absolute terms, because a baseline that completes nothing still has a
-p99.
+does not.
+
+**The tail claim, swept, because it is conditional.**  Those 23 cells were measured at one
+parameterisation of the flash crowd - half the sessions arriving inside a 4 s window - and the
+parameters are declared rather than observed, so we swept them: the share of sessions that arrive
+together (a quarter, half, three quarters) against the width of the window (1 s, 4 s, 16 s), at the
+two active sizes the region is carried by.  The conclusion moves, and the honest reading is narrower
+than the unswept one.  **At a 4,096-token state the flash crowd clears the 30% p99 bar in 6 of the 9
+parameterisations and advances in 6** (best +52.8%), **and at 8,192 in 1 of 9** - where several
+settings have a *negative* p99 reduction, the worst -50.5%: a state twice the size pays twice the
+rematerialisation exactly when the fleet is busiest, and at a 0.75 share inside a 1 s window the
+goodput ratio falls to 0.60.  So the tail half of the cluster gate is met **at the 4,096-token state
+the system runs at, for most realistic burst shapes, and not in general**, and the paper states it
+that way rather than quoting the single cell count the grid happened to produce.  Outside the burst
+regime the region is a throughput result, and the paper says so rather than implying a tail
+improvement it did not measure: where the baseline stalls, the ephemeral policy's own p99 is worse in
+absolute terms, because a baseline that completes nothing still has a p99.
 
 **What the region's size was waiting on.**  The columns differ by cell count: 4,096 advances in 77
 cells of 214 against the 8,192 column's 59 of 310, so moving the system to a 4,096-token state
@@ -646,10 +659,9 @@ reported in its paper.
 | reported cost | KV restoration under one second for a 1M workspace | 0.0954-0.2031 s to rebuild a 4-8K state, 0.55-1.04 s of active-set prefill for rollout |
 
 
-KVMem also reports an end-to-end agent-success metric that we do not: our end task is file-level
-localisation of the next turn against the recorded patch.  Task success on a benchmark like DeepSWE
-is the stronger evidence for a deployed agent, and adopting it is the natural next step for this
-work rather than something we have measured.
+KVMem's end-to-end agent-success metric is stronger evidence for a deployed agent than our end task,
+which is file-level localisation of the next turn; adopting it is the natural next step for this work
+rather than something we have measured.
 
 **Affinity, retention and load balancing.**  Cache-affinity routing and its interaction with load
 balancing is well studied, and sticky-until-saturated is the production answer [5]; sparse-attention
@@ -663,10 +675,8 @@ resident, against a tier that can move KV.
 **Compaction-based context management.**  Summarising history before it re-enters the model predates
 this work, and KVMem uses it as its own baseline.  Section 4.3 measures it under the same budget and
 the same window and finds it **equivalent, not worse** - paired intervals include zero - so the paper
-claims no win there.  Against the *compiler* variant of the same idea the report is negative and
-specific: the two stages that actually compile state are harmful, and the metric usually quoted for
-compaction is saturated by keeping the newest evidence whole.  What carries quality is the window and
-retrieval; what carries mobility is the bound.
+claims no win there, and against the *compiler* variant of the same idea the report is negative and
+specific rather than softened.
 
 ## 6. Limitations and non-claims
 
@@ -789,7 +799,8 @@ Table 14 maps each claim to the receipt that backs it and to the script that pro
 | the 1M lookup is measured, and query-driven rather than history-driven | `g2-index-lookup-composed-1m-v1.json` | `benchmarks/g2_index_lookup.py` |
 | the dead-state concentration does not extrapolate to composed lengths | `g2-dead-state-composed-1m-v1.json` | `benchmarks/g2_dead_state.py` |
 | lexical evidence mass grows with session length | `g2-evidence-mass-composed-1m-v1.json` | `benchmarks/g2_evidence_mass.py` |
-| 157 of 724 replay cells sit at an admissible state, 117 of them clearing 1.5x goodput and 23 clearing 30% p99 | `g4-quality-join-v3.json`, `g4-all-phase-summary-v3.json`, `g4b-burst-*-v1.json` | `scripts/run_g4_join.sh`, `scripts/run_g4_regimes.sh` |
+| 157 of 724 replay cells sit at an admissible state, 117 of them clearing 1.5x goodput | `g4-quality-join-v3.json`, `g4-all-phase-summary-v3.json`, `g4b-burst-*-v1.json` | `scripts/run_g4_join.sh`, `scripts/run_g4_regimes.sh` |
+| the p99 half of the gate is conditional on the burst parameters, and where it holds | `g4b-burst-sensitivity-v1.json`, `g4b-burstsweep-*-v1.json` | `scripts/run_g4_burst_sweep.sh`, `benchmarks/g4_burst_sensitivity.py` |
 | the compiler does not rescue the 4,096-token floor | `g2-compiler-window3k-farmaterialize-b4096-v1.json`, `g2-compiler-window3584-b4096-v1.json` | `scripts/run_floor_3584.sh` |
 
 ### A.2 How these numbers are kept honest

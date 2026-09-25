@@ -313,6 +313,24 @@ def main(argv=None) -> int:
                     len(finite) >= 1 and len(tail) >= 1,
                     f"goodput bar in capacity/worker-loss, p99 bar in the flash crowd "
                     f"({len(tail)} cells, best {max(r['p99_reduction'] for r in admissible):.0%})"))
+    # the tail claim swept over the burst's own parameters.  The grid's 23 cells were measured at one
+    # parameterisation and the parameters are declared, so the paper reports where the result
+    # survives - and the audit has to carry both halves: that it does survive at the size the system
+    # runs at, and that it does not at 8,192, because that asymmetry is the honest reading.
+    sweep = load("artifacts/g4b-burst-sensitivity-v1.json")
+    by_active = sweep["summary"]["by_active_tokens"]
+    check("burst sweep cells", sweep["summary"]["cells"], 18, 0)
+    check("burst sweep advances", sweep["summary"]["advance"], 7, 0)
+    check("burst sweep p99 clears at 4,096", by_active["4096"]["clear_p99"], 6, 0)
+    check("burst sweep advances at 4,096", by_active["4096"]["advance"], 6, 0)
+    check("burst sweep p99 clears at 8,192", by_active["8192"]["clear_p99"], 1, 0)
+    check("burst sweep advances at 8,192", by_active["8192"]["advance"], 1, 0)
+    check("burst sweep worst p99 (8,192)",
+          round(by_active["8192"]["p99_min"], 2), -0.51, 1e-2)
+    results.append(("the tail result is conditional and the paper says where",
+                    by_active["4096"]["clear_p99"] > by_active["8192"]["clear_p99"],
+                    f"p99 clears {by_active['4096']['clear_p99']}/9 at 4,096 against "
+                    f"{by_active['8192']['clear_p99']}/9 at 8,192"))
 
     # --- C8: capacity
     capacity = load("artifacts/g5-capacity-planning-v1.json")["rows"]

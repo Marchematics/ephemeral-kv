@@ -1,0 +1,234 @@
+{
+  "schema": "ephemeral-kv-g4-burst-sensitivity-v1",
+  "kind": "derived_measurement",
+  "what": "the flash-crowd regime swept over the share of sessions that arrive together and the width of the window they arrive in; the arrival model is declared, the costs are the measured G3 primitives",
+  "p99_bar": 0.3,
+  "goodput_bar": 1.5,
+  "summary": {
+    "cells": 18,
+    "advance": 7,
+    "clear_p99": 7,
+    "clear_goodput": 4,
+    "by_active_tokens": {
+      "4096": {
+        "cells": 9,
+        "advance": 6,
+        "clear_p99": 6,
+        "clear_goodput": 3,
+        "p99_min": -0.1691057754891731,
+        "p99_p50": 0.3916044622531862,
+        "p99_max": 0.5277310606134249
+      },
+      "8192": {
+        "cells": 9,
+        "advance": 1,
+        "clear_p99": 1,
+        "clear_goodput": 1,
+        "p99_min": -0.5051094103449012,
+        "p99_p50": 0.1729038979353404,
+        "p99_max": 0.4399358860505557
+      }
+    }
+  },
+  "rows": [
+    {
+      "receipt": "g4b-burstsweep-h32768_131072_262144-warm4-tier8-a4096-s0.25-w1-v1.json",
+      "active_tokens": 4096,
+      "burst_share": 0.25,
+      "burst_window_s": 1.0,
+      "goodput_ratio": 1.39453125,
+      "p99_reduction": 0.13254118836055453,
+      "decision": "not_established",
+      "clears_goodput": false,
+      "clears_p99": false
+    },
+    {
+      "receipt": "g4b-burstsweep-h32768_131072_262144-warm4-tier8-a4096-s0.25-w16-v1.json",
+      "active_tokens": 4096,
+      "burst_share": 0.25,
+      "burst_window_s": 16.0,
+      "goodput_ratio": 1.4875,
+      "p99_reduction": 0.42483978864321903,
+      "decision": "advance",
+      "clears_goodput": false,
+      "clears_p99": true
+    },
+    {
+      "receipt": "g4b-burstsweep-h32768_131072_262144-warm4-tier8-a4096-s0.25-w4-v1.json",
+      "active_tokens": 4096,
+      "burst_share": 0.25,
+      "burst_window_s": 4.0,
+      "goodput_ratio": 1.439516129032258,
+      "p99_reduction": 0.42483978864321903,
+      "decision": "advance",
+      "clears_goodput": false,
+      "clears_p99": true
+    },
+    {
+      "receipt": "g4b-burstsweep-h32768_131072_262144-warm4-tier8-a4096-s0.5-w1-v1.json",
+      "active_tokens": 4096,
+      "burst_share": 0.5,
+      "burst_window_s": 1.0,
+      "goodput_ratio": 1.5,
+      "p99_reduction": 0.3916044622531862,
+      "decision": "advance",
+      "clears_goodput": true,
+      "clears_p99": true
+    },
+    {
+      "receipt": "g4b-burstsweep-h32768_131072_262144-warm4-tier8-a4096-s0.5-w16-v1.json",
+      "active_tokens": 4096,
+      "burst_share": 0.5,
+      "burst_window_s": 16.0,
+      "goodput_ratio": 1.4765625,
+      "p99_reduction": 0.2455171601156419,
+      "decision": "not_established",
+      "clears_goodput": false,
+      "clears_p99": false
+    },
+    {
+      "receipt": "g4b-burstsweep-h32768_131072_262144-warm4-tier8-a4096-s0.5-w4-v1.json",
+      "active_tokens": 4096,
+      "burst_share": 0.5,
+      "burst_window_s": 4.0,
+      "goodput_ratio": 1.6,
+      "p99_reduction": 0.41443544441791813,
+      "decision": "advance",
+      "clears_goodput": true,
+      "clears_p99": true
+    },
+    {
+      "receipt": "g4b-burstsweep-h32768_131072_262144-warm4-tier8-a4096-s0.75-w1-v1.json",
+      "active_tokens": 4096,
+      "burst_share": 0.75,
+      "burst_window_s": 1.0,
+      "goodput_ratio": 0.9375,
+      "p99_reduction": -0.1691057754891731,
+      "decision": "not_established",
+      "clears_goodput": false,
+      "clears_p99": false
+    },
+    {
+      "receipt": "g4b-burstsweep-h32768_131072_262144-warm4-tier8-a4096-s0.75-w16-v1.json",
+      "active_tokens": 4096,
+      "burst_share": 0.75,
+      "burst_window_s": 16.0,
+      "goodput_ratio": 2.2142857142857144,
+      "p99_reduction": 0.5277310606134249,
+      "decision": "advance",
+      "clears_goodput": true,
+      "clears_p99": true
+    },
+    {
+      "receipt": "g4b-burstsweep-h32768_131072_262144-warm4-tier8-a4096-s0.75-w4-v1.json",
+      "active_tokens": 4096,
+      "burst_share": 0.75,
+      "burst_window_s": 4.0,
+      "goodput_ratio": 1.46484375,
+      "p99_reduction": 0.3737462307886233,
+      "decision": "advance",
+      "clears_goodput": false,
+      "clears_p99": true
+    },
+    {
+      "receipt": "g4b-burstsweep-h32768_131072_262144-warm4-tier8-a8192-s0.25-w1-v1.json",
+      "active_tokens": 8192,
+      "burst_share": 0.25,
+      "burst_window_s": 1.0,
+      "goodput_ratio": 1.2890625,
+      "p99_reduction": -0.10369265576379366,
+      "decision": "not_established",
+      "clears_goodput": false,
+      "clears_p99": false
+    },
+    {
+      "receipt": "g4b-burstsweep-h32768_131072_262144-warm4-tier8-a8192-s0.25-w16-v1.json",
+      "active_tokens": 8192,
+      "burst_share": 0.25,
+      "burst_window_s": 16.0,
+      "goodput_ratio": 1.375,
+      "p99_reduction": 0.26820721324820473,
+      "decision": "not_established",
+      "clears_goodput": false,
+      "clears_p99": false
+    },
+    {
+      "receipt": "g4b-burstsweep-h32768_131072_262144-warm4-tier8-a8192-s0.25-w4-v1.json",
+      "active_tokens": 8192,
+      "burst_share": 0.25,
+      "burst_window_s": 4.0,
+      "goodput_ratio": 1.3306451612903225,
+      "p99_reduction": 0.26820721324820473,
+      "decision": "not_established",
+      "clears_goodput": false,
+      "clears_p99": false
+    },
+    {
+      "receipt": "g4b-burstsweep-h32768_131072_262144-warm4-tier8-a8192-s0.5-w1-v1.json",
+      "active_tokens": 8192,
+      "burst_share": 0.5,
+      "burst_window_s": 1.0,
+      "goodput_ratio": 1.1015625,
+      "p99_reduction": 0.1729038979353404,
+      "decision": "not_established",
+      "clears_goodput": false,
+      "clears_p99": false
+    },
+    {
+      "receipt": "g4b-burstsweep-h32768_131072_262144-warm4-tier8-a8192-s0.5-w16-v1.json",
+      "active_tokens": 8192,
+      "burst_share": 0.5,
+      "burst_window_s": 16.0,
+      "goodput_ratio": 1.2890625,
+      "p99_reduction": 0.06298402015709861,
+      "decision": "not_established",
+      "clears_goodput": false,
+      "clears_p99": false
+    },
+    {
+      "receipt": "g4b-burstsweep-h32768_131072_262144-warm4-tier8-a8192-s0.5-w4-v1.json",
+      "active_tokens": 8192,
+      "burst_share": 0.5,
+      "burst_window_s": 4.0,
+      "goodput_ratio": 1.2625,
+      "p99_reduction": 0.2443799759679024,
+      "decision": "not_established",
+      "clears_goodput": false,
+      "clears_p99": false
+    },
+    {
+      "receipt": "g4b-burstsweep-h32768_131072_262144-warm4-tier8-a8192-s0.75-w1-v1.json",
+      "active_tokens": 8192,
+      "burst_share": 0.75,
+      "burst_window_s": 1.0,
+      "goodput_ratio": 0.59765625,
+      "p99_reduction": -0.5051094103449012,
+      "decision": "not_established",
+      "clears_goodput": false,
+      "clears_p99": false
+    },
+    {
+      "receipt": "g4b-burstsweep-h32768_131072_262144-warm4-tier8-a8192-s0.75-w16-v1.json",
+      "active_tokens": 8192,
+      "burst_share": 0.75,
+      "burst_window_s": 16.0,
+      "goodput_ratio": 1.9285714285714286,
+      "p99_reduction": 0.4399358860505557,
+      "decision": "advance",
+      "clears_goodput": true,
+      "clears_p99": true
+    },
+    {
+      "receipt": "g4b-burstsweep-h32768_131072_262144-warm4-tier8-a8192-s0.75-w4-v1.json",
+      "active_tokens": 8192,
+      "burst_share": 0.75,
+      "burst_window_s": 4.0,
+      "goodput_ratio": 0.984375,
+      "p99_reduction": 0.11101298668848109,
+      "decision": "not_established",
+      "clears_goodput": false,
+      "clears_p99": false
+    }
+  ],
+  "reading": "the tail win is conditional, not universal: at a 4,096-token state the flash crowd clears the 30% p99 bar in 6 of 9 parameterisations and advances in the same 6, while at 8,192 only one of nine advances and the p99 reduction is negative in several - a state twice the size pays twice the rematerialisation exactly when the fleet is busiest.  The single-parameter claim in the grid ('23 cells clear the bar') is therefore scoped to the workload it was measured in rather than presented as a property of the regime"
+}

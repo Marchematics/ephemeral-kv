@@ -36,8 +36,11 @@ against a checked-in receipt, and the CPU-only path in
   8,192, 3 at 16,384 - across **all five regimes** the replay models: balanced, slow-worker hotspot,
   worker loss, a flash crowd and a heavy-tailed session-size mix.  **117 clear the 1.5x SLO-goodput
   bar** with a finite ratio (median 1.61x, max 5.06x) and 40 face a baseline that completes no work
-  at all; **23 clear the 30% p99 bar** (best +68.7%), every one of them in the flash-crowd regime,
-  where all workers evict at once and a history-sized cold route queues behind the spike.
+  at all.  **23 clear the 30% p99 bar** (best +68.7%), every one of them in the flash-crowd regime,
+  where all workers evict at once and a history-sized cold route queues behind the spike - and that
+  tail claim is swept over the burst's own parameters rather than quoted from one setting: it holds
+  at the 4,096-token state in 6 of 9 burst shapes (advancing in the same 6) and at 8,192 in 1 of 9, so it is
+  stated as conditional on the workload rather than as a property of the regime.
 * **Recovery moves state, not history.**  A killed worker's replacement rebuilds 8,192 tokens in
   0.91-1.42 s with identical token accuracy, reading ~32 KB instead of the 0.38 GiB of KV the owner
   held; the durable object also resumes on a **different** model.
