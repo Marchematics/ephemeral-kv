@@ -529,9 +529,10 @@ compiler, is measured not to pay.  The session keeps growing; the state that mus
 
 Every claim in this paper maps to a receipt in `artifacts/` and to the script in `scripts/` that
 produced it.  `benchmarks/paper_numbers.py` re-derives the headline numbers from the receipts and
-asserts them (27 checks); `benchmarks/check_receipts.py` verifies that every receipt a document
-cites exists and is not a partial write; `benchmarks/make_figures.py` regenerates the figures from
-the receipts.
+asserts them (including the figures' own CSVs, so a figure cannot drift from its receipt);
+`benchmarks/check_receipts.py` verifies that every receipt a document cites exists and is not a
+partial write; `benchmarks/check_scripts.py` checks that every script's promised output exists;
+`benchmarks/make_figures.py` regenerates the figures from the receipts.
 
 | claim | receipt | script |
 |---|---|---|
