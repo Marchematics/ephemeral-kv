@@ -270,6 +270,7 @@ def main(argv=None) -> int:
                 # arm that called its summariser from one that silently skipped it
                 "summariser_calls": getattr(example, "summariser_calls", 0),
                 "summary_reuses": getattr(example, "summary_reuses", 0),
+                "summary_tokens_in_view": getattr(example, "summary_tokens_in_view", 0),
                 "full": {"continuation": full_text,
                          **score_continuation(full_text, recorded),
                          "next_turn": score_continuation(full_text, next_turn_files)

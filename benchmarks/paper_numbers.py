@@ -225,6 +225,14 @@ def main(argv=None) -> int:
                         recorded and calls > 0 and bool(rows),
                         f"{calls} calls over {len(rows)} rows"
                         + ("" if recorded else " (field absent: the arm ran without the fix)")))
+        # Calls are not enough: the summary has to be *in the scored context*.  A gate that skips
+        # an oversized span left the summary empty on exactly the long-history turns these arms
+        # keep, so the arm was a window-only view while its calls, its view size and its numbers
+        # all looked right.  This is the check that would have caught it.
+        in_view = [int(row.get("summary_tokens_in_view") or 0) for row in rows]
+        results.append((f"{path.stem} summary is in the scored context",
+                        bool(rows) and all(value > 0 for value in in_view),
+                        f"min {min(in_view) if in_view else 0} tokens in view over {len(in_view)} rows"))
         window = (payload.get("config") or {}).get("tail_tokens")
         view_key = ("active_tokens_estimate" if "active_tokens_estimate" in rows[0]
                     else "active_tokens")

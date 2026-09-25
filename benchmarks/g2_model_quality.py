@@ -97,6 +97,7 @@ def build_examples(
     history: list[dict] = []
     summariser_calls = 0
     summary_reuses = 0
+    summary_in_view = 0
     summary_cache: dict = {}
     if token_counter is None:
         token_counter = lambda text: max(1, len(text.split()))
@@ -181,15 +182,29 @@ def build_examples(
                     # `summary_input_tokens` of the older history, and reuse the summary while the
                     # older set has not grown by `summary_stride` spans.  Summarising the whole
                     # older history once per turn costs hours and is not what production does.
-                    recent_older, used_older = [], 0
+                    # A span that does not fit is skipped, which is right for the window but not
+                    # for the summary: when the span just outside the window is one large tool
+                    # dump (common on these traces - 20K-45K tokens), breaking on the first
+                    # iteration leaves `older_text` empty, the summary is never built, and the arm
+                    # silently becomes a *window-only* view.  Nothing in the receipt showed that:
+                    # the summariser is still called on other turns, its calls are still counted,
+                    # and the view size still matches.  Take a suffix of that span instead, so a
+                    # summary always exists and the arm is the arm it claims to be.
+                    pieces, used_older = [], 0
                     for span in reversed(older):
-                        cost = max(1, int(token_counter(span.text)))
+                        rendered = render_span(span)
+                        cost = max(1, int(token_counter(rendered)))
                         if used_older + cost > summary_input_tokens:
+                            room = summary_input_tokens - used_older
+                            if room > 0:
+                                piece = suffix_within(rendered, room, token_counter)
+                                if piece.strip():
+                                    pieces.append(piece)
                             break
+                        pieces.append(rendered)
                         used_older += cost
-                        recent_older.append(span)
-                    recent_older.reverse()
-                    older_text = "".join(render_span(sp) for sp in recent_older)
+                    pieces.reverse()
+                    older_text = "".join(pieces)
                     key = (len(older) // max(1, summary_stride), tail_used // 512)
                     if summarizer is not None and older_text.strip():
                         if key in summary_cache:
@@ -207,9 +222,10 @@ def build_examples(
                     # the reported state size, and an arm whose summary is free would look smaller
                     # than it is
                     view = tail
+                    summary_in_view = 0
                     if summary:
-                        view = tail + [Span(0, -1, "summary", summary,
-                                            max(1, int(token_counter(summary))))]
+                        summary_in_view = max(1, int(token_counter(summary)))
+                        view = tail + [Span(0, -1, "summary", summary, summary_in_view)]
                 elif consolidate_view:
                     # retrieve generously, consolidate the evidence, then compile down: the
                     # point is that the *representation* changes, not that the ranking does
@@ -398,6 +414,9 @@ def build_examples(
     for example in out:
         object.__setattr__(example, "summariser_calls", summariser_calls)
         object.__setattr__(example, "summary_reuses", summary_reuses)
+        # the summary's tokens *in this example's view*: a compact arm whose summaries are called
+        # but never reach a view is not a compaction arm, and only this number shows that
+        object.__setattr__(example, "summary_tokens_in_view", summary_in_view)
     return out
 
 
@@ -753,6 +772,7 @@ def main(argv=None):
                         "active_tokens_estimate": ex.active_tokens_estimate,
                         "turns": ex.turns,
                         "summariser_calls": getattr(ex, "summariser_calls", 0),
+                        "summary_tokens_in_view": getattr(ex, "summary_tokens_in_view", 0),
                         "summary_reuses": getattr(ex, "summary_reuses", 0),
                         "full": full,
                         "active": active,
