@@ -39,5 +39,15 @@ export PYTORCH_CUDA_ALLOC_CONF=${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:Tr
   --out artifacts/g2d-action-turns-state4096-v1.json
 
 # the harness checkpoints every scored turn next to its output, so a run that is interrupted resumes
-# instead of regenerating; the partial file is not a receipt and is removed once the payload exists
-rm -f artifacts/g2d-action-turns-state4096-v1.json.partial.jsonl
+# instead of regenerating.  If only the payload write failed, assemble it from the checkpoint rather
+# than regenerating an hour of views:
+#
+#   python benchmarks/g2d_action_turns.py --from-checkpoint --jsonl data/sessions-patch-64k.jsonl \
+#       --model "$MODEL" --min-history-tokens 32768 --max-history-tokens 49152 \
+#       --max-sessions 24 --actions-per-session 2 --token-budget 4096 --tail-tokens 3584 \
+#       --compile-mode tail_state --tail-cap 0.5 --out artifacts/g2d-action-turns-state4096-v1.json
+#
+# the checkpoint is not a receipt and is removed only once the payload exists
+if [ -f artifacts/g2d-action-turns-state4096-v1.json ]; then
+  rm -f artifacts/g2d-action-turns-state4096-v1.json.partial.jsonl
+fi
