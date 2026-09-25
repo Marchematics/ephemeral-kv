@@ -35,30 +35,37 @@ def decision(path: Path):
         statistics.median(state) if state else None)
 
 
-def accuracy_by_session(path: Path):
-    """{session_id: active token accuracy} for one arm."""
+def arm_rows(path: Path):
     try:
-        rows = json.loads(path.read_text())["rows"]
+        return json.loads(path.read_text())["rows"]
     except (OSError, json.JSONDecodeError, KeyError):
-        return {}
-    return {row.get("session_id"): (row.get("active") or {}).get("token_accuracy")
-            for row in rows if (row.get("active") or {}).get("token_accuracy") is not None}
+        return []
 
 
 def state_vs_reference(state_path: Path, reference_path: Path):
     """Paired accuracy difference between the bounded state and the reference view, in pp.
 
-    Both arms are scored on the same sessions, so this is a paired comparison; the reference is what
-    a resident system can serve on this card (the newest tokens that fit its window), not the full
-    history, which past that window cannot be served at all.
+    Rows are paired by *index* and the pairing is checked against the per-row history tokens, because
+    the model harnesses do not record a session id: pairing by a missing key silently compares one
+    arbitrary row against another, which is how an earlier version of this summary reported a
+    constant gap that the data does not show.  Both arms read the same corpus in the same order, so
+    equal `history_tokens_estimate` per index is the evidence the rows correspond.
     """
-    state, reference = accuracy_by_session(state_path), accuracy_by_session(reference_path)
-    shared = sorted(set(state) & set(reference))
-    if not shared:
-        return None, 0, None
-    deltas = [100 * (state[key] - reference[key]) for key in shared]
-    return (statistics.median(deltas), len(shared),
-            statistics.median(100 * state[key] for key in shared))
+    state, reference = arm_rows(state_path), arm_rows(reference_path)
+    if not state or len(state) != len(reference):
+        return None, 0, None, (None, None)
+    histories = [row["history_tokens_estimate"] for row in state]
+    if histories != [row["history_tokens_estimate"] for row in reference]:
+        return None, 0, None, (None, None)
+    pairs = [(s["active"].get("token_accuracy"), r["active"].get("token_accuracy"))
+             for s, r in zip(state, reference)]
+    pairs = [(s, r) for s, r in pairs if s is not None and r is not None]
+    if not pairs:
+        return None, 0, None, (None, None)
+    deltas = [100 * (s - r) for s, r in pairs]
+    return (statistics.median(deltas), len(pairs),
+            statistics.median(100 * s for s, _ in pairs),
+            (min(deltas), max(deltas)))
 
 
 def main(argv=None) -> int:
@@ -74,10 +81,11 @@ def main(argv=None) -> int:
         reference = Path(f"artifacts/g2-composed-{bucket}-reference131k-v1.json")
         decision_f1, n, _ = decision(decision_receipt)
         _, _, state_tokens = decision(state_receipt)
-        fidelity_pp, n_fid, state_accuracy = state_vs_reference(state_receipt, reference)
+        fidelity_pp, n_fid, state_accuracy, spread = state_vs_reference(state_receipt, reference)
         rows.append({"bucket": bucket, "state_tokens_p50": state_tokens,
                      "state_decision_f1": decision_f1, "decision_instances": n,
                      "state_vs_reference_pp_p50": fidelity_pp,
+                     "state_vs_reference_pp_range": spread,
                      "state_accuracy_p50": state_accuracy,
                      "fidelity_instances": n_fid,
                      "state_receipt": str(state_receipt), "decision_receipt": str(decision_receipt),

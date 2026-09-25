@@ -16,9 +16,9 @@
       "history_tokens": 156207,
       "spans": 45,
       "query_tokens": 45039,
-      "lookup_ms_p50": 2.5275,
-      "lookup_ms_p95": 2.6479,
-      "lookup_ms_min": 2.492,
+      "lookup_ms_p50": 2.5102,
+      "lookup_ms_p95": 2.5668,
+      "lookup_ms_min": 2.4539,
       "spans_returned": 42
     },
     {
@@ -26,9 +26,9 @@
       "history_tokens": 155997,
       "spans": 61,
       "query_tokens": 45416,
-      "lookup_ms_p50": 2.6202,
-      "lookup_ms_p95": 2.7152,
-      "lookup_ms_min": 2.5318,
+      "lookup_ms_p50": 2.5549,
+      "lookup_ms_p95": 2.6304,
+      "lookup_ms_min": 2.4919,
       "spans_returned": 57
     },
     {
@@ -36,9 +36,9 @@
       "history_tokens": 155292,
       "spans": 97,
       "query_tokens": 45347,
-      "lookup_ms_p50": 6.7399,
-      "lookup_ms_p95": 7.1464,
-      "lookup_ms_min": 6.0199,
+      "lookup_ms_p50": 5.3133,
+      "lookup_ms_p95": 5.4191,
+      "lookup_ms_min": 5.2327,
       "spans_returned": 96
     },
     {
@@ -46,9 +46,9 @@
       "history_tokens": 123210,
       "spans": 29,
       "query_tokens": 55320,
-      "lookup_ms_p50": 6.049,
-      "lookup_ms_p95": 6.7606,
-      "lookup_ms_min": 5.4713,
+      "lookup_ms_p50": 4.7764,
+      "lookup_ms_p95": 4.8771,
+      "lookup_ms_min": 4.723,
       "spans_returned": 29
     },
     {
@@ -56,9 +56,9 @@
       "history_tokens": 141168,
       "spans": 65,
       "query_tokens": 56514,
-      "lookup_ms_p50": 15.1459,
-      "lookup_ms_p95": 16.2942,
-      "lookup_ms_min": 11.6117,
+      "lookup_ms_p50": 9.0792,
+      "lookup_ms_p95": 9.1944,
+      "lookup_ms_min": 8.9349,
       "spans_returned": 62
     },
     {
@@ -66,9 +66,9 @@
       "history_tokens": 141239,
       "spans": 55,
       "query_tokens": 38724,
-      "lookup_ms_p50": 5.5357,
-      "lookup_ms_p95": 6.1822,
-      "lookup_ms_min": 5.0974,
+      "lookup_ms_p50": 4.3369,
+      "lookup_ms_p95": 4.4694,
+      "lookup_ms_min": 4.2646,
       "spans_returned": 55
     },
     {
@@ -76,9 +76,9 @@
       "history_tokens": 127126,
       "spans": 83,
       "query_tokens": 28232,
-      "lookup_ms_p50": 2.8335,
-      "lookup_ms_p95": 3.3146,
-      "lookup_ms_min": 2.652,
+      "lookup_ms_p50": 2.3844,
+      "lookup_ms_p95": 2.4207,
+      "lookup_ms_min": 2.2863,
       "spans_returned": 83
     },
     {
@@ -86,9 +86,9 @@
       "history_tokens": 124995,
       "spans": 61,
       "query_tokens": 531,
-      "lookup_ms_p50": 0.093,
-      "lookup_ms_p95": 0.206,
-      "lookup_ms_min": 0.0905,
+      "lookup_ms_p50": 0.0931,
+      "lookup_ms_p95": 0.1069,
+      "lookup_ms_min": 0.0919,
       "spans_returned": 40
     }
   ]
