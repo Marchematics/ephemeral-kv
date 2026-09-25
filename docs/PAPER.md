@@ -584,6 +584,13 @@ either column advances through the p99 route - the best reduction in the admissi
 under the 30% bar - so this is a throughput result, and the paper says so rather than implying a tail
 improvement it did not measure.
 
+**The second admissible size agrees.**  Replaying the capacity grid at 6,144 tokens - the
+configuration to run when a deployment wants the whole 2 pp allowance in reserve (fidelity 0.00 pp,
+decision 0.150 on 48 instances) - advances in **10 of its 36 cells**, all clearing the 1.5x bar
+(8 with a finite ratio, median 1.53x).  Its prefill primitive is measured too, at 0.1496 s between
+the 4,096 (0.0946 s) and 8,192 (0.2026 s) points, so the column is priced the way the others are and
+the admissible region is not an artifact of the single smallest admissible size.
+
 **What the region's size was waiting on.**  The columns differ by cell count: 4,096 advances in 63
 cells of 198 against the 8,192 column's 52 of 294, so moving the system to a 4,096-token state
 widens the region from 52 to 115 cells at *half* the state size - and capacity and mobility improve

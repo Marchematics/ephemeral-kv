@@ -450,6 +450,22 @@ def main(argv=None) -> int:
                     long_bucket["relevant_tokens_p50"] / long_bucket["history_p50"] > 0.5,
                     f"{100 * long_bucket['relevant_tokens_p50'] / long_bucket['history_p50']:.0f}%"))
 
+    # --- the second admissible size: the capacity grid replayed at 6,144 tokens, with its own
+    # measured prefill primitive (the column had no replay before this)
+    column = load("artifacts/g4b-capacity-a6144-phase-summary-v1.json")["rows"]
+    advancing = [r for r in column if r["decision"] == "advance"]
+    check("6,144 column cells", len(column), 36, 0)
+    check("6,144 column advancing cells", len(advancing), 10, 0)
+    finite_6144 = [r["goodput_ratio"] for r in advancing
+                   if r["goodput_ratio"] not in (None, float("inf"))]
+    check("6,144 column goodput p50 (finite)",
+          round(statistics.median(finite_6144), 2), 1.53, 1e-2)
+    prefill = {r["tokens"]: r["times"]["p50_s"] for r in
+               load("artifacts/g3-active-prefill-warm-qwen05b-v2.json")["active_prefill_rows"]}
+    check("6,144 prefill p50 s", round(prefill[6144], 4), 0.1496, 1e-3)
+    check("4,096 prefill p50 s", round(prefill[4096], 4), 0.0946, 1e-3)
+    check("8,192 prefill p50 s", round(prefill[8192], 4), 0.2026, 1e-3)
+
     # --- C5's lookup term: measured on composed histories, and query-driven rather than
     # history-driven - which is the abstraction's own claim, so it is asserted rather than narrated
     lookup_1m = load("artifacts/g2-index-lookup-composed-1m-v1.json")["rows"]
