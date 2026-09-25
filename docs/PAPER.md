@@ -104,19 +104,8 @@ inside the 2 pp allowance against the full transcript, end-task score
 
 ### 2.1 Most of a session is state that is never needed again
 
-**Table 1:** Where a long session's tokens sit. The spans that dominate a session are a small
-fraction of the turns that produced them - which is the whole reason a bounded state is possible.
-
-Table 1 measures the token share held by the largest spans of each long session
-(`g2_dead_state.py`):
-
-| session tokens | spans | largest span | top-2 share | top-5 share | the rest |
-|---:|---:|---:|---:|---:|---:|
-| 156,207 | 45 | 45,051 | 58% | 93% | 7% |
-| 155,997 | 61 | 45,416 | 58% | 94% | 6% |
-| 123,210 | 29 | 55,320 | 90% | 96% | 4% |
-| 141,168 | 65 | 56,514 | 80% | 92% | 8% |
-| 127,126 | 83 | 28,261 | 44% | 73% | 27% |
+Table 1, in Appendix B, measures the token share held by the largest spans of each long session
+(`g2_dead_state.py`).
 
 This is the arithmetic behind the abstraction: the footprint is dominated by blocks that were
 needed once (a task prompt carrying the workspace, a whole-file dump, a long plan), and the
@@ -184,8 +173,7 @@ ships, and it is the configuration in bold above.
 **A stricter end task, scored offline.**  File *mention* is a weak bar, so the same receipts are
 rescored one notch higher: `action_hit` requires the generated turn to name an edit-type tool or
 command (`str_replace_editor`, `apply_patch`, `sed -i`, `cat >`, `patch`, ...) *and* to target a file
-the recorded patch touched (`g2b_action_metric.py`, `artifacts/g2b-action-metric-v1.json`);
-Table 3 reports it for every arm:
+the recorded patch touched (`g2b_action_metric.py`, `artifacts/g2b-action-metric-v1.json`).
 
 Read the other way, the same arms are a frontier, and it is the honest answer to "does the bounded
 state beat retrieval": of the twelve arms measured at this budget that hold fidelity, the bounded
@@ -197,16 +185,8 @@ retrieval 0.191 at -6.94 pp.  So the claim is not that
 a bounded view decides better than retrieval, which it does not; it is that among the views a
 fidelity-gated system may actually use, this is the one that decides best.
 
-**Table 3:** The stricter action-level end task: a continuation has to name the right kind of
-command *and* target a file the recorded patch touched.
-
-| arm | instances | full-history action rate | active action rate | paired delta |
-|---|---:|---:|---:|---:|
-| raw retrieval, 4,096 | 96 | 0.042 | 0.031 | -0.010 [-0.062, +0.042] |
-| window + compiled far field, 8,192 | 96 | 0.042 | 0.052 | +0.010 [-0.042, +0.062] |
-| evidence consolidation, 8,192 | 48 | 0.042 | 0.021 | -0.021 [-0.104, +0.042] |
-| raw retrieval, 8,192 | 48 | 0.042 | **0.125** | **+0.083 [0.000, +0.188]** |
-| plain recency, 8,192 | 24 | 0.042 | 0.042 | 0.000 [-0.125, +0.125] |
+The action-level table is in Appendix B (Table 3): it holds every arm's paired interval, and its
+reading is the same - a bound the claim must clear, not a win.
 
 On this bar the bounded state is **not worse** than the full transcript - every interval includes
 zero, and one arm is nominally ahead at the edge of significance - but **no arm is measurably
@@ -612,18 +592,8 @@ treating the region's current width as a property of the workload.
 
 ### 4.6 Recovery and rollout
 
-Table 12 records what the runtime does under process loss and what reuse across models costs.
-
-**Table 12:** What the runtime does when it loses a worker, and what resuming on another model
-costs.
-
-| operation | measured |
-|---|---|
-| two-worker failover, owner SIGKILLed | fresh process rebuilds 8,192 tokens in 0.91-1.42 s (p50 1.387 s); recorded files named in 4/6 sessions; token accuracy identical to the killed owner's (0.593 both) |
-| model rollout | resumes on a model that never saw the session: end-task 0.137/0.145 against full history's 0.017/0.042 (Qwen2.5-0.5B/1.5B) |
-| data moved | ~32,455 bytes of state text against 0.38 GiB of KV the dissolved owner held at these 33K histories (12-128 GiB at 1M on the declared geometries) |
-| data moved, at any age | the state is 18-40 KB of text at every history length measured, from 111K to 984K tokens (Table 7b), so what a recovering worker reads does not grow with the session either |
-| cost | 0.55-1.04 s of active-set prefill against 6.31 s of re-prefill |
+Table 12, in Appendix B, records what the runtime does under process loss and what reuse across
+models costs.
 
 ---
 
@@ -890,3 +860,44 @@ a real million-token session (no public trace is that long), the 8B/70B geometri
 over measured primitives rather than a deployment, and task success on a benchmark like DeepSWE is
 not measured at all.  Those four sentences are the paper's honest perimeter, and none of them is
 load-bearing for a claim above.
+
+---
+
+## Appendix B. Tables held in the appendix
+
+These carry evidence a reader checks once, not prose the argument depends on line by line; each is
+referenced from the section it belongs to.
+
+**Table 1:** Where a long session's tokens sit. The spans that dominate a session are a small
+fraction of the turns that produced them - which is the whole reason a bounded state is possible.
+Measured by `benchmarks/g2_dead_state.py` (`artifacts/g2-dead-state-v1.json`).
+
+| session tokens | spans | largest span | top-2 share | top-5 share | the rest |
+|---:|---:|---:|---:|---:|---:|
+| 156,207 | 45 | 45,051 | 58% | 93% | 7% |
+| 155,997 | 61 | 45,416 | 58% | 94% | 6% |
+| 123,210 | 29 | 55,320 | 90% | 96% | 4% |
+| 141,168 | 65 | 56,514 | 80% | 92% | 8% |
+| 127,126 | 83 | 28,261 | 44% | 73% | 27% |
+
+**Table 3:** The stricter action-level end task: a continuation has to name the right kind of
+command *and* target a file the recorded patch touched.
+
+| arm | instances | full-history action rate | active action rate | paired delta |
+|---|---:|---:|---:|---:|
+| raw retrieval, 4,096 | 96 | 0.042 | 0.031 | -0.010 [-0.062, +0.042] |
+| window + compiled far field, 8,192 | 96 | 0.042 | 0.052 | +0.010 [-0.042, +0.062] |
+| evidence consolidation, 8,192 | 48 | 0.042 | 0.021 | -0.021 [-0.104, +0.042] |
+| raw retrieval, 8,192 | 48 | 0.042 | **0.125** | **+0.083 [0.000, +0.188]** |
+| plain recency, 8,192 | 24 | 0.042 | 0.042 | 0.000 [-0.125, +0.125] |
+
+**Table 12:** What the runtime does when it loses a worker, and what resuming on another model
+costs.
+
+| operation | measured |
+|---|---|
+| two-worker failover, owner SIGKILLed | fresh process rebuilds 8,192 tokens in 0.91-1.42 s (p50 1.387 s); recorded files named in 4/6 sessions; token accuracy identical to the killed owner's (0.593 both) |
+| model rollout | resumes on a model that never saw the session: end-task 0.137/0.145 against full history's 0.017/0.042 (Qwen2.5-0.5B/1.5B) |
+| data moved | ~32,455 bytes of state text against 0.38 GiB of KV the dissolved owner held at these 33K histories (12-128 GiB at 1M on the declared geometries) |
+| data moved, at any age | the state is 18-40 KB of text at every history length measured, from 111K to 984K tokens (Table 7b), so what a recovering worker reads does not grow with the session either |
+| cost | 0.55-1.04 s of active-set prefill against 6.31 s of re-prefill |
