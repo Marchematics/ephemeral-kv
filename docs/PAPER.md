@@ -400,9 +400,14 @@ qualifying turn in the bucket.
 Across an **8.9x** range of raw history - and a 45x range of turns - the state that must move stays
 between 4,588 and 8,439 tokens with no trend (p50 6,598 -> 7,039), and between 18 and 40 KB of text.
 **The session keeps growing; the state that must move does not.**  The quality side of these same
-buckets - whether the decision and the surface hold at these lengths - is measured with the arms of
-Section 2.2 and reported in Section 4.2; the composition itself is the honest limit: the transcripts
-are real, the million-token sessions are not.
+buckets has a shape that matters more than its level: paired against a *resident* view that uses the
+model's whole 131,072-token window, the bounded state's teacher-forced accuracy is **2.41 pp** behind
+at 145K histories and **2.50 pp** behind at 278K - the gap does not grow with the session, the same
+way the state and its transfer cost do not.  The reference there is not full history: past 131K
+tokens a resident system cannot serve the whole transcript at all, so the comparison is against the
+strongest view it *can* serve, which is why the number is reported separately from the 2 pp
+allowance the real-corpus measurements meet.  The composition is the honest limit throughout: the
+transcripts are real, the million-token sessions are not.
 
 ### 4.2 The mobility law and the inversion
 

@@ -404,6 +404,18 @@ def main(argv=None) -> int:
                     history_growth > 6.5 and abs(state_growth - 1.0) < 0.15,
                     f"history x{history_growth:.1f}, state x{state_growth:.2f}"))
 
+    # --- the killer table's quality side: paired against a resident 131K-window reference, the
+    # state's accuracy gap does not grow with age (145K and 278K histories)
+    for bucket, want in (("128k", -2.41), ("256k", -2.50)):
+        state = {r.get("session_id"): r["active"].get("token_accuracy")
+                 for r in load(f"artifacts/g2-composed-{bucket}-state8192-v1.json")["rows"]}
+        reference = {r.get("session_id"): r["active"].get("token_accuracy")
+                     for r in load(f"artifacts/g2-composed-{bucket}-reference131k-v1.json")["rows"]}
+        shared = sorted(set(state) & set(reference))
+        gap = statistics.median(100 * (state[k] - reference[k]) for k in shared
+                                if state[k] is not None and reference[k] is not None)
+        check(f"composed {bucket}: state vs resident reference pp", round(gap, 2), want, 0.05)
+
     # --- the evidence-mass caveat, measured at the long end: more than half of a 764K-token history
     # still shares terms with the query, so the bound is a design choice rather than a ceiling
     mass_long = load("artifacts/g2-evidence-mass-composed-1m-v1.json")["by_history_bucket"]
