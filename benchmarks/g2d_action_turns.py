@@ -44,6 +44,8 @@ import argparse
 import json
 import random
 import statistics
+import subprocess
+import time
 from pathlib import Path
 
 from benchmarks.g2_model_quality import build_examples
@@ -106,6 +108,57 @@ def action_turns(examples: list, per_session: int, max_history_tokens: int = 0) 
 def mean(values):
     values = [v for v in values if v is not None]
     return statistics.mean(values) if values else None
+
+
+def free_gpu_mib() -> int:
+    """Free device memory, or a large number when the query fails (do not block on a bad query)."""
+    try:
+        out = subprocess.run(["nvidia-smi", "--query-gpu=memory.free", "--format=csv,noheader,nounits"],
+                             capture_output=True, text=True, timeout=30).stdout
+        return int(out.strip().splitlines()[0])
+    except Exception:
+        return 1 << 20
+
+
+def wait_for_gpu(need_mib: int, max_wait_s: int = 3600, label: str = "") -> None:
+    """Block until the card has room.
+
+    This measurement runs on a shared 24 GiB card and a co-tenant arrives without warning; two runs
+    of it died mid-generation with `CUDA out of memory` after an hour of work.  Waiting is the
+    difference between a measurement and a crashed one, and the checkpoint below is the difference
+    between waiting and starting over.
+    """
+    waited = 0
+    while True:
+        free = free_gpu_mib()
+        if free >= need_mib:
+            return
+        if waited >= max_wait_s:
+            raise SystemExit(f"gave up waiting for {need_mib} MiB free (have {free}){label}")
+        print(f"[g2d] waiting for {need_mib} MiB free, have {free}{label}", flush=True)
+        time.sleep(20)
+        waited += 20
+
+
+def generate_guarded(model, tokenizer, context, max_new, max_length, device, need_mib, label=""):
+    """`generate`, retried through a co-tenant's allocations rather than dying on them."""
+    wait_for_gpu(need_mib, label=label)
+    for attempt in range(40):
+        try:
+            return generate(model, tokenizer, context, max_new, max_length, device)
+        except Exception as exc:                                     # torch.cuda.OutOfMemoryError
+            if "out of memory" not in str(exc).lower():
+                raise
+            try:
+                import torch
+
+                torch.cuda.empty_cache()
+            except Exception:
+                pass
+            print(f"[g2d] OOM on attempt {attempt + 1}{label}, waiting for room", flush=True)
+            time.sleep(20)
+            wait_for_gpu(need_mib, label=label)
+    raise SystemExit(f"still out of memory after 40 attempts{label}")
 
 
 def summarize(rows: list[dict]) -> dict:
@@ -175,14 +228,30 @@ def main(argv=None) -> int:
     p.add_argument("--snippet-spans", action=argparse.BooleanOptionalAction, default=True)
     p.add_argument("--no-collapse-paths", action="store_true")
     p.add_argument("--device", default="cuda")
+    p.add_argument("--min-free-mib", type=int, default=9000,
+                   help="free device memory required before each generation; the card is shared, so "
+                        "the harness waits for room instead of dying on a co-tenant's allocation")
+    p.add_argument("--checkpoint", default="",
+                   help="append each scored row here as it completes (default: <out>.partial.jsonl) "
+                        "and resume from it, so an hour of generation is not lost to one OOM")
     args = p.parse_args(argv)
 
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
     tokenizer = AutoTokenizer.from_pretrained(args.model, use_fast=True)
+    wait_for_gpu(args.min_free_mib, label=" (model load)")
     model = AutoModelForCausalLM.from_pretrained(args.model, dtype=torch.bfloat16)
     model.to(args.device).eval()
+
+    checkpoint = Path(args.checkpoint or (args.out + ".partial.jsonl"))
+    done: set[tuple] = set()
+    if checkpoint.exists():
+        for line in checkpoint.read_text().splitlines():
+            if line.strip():
+                prior = json.loads(line)
+                done.add((prior.get("session_id"), prior.get("turn_index")))
+        print(f"[g2d] resuming: {len(done)} rows already in {checkpoint}", flush=True)
 
     rows = []
     with Path(args.jsonl).open() as handle:
@@ -236,13 +305,17 @@ def main(argv=None) -> int:
             if not picked:
                 continue
             for index, example, recorded in picked:
-                full_text = generate(model, tokenizer, example.full_context, args.max_new,
-                                     args.max_length, args.device)
-                active_text = generate(model, tokenizer, example.active_context, args.max_new,
-                                       args.max_length, args.device)
-                retrieval_text = generate(model, tokenizer,
-                                          retrieval_examples[index].active_context,
-                                          args.max_new, args.max_length, args.device)
+                if (getattr(example, "session_id", None), index) in done:
+                    continue
+                tag = f" ({meta.get('instance_id')} turn {index})"
+                full_text = generate_guarded(model, tokenizer, example.full_context, args.max_new,
+                                             args.max_length, args.device, args.min_free_mib, tag)
+                active_text = generate_guarded(model, tokenizer, example.active_context, args.max_new,
+                                               args.max_length, args.device, args.min_free_mib, tag)
+                retrieval_text = generate_guarded(model, tokenizer,
+                                                  retrieval_examples[index].active_context,
+                                                  args.max_new, args.max_length, args.device,
+                                                  args.min_free_mib, tag)
                 rows.append({
                     "session_id": getattr(example, "session_id", None),
                     "instance_id": meta.get("instance_id"),
@@ -258,6 +331,8 @@ def main(argv=None) -> int:
                     "retrieval": {**score_action(retrieval_text, recorded),
                                   "continuation": retrieval_text},
                 })
+                with checkpoint.open("a") as handle:
+                    handle.write(json.dumps(rows[-1]) + "\n")
                 print(f"[g2d] {meta.get('instance_id')} turn {index}/{len(examples)} "
                       f"hist={example.history_tokens_estimate} "
                       f"action={recorded['tool']}:{recorded.get('target')} "
@@ -268,6 +343,17 @@ def main(argv=None) -> int:
             if len({r["session_id"] for r in rows}) >= args.max_sessions:
                 break
 
+    if done:
+        # the checkpoint is the record of what was actually generated; a resumed run has to report
+        # the whole sample, not only the rows it produced this time
+        seen = {(r.get("session_id"), r.get("turn_index")) for r in rows}
+        for line in checkpoint.read_text().splitlines():
+            if not line.strip():
+                continue
+            prior = json.loads(line)
+            if (prior.get("session_id"), prior.get("turn_index")) not in seen:
+                rows.append(prior)
+    rows.sort(key=lambda r: (str(r.get("session_id")), r.get("turn_index") or 0))
     summary = summarize(rows)
     payload = {
         "schema": "ephemeral-kv-g2d-action-turns-v1",

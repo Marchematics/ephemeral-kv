@@ -22,6 +22,8 @@ export PYTHONPATH="$PWD"
 
 PY=${PY:-/root/qcc/venv/bin/python}
 MODEL=${MODEL:-/root/qcc/models/Llama-3.2-1B-Instruct}
+# the card is shared: fragmentation from a co-tenant's allocations is what killed two earlier runs
+export PYTORCH_CUDA_ALLOC_CONF=${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}
 
 # three turns per session, evenly spread, and the submission turn excluded: a receipt that only
 # scored the end of the session would answer the question `g2c` already answered
@@ -33,4 +35,9 @@ MODEL=${MODEL:-/root/qcc/models/Llama-3.2-1B-Instruct}
   --max-sessions 24 \
   --actions-per-session 2 \
   --token-budget 4096 --tail-tokens 3584 --compile-mode tail_state --tail-cap 0.5 \
+  --min-free-mib 9000 \
   --out artifacts/g2d-action-turns-state4096-v1.json
+
+# the harness checkpoints every scored turn next to its output, so a run that is interrupted resumes
+# instead of regenerating; the partial file is not a receipt and is removed once the payload exists
+rm -f artifacts/g2d-action-turns-state4096-v1.json.partial.jsonl
