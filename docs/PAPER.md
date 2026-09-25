@@ -14,11 +14,13 @@ sentence around them carry the scope.
 A long-lived LLM session is served today as if its KV cache *were* the session: the resident object
 grows with the transcript, so placement, recovery and capacity planning all inherit the session's
 age.  We measure what a turn actually needs and find that the object those decisions depend on is
-bounded and independent of age.  On real coding-agent traces, a 4-8K execution state holds
-the next turn at a teacher-forced fidelity delta of **0.00 pp** against the full transcript, and its
-end-task score is statistically indistinguishable from the best retrieval baseline we can build,
-while the state stays at **7-8K tokens** as the raw history grows from 64K to 156K (and, on the turn
-axis, from 40 to 96 turns).  The consequence is a phase change rather than a speedup: a session
+bounded and independent of age.  On real coding-agent traces, a **4,096-token** execution state
+holds the next turn inside the 2 pp fidelity allowance (-0.96 pp) and a **6,144-token** one holds it
+at parity (0.00 pp), with an end-task score statistically indistinguishable from the best retrieval
+baseline we can build.  The state does not track the history: it stays between **4,588 and 8,439
+tokens** - and its transfer between **18 and 40 KB** - across an **8.9x range of raw history** (64K to
+984K tokens, the long end composed from real sessions) and a 45x range of turns, and paired against a
+resident 131K-token view its teacher-forced accuracy is 2.41-2.50 pp behind at every length.  The consequence is a phase change rather than a speedup: a session
 **32x older costs 2.4x less to move** (5.1x at a 4K state) because the transfer term leaves the cold
 path; one worker holds **32x more sessions**; recovery and a model revision rebuild the state from a
 durable index instead of moving 12-128 GiB of KV; and a replay against measured hardware primitives
