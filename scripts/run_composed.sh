@@ -32,6 +32,22 @@ for bucket in 128k 256k 512k 1m; do
     --dedup-spans --consolidate --snippet-spans --retrieve-multiplier 2 \
     --compile-mode tail_state --tail-tokens 4096 \
     --out "artifacts/g2b-patch-localization-composed-${bucket}-b8192-v1.json"
+  # the fidelity side: the shipped state, and the reference a resident system can hold on this
+  # card (the newest 131,072 tokens, the model's whole window).  A full-history reference is
+  # impossible past this point - that is a property of the hardware, not of the state.
+  /root/qcc/venv/bin/python benchmarks/g2_model_quality.py \
+    --jsonl "data/sessions-composed-${bucket}.jsonl" --model /root/qcc/models/Llama-3.2-1B-Instruct \
+    --max-length 131072 --max-examples 12 --min-history-tokens 32768 --dedup-spans --consolidate \
+    --retrieve-multiplier 2 --provenance-terms 8 --max-spans 128 --recency-fraction 0.6 \
+    --recency-spans 3 --max-span-fraction 0.25 --token-budget 8192 \
+    --compile-mode tail_state --tail-tokens 4096 \
+    --out "artifacts/g2-composed-${bucket}-state8192-v1.json"
+  /root/qcc/venv/bin/python benchmarks/g2_model_quality.py \
+    --jsonl "data/sessions-composed-${bucket}.jsonl" --model /root/qcc/models/Llama-3.2-1B-Instruct \
+    --max-length 131072 --max-examples 12 --min-history-tokens 32768 --dedup-spans --consolidate \
+    --retrieve-multiplier 2 --provenance-terms 8 --max-spans 128 --recency-fraction 0.6 \
+    --recency-spans 3 --max-span-fraction 0.25 --token-budget 131072 --compile-mode recency \
+    --out "artifacts/g2-composed-${bucket}-reference131k-v1.json"
   /root/qcc/venv/bin/python benchmarks/g2_dead_state.py \
     --jsonl "data/sessions-composed-${bucket}.jsonl" \
     --out "artifacts/g2-dead-state-composed-${bucket}-v1.json"
