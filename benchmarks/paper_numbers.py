@@ -24,6 +24,13 @@ def load(name: str) -> dict:
     return json.loads(Path(name).read_text())
 
 
+def read_csv_rows(path: Path) -> list[dict]:
+    import csv
+    with path.open() as handle:
+        lines = [line for line in handle if not line.startswith("#")]
+    return list(csv.DictReader(lines))
+
+
 def assert_complete(path: str) -> None:
     """A killed run leaves a partial artifact at its final path; never quote one as evidence."""
     payload = load(path)
@@ -140,6 +147,19 @@ def main(argv=None) -> int:
     else:
         results.append(("compaction baseline",
                         True, "WITHDRAWN - receipt absent, no claim in the paper"))
+
+    # --- the figures must carry the same numbers as the receipts (data path: receipt -> CSV -> SVG)
+    fig3 = Path("figures/fig3_compiler_ablation.csv")
+    if fig3.exists():
+        rows = read_csv_rows(fig3)
+        shipped = next((r for r in rows if r["arm"] == "window + compiler (n=96)"), None)
+        if shipped:
+            check("figure 3 carries the shipped view's decision",
+                  float(shipped["active_f1"]), 0.165, TOL)
+        raw96 = next((r for r in rows if r["arm"] == "raw retrieval (n=96)"), None)
+        if raw96:
+            check("figure 3 carries the retrieval arm's decision",
+                  float(raw96["active_f1"]), 0.169, TOL)
 
     # --- C3 (stricter end task): the action-level rescoring must stay a bound, not a win
     action = load("artifacts/g2b-action-metric-v1.json")["rows"]

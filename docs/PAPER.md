@@ -525,6 +525,8 @@ compiler, is measured not to pay.  The session keeps growing; the state that mus
 
 ## Appendix A. Claims, receipts and reproduction
 
+### A.1 The claim map
+
 Every claim in this paper maps to a receipt in `artifacts/` and to the script in `scripts/` that
 produced it.  `benchmarks/paper_numbers.py` re-derives the headline numbers from the receipts and
 asserts them (27 checks); `benchmarks/check_receipts.py` verifies that every receipt a document
@@ -544,7 +546,7 @@ the receipts.
 | the routing phase change at an admissible state | `g4-quality-join-v2.json` | `scripts/run_g4_{grid2,geometry,pressure,hotspot}.sh` |
 | capacity and recovery | `g5-capacity-planning-v1.json`, `g5-failover-two-workers-samemodel-v1.json` | `benchmarks/g5_*.py` |
 
-### A.1 How these numbers are kept honest
+### A.2 How these numbers are kept honest
 
 Four checks run against the repository rather than against the prose:
 
