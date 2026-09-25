@@ -26,9 +26,9 @@
       "active_tokens": 4096,
       "cells": 198,
       "advance": 63,
-      "arm": "newest span + compiled far field (tail_query cap 0.75); decision best of tail_query 0.125 / protect-whole 0.121",
-      "fidelity_pp": -25.0,
-      "decision_f1": 0.125,
+      "arm": "window 3,072 + consolidated far field at a 4,096-token total (tail_state)",
+      "fidelity_pp": -2.4,
+      "decision_f1": 0.117,
       "fidelity_admissible": false,
       "decision_admissible": true,
       "decision_parity_admissible": false

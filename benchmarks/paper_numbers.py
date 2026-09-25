@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
+import random
 import statistics
 import subprocess
 import sys
@@ -54,6 +55,29 @@ def bucket_stats(path: str) -> dict:
     payload = load(path)
     buckets = module.summarize_by_bucket(payload["rows"])
     return buckets
+
+
+def paired_delta(path_a: str, path_b: str, repeats: int = 20000, seed: int = 0):
+    """The paired mean difference and 95% interval that `paired_f1.py` reports.
+
+    Recomputed here rather than read from a receipt because the window-axis comparisons are between
+    arms that were run separately: the pairing is over the instances the two receipts share.
+    """
+    def by_instance(name: str) -> dict:
+        return {row["instance_id"]: row["active"]["f1"]
+                for row in load(name)["rows"] if "active" in row}
+
+    a, b = by_instance(path_a), by_instance(path_b)
+    shared = sorted(set(a) & set(b))
+    diffs = [b[i] - a[i] for i in shared]
+    rng = random.Random(seed)
+    means = []
+    for _ in range(repeats):
+        sample = [diffs[rng.randrange(len(diffs))] for _ in diffs]
+        means.append(sum(sample) / len(sample))
+    means.sort()
+    return (sum(diffs) / len(diffs), means[int(0.025 * len(means))],
+            means[int(0.975 * len(means)) - 1], len(shared))
 
 
 def main(argv=None) -> int:
@@ -115,6 +139,32 @@ def main(argv=None) -> int:
     check("routing cells at 8192", row8192["cells"], 294, 0)
     check("advancing cells at 8192 (fidelity-admissible)", row8192["advance"], 52, 0)
     check("retrieval-parity cells", join["summary"]["advancing_cells_decision_parity"], 0, 0)
+    # C11: the region's width is waiting on the 4,096-token state, so the count in that column and
+    # the distance to admissibility are the numbers the paper's "what would widen this" paragraph
+    # quotes - and the fidelity figure it calls 0.4 pp outside the allowance
+    row4096 = next(r for r in join["rows"] if r["active_tokens"] == 4096)
+    check("routing cells at 4096", row4096["cells"], 198, 0)
+    check("advancing cells at 4096", row4096["advance"], 63, 0)
+    check("region if 4096 were admissible (8192 + 4096 columns)",
+          row8192["advance"] + row4096["advance"], 115, 0)
+    window3k = bucket_stats("artifacts/g2-compiler-window3k-b4096-v1.json").get("32K-128K") or {}
+    check("best 4096-token state fidelity pp",
+          100 * (window3k.get("token_accuracy_delta_p50") or 0.0), -2.40, TOL_PP)
+    # the join's 4,096 point must be that arm, not an arm that replaces the window: the first
+    # version of the points file scored this column at -25 pp, which overstated the distance to
+    # admissibility by a factor of ten and contradicted C11
+    check("join 4096 fidelity point is the best measured state", row4096["fidelity_pp"], -2.4, TOL)
+    # and the no-window retrieval row of Table 9, whose fidelity and decision come from the
+    # retrieval-only arm at that budget rather than from an arm that caps the newest span
+    lexical = bucket_stats("artifacts/g2-compiler-lexical-b4096-n48.json").get("32K-128K") or {}
+    check("plain retrieval, no window, 4096 fidelity pp",
+          100 * (lexical.get("token_accuracy_delta_p50") or 0.0), -22.84, TOL_PP)
+    raw_rows = {r["instance_id"]: r for r in load("artifacts/g2b-patch-localization-raw-b4096-n48.json")["rows"]}
+    raw_f1 = [r["active"]["f1"] for r in raw_rows.values() if r.get("recorded_files")]
+    check("plain retrieval, no window, 4096 decision",
+          round(statistics.mean(raw_f1), 3), 0.243, TOL)
+    results.append(("plain retrieval, no window, 4096 instances",
+                    len(raw_f1) == 48, f"got {len(raw_f1)}, want 48"))
 
     # --- C8: capacity
     capacity = load("artifacts/g5-capacity-planning-v1.json")["rows"]
@@ -227,6 +277,26 @@ def main(argv=None) -> int:
     ci_low, ci_high = joint_action["ci95"]
     results.append(("action-level interval includes zero",
                     ci_low <= 0 <= ci_high, f"ci95 [{ci_low}, {ci_high}]"))
+
+    # --- the window axis at a fixed 8,192-token budget (Table 9): every step towards a smaller
+    # window is positive on the decision, none is resolvable on its own, and all three points hold
+    # fidelity - which is what makes the window/budget split the lever rather than the summary
+    axis = (("6,656 -> 4,096", "artifacts/g2b-patch-localization-window6656-b8192-n48.json",
+             "artifacts/g2b-patch-localization-windowcompiler-b8192-n96.json", 0.072, 48),
+            ("6,656 -> 2,867", "artifacts/g2b-patch-localization-window6656-b8192-n48.json",
+             "artifacts/g2b-patch-localization-tailstate-compiledfar-tf0.35-b8192-v1.json", 0.069, 24),
+            ("4,096 -> 2,867", "artifacts/g2b-patch-localization-windowcompiler-b8192-n96.json",
+             "artifacts/g2b-patch-localization-tailstate-compiledfar-tf0.35-b8192-v1.json", 0.040, 24))
+    for label, path_a, path_b, want, want_n in axis:
+        if not (Path(path_a).exists() and Path(path_b).exists()):
+            results.append((f"window axis {label}", False, "receipt absent"))
+            continue
+        mean, low, high, n = paired_delta(path_a, path_b)
+        check(f"window axis {label} paired delta", round(mean, 3), want, TOL)
+        results.append((f"window axis {label} interval includes zero",
+                        low <= 0 <= high, f"ci95 [{low:.3f}, {high:.3f}]"))
+        results.append((f"window axis {label} shared instances", n == want_n,
+                        f"got {n}, want {want_n}"))
 
     # --- C1 (structural): dead state
     dead = load("artifacts/g2-dead-state-v1.json")["rows"]

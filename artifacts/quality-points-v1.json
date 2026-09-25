@@ -22,14 +22,16 @@
     },
     {
       "active_tokens": 4096,
-      "arm": "newest span + compiled far field (tail_query cap 0.75); decision best of tail_query 0.125 / protect-whole 0.121",
-      "fidelity_pp": -25.0,
-      "decision_f1": 0.125,
+      "arm": "window 3,072 + consolidated far field at a 4,096-token total (tail_state)",
+      "fidelity_pp": -2.4,
+      "decision_f1": 0.117,
       "receipts": {
-        "fidelity": "artifacts/g2-compiler-tailquery-cap0.75-b4096-v1.json",
-        "decision": "artifacts/g2b-patch-localization-tailquery-cap0.75-b4096-v1.json",
-        "decision_alt": "artifacts/g2b-patch-localization-protectwhole-b4096-v1.json"
-      }
+        "fidelity": "artifacts/g2-compiler-window3k-b4096-v1.json",
+        "decision": "artifacts/g2b-patch-localization-window3k-b4096-n48.json",
+        "fidelity_alt": "artifacts/g2-compiler-tailquery-cap0.75-b4096-v1.json",
+        "decision_alt": "artifacts/g2b-patch-localization-tailquery-cap0.75-b4096-v1.json"
+      },
+      "note": "the windowed arm supersedes the tail-query point this file was first built with: at this size the windowed state is the best measured fidelity (-2.40 pp against the tail-query arm's -25.00 pp), and it is 0.4 pp outside the tolerance rather than 23 pp.  It is still not admissible, which is what the paper's C11 says"
     },
     {
       "active_tokens": 8192,
