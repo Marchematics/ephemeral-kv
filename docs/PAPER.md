@@ -472,14 +472,20 @@ resident, against a tier that can move KV.
 
 **Compaction-based context management.**  Summarising or compacting history before it re-enters the
 model is a crowded space and predates this work; KVMem itself uses compaction as its baseline, and
-Section 4.2b measures that baseline under the same budget and instances: keeping the newest 3,072
-tokens verbatim and having the model summarise the rest scores **-23.86 pp** of fidelity where
-keeping the evidence and retrieving the rest scores 0.00 pp, with the decision tied in both.  Our
-contribution there is negative and specific: on these traces compaction is neutral at best (dedup
-alone is a statistical tie with plain retrieval), the state-compiling stages are harmful
-(collapse-each-file-to-its-latest costs 8.5 pp of fidelity, snippet re-selection of the newest output
-20 pp), and the metric usually quoted for it - teacher-forced next-token fidelity - is saturated by
-keeping the newest evidence whole.  Reporting that is what keeps the positive claim honest: what
+Section 4.2b measures that baseline under the same budget and the same window, with a summariser
+varied independently of the scorer.  The honest result is that **compaction is equivalent here, not
+worse**: fidelity 0.00 pp both ways, decision 0.122 against 0.089 with a paired interval that
+includes zero, and a stronger summariser changes nothing.  We therefore do not claim to beat
+compaction, and the paper's contribution is not in that comparison - it is the bound and its
+consequences.
+
+What we do report against the *compiler* variant of the same idea is negative and specific: content
+dedup alone is a statistical tie with plain retrieval, the two stages that actually compile state are
+harmful (collapsing each file to its latest costs 8.5 pp of fidelity, re-selecting the newest
+output's lines 20 pp), and the metric usually quoted for compaction - teacher-forced next-token
+fidelity - is saturated by keeping the newest evidence whole, which is why a system can appear to
+improve under it while nothing about the turn's evidence has changed.  Reporting that is what keeps
+the positive claim honest: what
 carries quality is the window and retrieval, and what carries mobility is the bound.
 
 ## 6. Limitations and non-claims
@@ -553,7 +559,7 @@ Four checks run against the repository rather than against the prose:
 
 * **value audit** - `benchmarks/paper_numbers.py` re-derives every headline number from the
   receipts and asserts it - including that the routing cells which clear a strict
-  retrieval-parity bar are exactly zero, and that the stricter end task's interval contains zero);
+  retrieval-parity bar are exactly zero, and that the stricter end task's interval contains zero;
 * **receipt audit** - `benchmarks/check_receipts.py` reports any cited receipt that is missing, and
   any whose payload is a *partial* write (the harnesses write incrementally, so a killed run leaves
   a partial artifact at its final path);
