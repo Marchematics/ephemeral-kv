@@ -30,6 +30,8 @@ def main(argv=None) -> int:
 
     skipped = [name for pattern in args.exclude for name in glob.glob(pattern)]
     rows = []
+    realised: list[int | None] = []
+    seen_realised: set[str] = set()
     for path in sorted(glob.glob(args.glob)):
         if path in skipped:
             continue
@@ -39,6 +41,9 @@ def main(argv=None) -> int:
         if "verdict" not in payload:
             continue          # receipts from before the gate was evaluated in-artifact
         config, verdicts = payload["config"], payload["verdict"]
+        if path not in seen_realised:
+            seen_realised.add(path)
+            realised.append((payload.get("realised") or {}).get("history_max"))
         # The regimes a receipt contributes are the ones it was *asked* to compute.  Reading
         # every table it happens to carry would double-count: a receipt run for the two
         # workload regimes also reports its balanced table, which is the same cell as the
@@ -78,8 +83,14 @@ def main(argv=None) -> int:
     by_active_regime: dict[str, list[int]] = {}
     by_history: dict[str, list[int]] = {}
     for row in rows:
+        # The name is the *largest history choice the receipt was configured with*, not the largest
+        # history it contains.  The two are different here and the difference matters: a session's
+        # transcript grows 1.7x per turn from 2,048 tokens, so with the 8 turns per session this
+        # grid uses no session exceeds 113,300 tokens whatever the choice says, and a bucket called
+        # "1M-mix" would be claiming an age axis the workload never exercises.  The bucket is
+        # labelled for what it is, and `realised_history` carries what the receipts now record.
         long_session = "1048576" in row["receipt"]
-        scale = "1M-mix" if long_session else "corpus-mix"
+        scale = "1M-target-mix" if long_session else "corpus-target-mix"
         for bucket, key in ((by_active, row["active_tokens"]),
                             (by_active_regime, f"{row['regime']}|{row['active_tokens']}"),
                             (by_history, scale)):
@@ -95,6 +106,13 @@ def main(argv=None) -> int:
         "advances_by_active_tokens": {str(k): v for k, v in sorted(by_active.items())},
         "advances_by_regime_and_active": {k: v for k, v in sorted(by_active_regime.items())},
         "advances_by_history_scale": by_history,
+        # What the receipts that carry the field say they actually contain.  Every receipt in this
+        # grid predates it, so the list is empty and the count says so: the largest history a
+        # receipt here can contain is 113,300 tokens, because a session grows 1.7x per turn from
+        # 2,048 over 8 turns, and `paper_numbers.py` asserts that against the workload model.  The
+        # point of recording it is that "1M-target-mix" is a configuration, not a measurement.
+        "realised_history_max": sorted({value for value in realised if value is not None}),
+        "realised_history_recorded_by": f"{sum(1 for v in realised if v is not None)}/{len(realised)} receipts",
         "boundary": (
             "ephemeral mobility clears the gate where rematerialisation is cheaper than "
             "moving the history's KV payload: forced mobility (a worker disappears) at any "

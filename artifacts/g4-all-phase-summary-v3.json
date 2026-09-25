@@ -120,15 +120,17 @@
     ]
   },
   "advances_by_history_scale": {
-    "corpus-mix": [
+    "corpus-target-mix": [
       99,
       362
     ],
-    "1M-mix": [
+    "1M-target-mix": [
       75,
       362
     ]
   },
+  "realised_history_max": [],
+  "realised_history_recorded_by": "0/252 receipts",
   "boundary": "ephemeral mobility clears the gate where rematerialisation is cheaper than moving the history's KV payload: forced mobility (a worker disappears) at any active set the compiler can hold quality at, and capacity-pressured fleets with long sessions.  It does not clear it under balanced load with short sessions, where the KV payload is already cheap to move",
   "rows": [
     {

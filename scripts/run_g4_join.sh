@@ -23,8 +23,16 @@ set -x
 cd "$(dirname "$0")/.." || exit 1
 export PYTHONPATH="$PWD"
 
+# The grid is the cells that vary the *system's* axes.  Two studies that reuse the replay harness
+# are deliberately not folded in, because each changes something the grid holds fixed and would make
+# the region a count over two different workloads: the burst sweep varies the flash crowd's own
+# parameters (its result is `g4b-burst-sensitivity-v1.json`), and the long-age grid spreads the same
+# 128 turns over 16 turns per session so that sessions actually reach a million tokens (its result is
+# `g4b-long-age-summary-v1.json`).
 /root/qcc/venv/bin/python benchmarks/g4_phase_summary.py \
   --glob 'artifacts/g4[b-e]-*.json' \
+  --exclude 'artifacts/g4b-burstsweep-*' \
+  --exclude 'artifacts/g4b-longage-*' \
   --out artifacts/g4-all-phase-summary-v3.json
 
 /root/qcc/venv/bin/python benchmarks/g4_quality_join.py \
