@@ -203,6 +203,12 @@ now carries what was measured, what its scope is, and whether the gate is met.
 | 6 honest boundary | a region where the baseline wins, measured | balanced load with every session resident against a KV-moving tier does not advance; the 4,096 and 16,384 columns barely advance; the decision advantage vanishes into a tie at 64K-96K histories | **met** |
 | 7 deeper: `dM/dL ~ 0` | state flat in age with quality flat | state 7.1-8.2K while history grows 64K -> 156K and on the turn axis 40 -> 96 turns, fidelity delta +0.00/+0.00/+1.43 pp; **and** the lexical evidence mass does grow with age, so the bound is a design choice validated by quality, not an intrinsic ceiling | **met, with the caveat** |
 
+Two comparisons the space will ask for, and their honest state: **compaction** (the de facto
+baseline) is equivalent to the shipped view at the same budget and window on both metrics (paired
+intervals include zero), so this paper does not claim to beat it; and the *compiler* variant the
+project started from is not just unproven but measured worse or tied, which is why it was withdrawn
+rather than softened.
+
 The one gate that is *not* met is the compiler gate the project started from: a semantic compiler
 does not beat plain retrieval on the decision (+0.055 at n=24, -0.104 on one 48-instance set where
 it is worse, and tied at equal budget), and two of its stages measurably hurt.  That claim is
