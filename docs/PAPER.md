@@ -771,13 +771,20 @@ the cold-start drill runs all of them in a fresh clone:
   was corrected, and the re-run through it reproduced the previous receipt exactly - all 48 rows, the
   summary block and 223 summariser calls - while adding the configuration that had been missing.
 
-Two failure modes were found while building this and are worth naming, because both produced
-*plausible-looking* evidence rather than errors.  A killed duplicate run left a **partial artifact
+Three failure modes were found while building this and are worth naming, because all three
+produced *plausible-looking* evidence rather than errors.  A killed duplicate run left a **partial artifact
 at its final path** (16 of 48 rows), and a value audit cannot see that - the numbers it checks are
 real, just few.  And two arms were reported as queued for two rounds while **never having started**,
 because one harness did not accept a flag they passed and the runner scripts had no `set -e`: an
 experiment that never starts looks exactly like one that is still running.  The defences are the
 partial-receipt check, the semantic checks (`summariser_calls`), and queues that stop on failure.
+The third is the one the semantic audit itself missed for two rounds, and it is the sharpest of the
+three: the compaction baseline *called* its summariser, counted the calls, and scored a view that
+contained no summary at all - the builder walked the older spans newest-first, hit a single
+20K-45K-token tool dump that did not fit its 8,192-token summary input, and broke out of the loop
+before collecting any text, so the arm silently became a recency window.  Recording a mechanism's
+*activity* is not the same as recording its *effect*: the check now asserts that the summary's tokens
+are in the scored context (`summary_tokens_in_view`), not merely that the summariser ran.
 
 The runner scripts that produced each family of receipts are in `scripts/`, so the path from a
 claim to its evidence is a claim -> receipt -> script triple, and the paper states which of the
