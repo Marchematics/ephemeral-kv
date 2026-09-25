@@ -325,12 +325,12 @@ def main(argv=None) -> int:
     if compact_path.exists():
         compact = bucket_stats(str(compact_path)).get("32K-128K") or {}
         check("compaction fidelity pp (32K-128K)",
-              100 * (compact.get("token_accuracy_delta_p50") or 0.0), 0.0, TOL_PP)
+              100 * (compact.get("token_accuracy_delta_p50") or 0.0), 0.13, TOL_PP)
         check("compaction NLL delta p50 (32K-128K)",
-              round(compact.get("nll_delta_active_minus_full_p50") or 0.0, 3), -0.020, TOL)
+              round(compact.get("nll_delta_active_minus_full_p50") or 0.0, 3), -0.032, TOL)
         compact_view = statistics.median(row["active_tokens_estimate"]
                                          for row in load(str(compact_path))["rows"])
-        check("compaction view tokens p50", round(compact_view), 6650, 5)
+        check("compaction view tokens p50", round(compact_view), 7159, 20)
     else:
         results.append(("compaction baseline", False, "receipt absent - the paper quotes it"))
 

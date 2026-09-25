@@ -438,12 +438,21 @@ both into 8,192
 (`--compile-mode compact`, `scripts/run_compaction.sh`), with the summariser varied separately from
 the scorer (`--summarizer-model`).
 
-The corrected measurement is at **fidelity parity**: 0.00 pp (NLL -0.020 in the 32K-128K bucket,
-p50 over those examples) with 223 summariser calls and 395 summary reuses across 48 examples, and a
-view of 6,650 tokens p50 - because the window is 6,656 tokens of untouched newest evidence and
-*that* is what carries the surface.  The summariser is fixed (the scorer writes the summaries); one
-summariser family is a scope limit of this measurement, not a claim that the surface is
-summariser-independent.
+The corrected measurement is at **fidelity parity**: **+0.13 pp** (NLL -0.032 in the 32K-128K bucket,
+p50 over those examples) with 346 summariser calls and 915 summary reuses across 48 examples, a view
+of 7,159 tokens p50, and the summary present in **every** example's scored context (106-512 summary
+tokens, recorded per row as `summary_tokens_in_view`) - because the window is 6,656 tokens of
+untouched newest evidence and *that* is what carries the surface, with the summary adding a slight
+improvement on the loss.  The summariser is fixed (the scorer writes the summaries, and at this size
+it mostly copies older text rather than abstracting it); one summariser family is a scope limit of
+this measurement, not a claim that the surface is summariser-independent.
+
+An earlier version of this arm was measured with a **window-only view**: the builder skipped the
+oversized span it was meant to summarise, so no summary was ever built on the long-history turns the
+arm keeps, while the summariser was still called on other turns and the view size still matched.  The
+arm above is the corrected run - the same runner, with the summary in the view - and the difference
+is visible exactly where it should be: the NLL delta moves from -0.020 to -0.032 and fidelity from
+0.00 to +0.13 pp.  Appendix A.2 records it as the third silent-failure mode.
 
 Which makes the comparison a controlled one: the two designs spend the same budget and keep the
 same window, and differ only in what the remaining ~1.5K buys.  On the decision, that comparison
@@ -454,7 +463,7 @@ is the last cell of Table 9:
 | view (8,192 tokens) | window | remainder | fidelity | end-task F1 |
 |---|---:|---|---:|---:|
 | window + consolidated retrieval | 6,656 | 1.5K retrieved | 0.00 pp | 0.089 (n=48) |
-| compaction | 6,656 | 0.5K summary | 0.00 pp | 0.122 (n=48) |
+| compaction | 6,656 | 0.5K summary | +0.13 pp | 0.122 (n=48) |
 | **window + consolidated retrieval (shipped)** | **4,096** | **4.1K retrieved** | **0.00 pp** | **0.161 (n=48)** |
 | window (2,867) + compiled far field | 2,867 | 5.3K retrieved | 0.00 pp | 0.179 (n=24) |
 | plain retrieval, no window | 0 | 4,096 retrieved | -22.84 pp | 0.243 (n=48) |

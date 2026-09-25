@@ -47,29 +47,29 @@
   "sessions": 6,
   "summary": {
     "examples": 48,
-    "active_fraction_p50": 0.07890148670728345,
-    "active_fraction_p95": 0.1079334695800763,
-    "nll_delta_active_minus_full_p50": -0.023987948894500732,
-    "nll_delta_active_minus_full_p95": 0.36353269815444933,
+    "active_fraction_p50": 0.08510239784756904,
+    "active_fraction_p95": 0.11624399949527113,
+    "nll_delta_active_minus_full_p50": -0.051737308502197266,
+    "nll_delta_active_minus_full_p95": 0.3847161531448363,
     "token_accuracy_delta_p50": 0.0,
-    "token_accuracy_delta_p05": -0.07634408602150543
+    "token_accuracy_delta_p05": -0.07314814814814813
   },
   "by_history_bucket": {
     "32K-128K": {
       "examples": 44,
-      "active_fraction_p50": 0.07982906469288348,
-      "active_fraction_p95": 0.10862197092044129,
-      "nll_delta_active_minus_full_p50": -0.020176425576210022,
-      "nll_delta_active_minus_full_p95": 0.3832933545112611,
-      "token_accuracy_delta_p50": 0.0,
-      "token_accuracy_delta_p05": -0.0766749379652606
+      "active_fraction_p50": 0.08597437452241077,
+      "active_fraction_p95": 0.11698452301575987,
+      "nll_delta_active_minus_full_p50": -0.03235164284706116,
+      "nll_delta_active_minus_full_p95": 0.3970609903335572,
+      "token_accuracy_delta_p50": 0.0012853470437017567,
+      "token_accuracy_delta_p05": -0.07367724867724867
     },
     ">=128K": {
       "examples": 4,
-      "active_fraction_p50": 0.04277069589849597,
-      "active_fraction_p95": 0.04642955849555221,
-      "nll_delta_active_minus_full_p50": -0.10375499725341797,
-      "nll_delta_active_minus_full_p95": -0.026809382438659674,
+      "active_fraction_p50": 0.04548458213442126,
+      "active_fraction_p95": 0.04997896665397118,
+      "nll_delta_active_minus_full_p50": -0.20166659355163574,
+      "nll_delta_active_minus_full_p95": -0.06704697608947757,
       "token_accuracy_delta_p50": 0.0,
       "token_accuracy_delta_p05": 0.0
     }
@@ -85,10 +85,11 @@
   "rows": [
     {
       "history_tokens_estimate": 65651,
-      "active_tokens_estimate": 6654,
+      "active_tokens_estimate": 7166,
       "turns": 36,
       "summariser_calls": 4,
-      "summary_reuses": 7,
+      "summary_tokens_in_view": 510,
+      "summary_reuses": 12,
       "full": {
         "nll": 0.7642435431480408,
         "target_tokens": 105,
@@ -96,18 +97,19 @@
         "context_tokens": 65784
       },
       "active": {
-        "nll": 0.6930619478225708,
+        "nll": 0.7023756504058838,
         "target_tokens": 105,
         "token_accuracy": 0.7904761904761904,
-        "context_tokens": 6764
+        "context_tokens": 7283
       }
     },
     {
       "history_tokens_estimate": 65772,
-      "active_tokens_estimate": 6242,
+      "active_tokens_estimate": 6754,
       "turns": 38,
       "summariser_calls": 4,
-      "summary_reuses": 7,
+      "summary_tokens_in_view": 510,
+      "summary_reuses": 12,
       "full": {
         "nll": 1.9246526956558228,
         "target_tokens": 14,
@@ -115,18 +117,19 @@
         "context_tokens": 65913
       },
       "active": {
-        "nll": 2.016639471054077,
+        "nll": 1.9912525415420532,
         "target_tokens": 14,
         "token_accuracy": 0.7857142857142857,
-        "context_tokens": 6364
+        "context_tokens": 6883
       }
     },
     {
       "history_tokens_estimate": 110837,
-      "active_tokens_estimate": 6256,
+      "active_tokens_estimate": 6768,
       "turns": 40,
       "summariser_calls": 4,
-      "summary_reuses": 7,
+      "summary_tokens_in_view": 510,
+      "summary_reuses": 12,
       "full": {
         "nll": 0.6019846200942993,
         "target_tokens": 231,
@@ -134,18 +137,19 @@
         "context_tokens": 110984
       },
       "active": {
-        "nll": 0.5463393330574036,
+        "nll": 0.5416490435600281,
         "target_tokens": 231,
-        "token_accuracy": 0.8484848484848485,
-        "context_tokens": 6381
+        "token_accuracy": 0.8571428571428571,
+        "context_tokens": 6900
       }
     },
     {
       "history_tokens_estimate": 111084,
-      "active_tokens_estimate": 6503,
+      "active_tokens_estimate": 7015,
       "turns": 42,
       "summariser_calls": 4,
-      "summary_reuses": 7,
+      "summary_tokens_in_view": 510,
+      "summary_reuses": 12,
       "full": {
         "nll": 1.7737786769866943,
         "target_tokens": 14,
@@ -153,18 +157,19 @@
         "context_tokens": 111239
       },
       "active": {
-        "nll": 1.6003206968307495,
+        "nll": 1.632243037223816,
         "target_tokens": 14,
         "token_accuracy": 0.7857142857142857,
-        "context_tokens": 6636
+        "context_tokens": 7155
       }
     },
     {
       "history_tokens_estimate": 156137,
-      "active_tokens_estimate": 6517,
+      "active_tokens_estimate": 7027,
       "turns": 44,
       "summariser_calls": 4,
-      "summary_reuses": 7,
+      "summary_tokens_in_view": 510,
+      "summary_reuses": 12,
       "full": {
         "nll": 4.635786533355713,
         "target_tokens": 70,
@@ -172,18 +177,19 @@
         "context_tokens": 131002
       },
       "active": {
-        "nll": 4.472890853881836,
+        "nll": 4.486583709716797,
         "target_tokens": 70,
         "token_accuracy": 0.3,
-        "context_tokens": 6653
+        "context_tokens": 7169
       }
     },
     {
       "history_tokens_estimate": 64401,
-      "active_tokens_estimate": 6655,
+      "active_tokens_estimate": 7166,
       "turns": 46,
-      "summariser_calls": 2,
-      "summary_reuses": 0,
+      "summariser_calls": 10,
+      "summary_tokens_in_view": 511,
+      "summary_reuses": 15,
       "full": {
         "nll": 1.035487174987793,
         "target_tokens": 74,
@@ -191,18 +197,19 @@
         "context_tokens": 64571
       },
       "active": {
-        "nll": 0.9296541213989258,
+        "nll": 0.9281092286109924,
         "target_tokens": 74,
-        "token_accuracy": 0.8243243243243243,
-        "context_tokens": 6765
+        "token_accuracy": 0.8108108108108109,
+        "context_tokens": 7283
       }
     },
     {
       "history_tokens_estimate": 64526,
-      "active_tokens_estimate": 6654,
+      "active_tokens_estimate": 7165,
       "turns": 48,
-      "summariser_calls": 2,
-      "summary_reuses": 0,
+      "summariser_calls": 10,
+      "summary_tokens_in_view": 511,
+      "summary_reuses": 15,
       "full": {
         "nll": 1.0510896444320679,
         "target_tokens": 35,
@@ -210,18 +217,19 @@
         "context_tokens": 64703
       },
       "active": {
-        "nll": 1.3292540311813354,
+        "nll": 1.1789613962173462,
         "target_tokens": 35,
         "token_accuracy": 0.7428571428571429,
-        "context_tokens": 6759
+        "context_tokens": 7277
       }
     },
     {
       "history_tokens_estimate": 64624,
-      "active_tokens_estimate": 6654,
+      "active_tokens_estimate": 7165,
       "turns": 50,
-      "summariser_calls": 2,
-      "summary_reuses": 0,
+      "summariser_calls": 10,
+      "summary_tokens_in_view": 511,
+      "summary_reuses": 15,
       "full": {
         "nll": 1.4989745616912842,
         "target_tokens": 27,
@@ -229,18 +237,19 @@
         "context_tokens": 64808
       },
       "active": {
-        "nll": 1.4746659994125366,
+        "nll": 1.467511773109436,
         "target_tokens": 27,
         "token_accuracy": 0.8148148148148148,
-        "context_tokens": 6769
+        "context_tokens": 7287
       }
     },
     {
       "history_tokens_estimate": 64761,
-      "active_tokens_estimate": 6653,
+      "active_tokens_estimate": 7164,
       "turns": 52,
-      "summariser_calls": 2,
-      "summary_reuses": 0,
+      "summariser_calls": 10,
+      "summary_tokens_in_view": 511,
+      "summary_reuses": 15,
       "full": {
         "nll": 1.0593812465667725,
         "target_tokens": 27,
@@ -248,18 +257,19 @@
         "context_tokens": 64951
       },
       "active": {
-        "nll": 1.1057913303375244,
+        "nll": 1.1094905138015747,
         "target_tokens": 27,
         "token_accuracy": 0.8518518518518519,
-        "context_tokens": 6759
+        "context_tokens": 7277
       }
     },
     {
       "history_tokens_estimate": 64951,
-      "active_tokens_estimate": 6649,
+      "active_tokens_estimate": 7160,
       "turns": 54,
-      "summariser_calls": 2,
-      "summary_reuses": 0,
+      "summariser_calls": 10,
+      "summary_tokens_in_view": 511,
+      "summary_reuses": 15,
       "full": {
         "nll": 0.9347041845321655,
         "target_tokens": 20,
@@ -267,18 +277,19 @@
         "context_tokens": 65148
       },
       "active": {
-        "nll": 0.8193820118904114,
+        "nll": 0.8335322141647339,
         "target_tokens": 20,
         "token_accuracy": 0.9,
-        "context_tokens": 6765
+        "context_tokens": 7283
       }
     },
     {
       "history_tokens_estimate": 110387,
-      "active_tokens_estimate": 6655,
+      "active_tokens_estimate": 7166,
       "turns": 56,
-      "summariser_calls": 2,
-      "summary_reuses": 0,
+      "summariser_calls": 10,
+      "summary_tokens_in_view": 511,
+      "summary_reuses": 15,
       "full": {
         "nll": 1.2911674976348877,
         "target_tokens": 93,
@@ -286,18 +297,19 @@
         "context_tokens": 110591
       },
       "active": {
-        "nll": 1.6892813444137573,
+        "nll": 1.7282484769821167,
         "target_tokens": 93,
-        "token_accuracy": 0.6236559139784946,
-        "context_tokens": 6783
+        "token_accuracy": 0.6451612903225806,
+        "context_tokens": 7301
       }
     },
     {
       "history_tokens_estimate": 110497,
-      "active_tokens_estimate": 6656,
+      "active_tokens_estimate": 7167,
       "turns": 58,
-      "summariser_calls": 2,
-      "summary_reuses": 0,
+      "summariser_calls": 10,
+      "summary_tokens_in_view": 511,
+      "summary_reuses": 15,
       "full": {
         "nll": 1.96040940284729,
         "target_tokens": 14,
@@ -305,18 +317,19 @@
         "context_tokens": 110709
       },
       "active": {
-        "nll": 1.7340565919876099,
+        "nll": 1.7078263759613037,
         "target_tokens": 14,
         "token_accuracy": 0.7142857142857143,
-        "context_tokens": 6784
+        "context_tokens": 7302
       }
     },
     {
       "history_tokens_estimate": 155927,
-      "active_tokens_estimate": 6656,
+      "active_tokens_estimate": 7167,
       "turns": 60,
-      "summariser_calls": 2,
-      "summary_reuses": 0,
+      "summariser_calls": 10,
+      "summary_tokens_in_view": 511,
+      "summary_reuses": 15,
       "full": {
         "nll": 4.6989312171936035,
         "target_tokens": 70,
@@ -324,18 +337,19 @@
         "context_tokens": 131002
       },
       "active": {
-        "nll": 4.4789719581604,
+        "nll": 4.444800853729248,
         "target_tokens": 70,
         "token_accuracy": 0.2714285714285714,
-        "context_tokens": 6783
+        "context_tokens": 7301
       }
     },
     {
       "history_tokens_estimate": 62888,
-      "active_tokens_estimate": 6647,
+      "active_tokens_estimate": 7159,
       "turns": 82,
-      "summariser_calls": 8,
-      "summary_reuses": 24,
+      "summariser_calls": 9,
+      "summary_tokens_in_view": 106,
+      "summary_reuses": 31,
       "full": {
         "nll": 0.8653937578201294,
         "target_tokens": 25,
@@ -343,18 +357,19 @@
         "context_tokens": 63190
       },
       "active": {
-        "nll": 0.9640250205993652,
+        "nll": 0.933339536190033,
         "target_tokens": 25,
         "token_accuracy": 0.84,
-        "context_tokens": 6815
+        "context_tokens": 7334
       }
     },
     {
       "history_tokens_estimate": 108260,
-      "active_tokens_estimate": 6652,
+      "active_tokens_estimate": 7164,
       "turns": 84,
-      "summariser_calls": 8,
-      "summary_reuses": 24,
+      "summariser_calls": 9,
+      "summary_tokens_in_view": 106,
+      "summary_reuses": 31,
       "full": {
         "nll": 1.3164235353469849,
         "target_tokens": 50,
@@ -362,18 +377,19 @@
         "context_tokens": 108569
       },
       "active": {
-        "nll": 1.147261142730713,
+        "nll": 1.149467945098877,
         "target_tokens": 50,
-        "token_accuracy": 0.76,
-        "context_tokens": 6824
+        "token_accuracy": 0.8,
+        "context_tokens": 7343
       }
     },
     {
       "history_tokens_estimate": 108431,
-      "active_tokens_estimate": 6653,
+      "active_tokens_estimate": 6759,
       "turns": 86,
-      "summariser_calls": 8,
-      "summary_reuses": 24,
+      "summariser_calls": 9,
+      "summary_tokens_in_view": 106,
+      "summary_reuses": 31,
       "full": {
         "nll": 1.1073917150497437,
         "target_tokens": 37,
@@ -381,18 +397,19 @@
         "context_tokens": 108747
       },
       "active": {
-        "nll": 0.9174270629882812,
+        "nll": 0.9188511967658997,
         "target_tokens": 37,
         "token_accuracy": 0.7837837837837838,
-        "context_tokens": 6809
+        "context_tokens": 6921
       }
     },
     {
       "history_tokens_estimate": 108594,
-      "active_tokens_estimate": 6653,
+      "active_tokens_estimate": 6759,
       "turns": 88,
-      "summariser_calls": 8,
-      "summary_reuses": 24,
+      "summariser_calls": 9,
+      "summary_tokens_in_view": 106,
+      "summary_reuses": 31,
       "full": {
         "nll": 1.8240574598312378,
         "target_tokens": 34,
@@ -400,18 +417,19 @@
         "context_tokens": 108917
       },
       "active": {
-        "nll": 1.8022443056106567,
+        "nll": 1.7688220739364624,
         "target_tokens": 34,
-        "token_accuracy": 0.6764705882352942,
-        "context_tokens": 6808
+        "token_accuracy": 0.6470588235294118,
+        "context_tokens": 6920
       }
     },
     {
       "history_tokens_estimate": 108717,
-      "active_tokens_estimate": 6650,
+      "active_tokens_estimate": 6756,
       "turns": 90,
-      "summariser_calls": 8,
-      "summary_reuses": 24,
+      "summariser_calls": 9,
+      "summary_tokens_in_view": 106,
+      "summary_reuses": 31,
       "full": {
         "nll": 0.9545979499816895,
         "target_tokens": 76,
@@ -419,18 +437,19 @@
         "context_tokens": 109048
       },
       "active": {
-        "nll": 0.7459530234336853,
+        "nll": 0.7565775513648987,
         "target_tokens": 76,
-        "token_accuracy": 0.7763157894736842,
-        "context_tokens": 6829
+        "token_accuracy": 0.8026315789473685,
+        "context_tokens": 6941
       }
     },
     {
       "history_tokens_estimate": 109064,
-      "active_tokens_estimate": 6655,
+      "active_tokens_estimate": 7167,
       "turns": 92,
-      "summariser_calls": 8,
-      "summary_reuses": 24,
+      "summariser_calls": 9,
+      "summary_tokens_in_view": 106,
+      "summary_reuses": 31,
       "full": {
         "nll": 0.20759810507297516,
         "target_tokens": 405,
@@ -438,18 +457,19 @@
         "context_tokens": 109402
       },
       "active": {
-        "nll": 0.1773695945739746,
+        "nll": 0.1755424290895462,
         "target_tokens": 405,
         "token_accuracy": 0.9580246913580247,
-        "context_tokens": 6814
+        "context_tokens": 7333
       }
     },
     {
       "history_tokens_estimate": 109850,
-      "active_tokens_estimate": 6645,
+      "active_tokens_estimate": 6751,
       "turns": 94,
-      "summariser_calls": 8,
-      "summary_reuses": 24,
+      "summariser_calls": 9,
+      "summary_tokens_in_view": 106,
+      "summary_reuses": 31,
       "full": {
         "nll": 0.796622097492218,
         "target_tokens": 25,
@@ -457,18 +477,19 @@
         "context_tokens": 110195
       },
       "active": {
-        "nll": 0.6983841061592102,
+        "nll": 0.7188276648521423,
         "target_tokens": 25,
         "token_accuracy": 0.92,
-        "context_tokens": 6828
+        "context_tokens": 6940
       }
     },
     {
       "history_tokens_estimate": 155222,
-      "active_tokens_estimate": 6652,
+      "active_tokens_estimate": 6758,
       "turns": 96,
-      "summariser_calls": 8,
-      "summary_reuses": 24,
+      "summariser_calls": 9,
+      "summary_tokens_in_view": 106,
+      "summary_reuses": 31,
       "full": {
         "nll": 4.589028358459473,
         "target_tokens": 70,
@@ -476,18 +497,19 @@
         "context_tokens": 131002
       },
       "active": {
-        "nll": 4.565361022949219,
+        "nll": 4.536479473114014,
         "target_tokens": 70,
         "token_accuracy": 0.2857142857142857,
-        "context_tokens": 6840
+        "context_tokens": 6952
       }
     },
     {
       "history_tokens_estimate": 67310,
-      "active_tokens_estimate": 6649,
+      "active_tokens_estimate": 7159,
       "turns": 22,
       "summariser_calls": 2,
-      "summary_reuses": 3,
+      "summary_tokens_in_view": 314,
+      "summary_reuses": 7,
       "full": {
         "nll": 1.6727104187011719,
         "target_tokens": 32,
@@ -495,18 +517,19 @@
         "context_tokens": 67395
       },
       "active": {
-        "nll": 1.7245144844055176,
+        "nll": 1.6044023036956787,
         "target_tokens": 32,
-        "token_accuracy": 0.625,
-        "context_tokens": 6696
+        "token_accuracy": 0.6875,
+        "context_tokens": 7213
       }
     },
     {
       "history_tokens_estimate": 67747,
-      "active_tokens_estimate": 6636,
+      "active_tokens_estimate": 6950,
       "turns": 24,
       "summariser_calls": 2,
-      "summary_reuses": 3,
+      "summary_tokens_in_view": 314,
+      "summary_reuses": 7,
       "full": {
         "nll": 1.4886014461517334,
         "target_tokens": 27,
@@ -514,18 +537,19 @@
         "context_tokens": 67839
       },
       "active": {
-        "nll": 1.2905144691467285,
+        "nll": 1.2835274934768677,
         "target_tokens": 27,
         "token_accuracy": 0.7407407407407407,
-        "context_tokens": 6714
+        "context_tokens": 7034
       }
     },
     {
       "history_tokens_estimate": 67786,
-      "active_tokens_estimate": 6586,
+      "active_tokens_estimate": 6900,
       "turns": 26,
       "summariser_calls": 2,
-      "summary_reuses": 3,
+      "summary_tokens_in_view": 314,
+      "summary_reuses": 7,
       "full": {
         "nll": 1.3145108222961426,
         "target_tokens": 34,
@@ -533,18 +557,19 @@
         "context_tokens": 67886
       },
       "active": {
-        "nll": 1.3262990713119507,
+        "nll": 1.356641173362732,
         "target_tokens": 34,
-        "token_accuracy": 0.7647058823529411,
-        "context_tokens": 6668
+        "token_accuracy": 0.7352941176470589,
+        "context_tokens": 6988
       }
     },
     {
       "history_tokens_estimate": 123140,
-      "active_tokens_estimate": 6620,
+      "active_tokens_estimate": 6934,
       "turns": 28,
       "summariser_calls": 2,
-      "summary_reuses": 3,
+      "summary_tokens_in_view": 314,
+      "summary_reuses": 7,
       "full": {
         "nll": 4.588996887207031,
         "target_tokens": 70,
@@ -552,18 +577,19 @@
         "context_tokens": 123247
       },
       "active": {
-        "nll": 4.398090362548828,
+        "nll": 4.424003601074219,
         "target_tokens": 70,
         "token_accuracy": 0.3,
-        "context_tokens": 6706
+        "context_tokens": 7026
       }
     },
     {
       "history_tokens_estimate": 79344,
-      "active_tokens_estimate": 5577,
+      "active_tokens_estimate": 5937,
       "turns": 32,
-      "summariser_calls": 5,
-      "summary_reuses": 6,
+      "summariser_calls": 8,
+      "summary_tokens_in_view": 512,
+      "summary_reuses": 21,
       "full": {
         "nll": 1.4355437755584717,
         "target_tokens": 39,
@@ -571,18 +597,19 @@
         "context_tokens": 79462
       },
       "active": {
-        "nll": 1.8587775230407715,
+        "nll": 1.8418633937835693,
         "target_tokens": 39,
-        "token_accuracy": 0.6923076923076923,
-        "context_tokens": 5681
+        "token_accuracy": 0.6666666666666666,
+        "context_tokens": 6047
       }
     },
     {
       "history_tokens_estimate": 79728,
-      "active_tokens_estimate": 5961,
+      "active_tokens_estimate": 6473,
       "turns": 34,
-      "summariser_calls": 5,
-      "summary_reuses": 6,
+      "summariser_calls": 8,
+      "summary_tokens_in_view": 512,
+      "summary_reuses": 21,
       "full": {
         "nll": 1.9263049364089966,
         "target_tokens": 30,
@@ -590,18 +617,19 @@
         "context_tokens": 79853
       },
       "active": {
-        "nll": 1.9999862909317017,
+        "nll": 2.034703254699707,
         "target_tokens": 30,
         "token_accuracy": 0.6666666666666666,
-        "context_tokens": 6072
+        "context_tokens": 6591
       }
     },
     {
       "history_tokens_estimate": 79769,
-      "active_tokens_estimate": 6002,
+      "active_tokens_estimate": 6514,
       "turns": 36,
-      "summariser_calls": 5,
-      "summary_reuses": 6,
+      "summariser_calls": 8,
+      "summary_tokens_in_view": 512,
+      "summary_reuses": 21,
       "full": {
         "nll": 1.2168670892715454,
         "target_tokens": 28,
@@ -609,18 +637,19 @@
         "context_tokens": 79901
       },
       "active": {
-        "nll": 1.276936411857605,
+        "nll": 1.3706461191177368,
         "target_tokens": 28,
         "token_accuracy": 0.7857142857142857,
-        "context_tokens": 6120
+        "context_tokens": 6639
       }
     },
     {
       "history_tokens_estimate": 80637,
-      "active_tokens_estimate": 6345,
+      "active_tokens_estimate": 6854,
       "turns": 38,
-      "summariser_calls": 5,
-      "summary_reuses": 6,
+      "summariser_calls": 8,
+      "summary_tokens_in_view": 512,
+      "summary_reuses": 21,
       "full": {
         "nll": 2.04425048828125,
         "target_tokens": 28,
@@ -628,18 +657,19 @@
         "context_tokens": 80775
       },
       "active": {
-        "nll": 1.742961049079895,
+        "nll": 1.7702887058258057,
         "target_tokens": 28,
         "token_accuracy": 0.8214285714285714,
-        "context_tokens": 6466
+        "context_tokens": 6982
       }
     },
     {
       "history_tokens_estimate": 80806,
-      "active_tokens_estimate": 6514,
+      "active_tokens_estimate": 7023,
       "turns": 40,
-      "summariser_calls": 5,
-      "summary_reuses": 6,
+      "summariser_calls": 8,
+      "summary_tokens_in_view": 512,
+      "summary_reuses": 21,
       "full": {
         "nll": 1.1952202320098877,
         "target_tokens": 46,
@@ -647,18 +677,19 @@
         "context_tokens": 80950
       },
       "active": {
-        "nll": 1.1907004117965698,
+        "nll": 1.1995561122894287,
         "target_tokens": 46,
         "token_accuracy": 0.717391304347826,
-        "context_tokens": 6641
+        "context_tokens": 7157
       }
     },
     {
       "history_tokens_estimate": 80863,
-      "active_tokens_estimate": 6571,
+      "active_tokens_estimate": 7080,
       "turns": 42,
-      "summariser_calls": 5,
-      "summary_reuses": 6,
+      "summariser_calls": 8,
+      "summary_tokens_in_view": 512,
+      "summary_reuses": 21,
       "full": {
         "nll": 0.9859119057655334,
         "target_tokens": 28,
@@ -666,18 +697,19 @@
         "context_tokens": 81014
       },
       "active": {
-        "nll": 0.8491562008857727,
+        "nll": 0.8409518003463745,
         "target_tokens": 28,
         "token_accuracy": 0.8928571428571429,
-        "context_tokens": 6705
+        "context_tokens": 7221
       }
     },
     {
       "history_tokens_estimate": 81777,
-      "active_tokens_estimate": 6652,
+      "active_tokens_estimate": 7161,
       "turns": 44,
-      "summariser_calls": 5,
-      "summary_reuses": 6,
+      "summariser_calls": 8,
+      "summary_tokens_in_view": 512,
+      "summary_reuses": 21,
       "full": {
         "nll": 0.35787853598594666,
         "target_tokens": 104,
@@ -685,18 +717,19 @@
         "context_tokens": 81935
       },
       "active": {
-        "nll": 0.27953481674194336,
+        "nll": 0.29316017031669617,
         "target_tokens": 104,
-        "token_accuracy": 0.9423076923076923,
-        "context_tokens": 6787
+        "token_accuracy": 0.9326923076923077,
+        "context_tokens": 7303
       }
     },
     {
       "history_tokens_estimate": 81907,
-      "active_tokens_estimate": 6645,
+      "active_tokens_estimate": 7157,
       "turns": 46,
-      "summariser_calls": 5,
-      "summary_reuses": 6,
+      "summariser_calls": 8,
+      "summary_tokens_in_view": 512,
+      "summary_reuses": 21,
       "full": {
         "nll": 1.5138866901397705,
         "target_tokens": 28,
@@ -704,18 +737,19 @@
         "context_tokens": 82072
       },
       "active": {
-        "nll": 1.4692925214767456,
+        "nll": 1.4201107025146484,
         "target_tokens": 28,
         "token_accuracy": 0.6785714285714286,
-        "context_tokens": 6779
+        "context_tokens": 7298
       }
     },
     {
       "history_tokens_estimate": 82056,
-      "active_tokens_estimate": 6652,
+      "active_tokens_estimate": 7164,
       "turns": 48,
-      "summariser_calls": 5,
-      "summary_reuses": 6,
+      "summariser_calls": 8,
+      "summary_tokens_in_view": 512,
+      "summary_reuses": 21,
       "full": {
         "nll": 1.8457542657852173,
         "target_tokens": 37,
@@ -723,18 +757,19 @@
         "context_tokens": 82228
       },
       "active": {
-        "nll": 1.6045849323272705,
+        "nll": 1.6384624242782593,
         "target_tokens": 37,
-        "token_accuracy": 0.5675675675675675,
-        "context_tokens": 6781
+        "token_accuracy": 0.6216216216216216,
+        "context_tokens": 7300
       }
     },
     {
       "history_tokens_estimate": 82100,
-      "active_tokens_estimate": 6643,
+      "active_tokens_estimate": 7155,
       "turns": 50,
-      "summariser_calls": 5,
-      "summary_reuses": 6,
+      "summariser_calls": 8,
+      "summary_tokens_in_view": 512,
+      "summary_reuses": 21,
       "full": {
         "nll": 1.1614973545074463,
         "target_tokens": 52,
@@ -742,18 +777,19 @@
         "context_tokens": 82279
       },
       "active": {
-        "nll": 1.150687575340271,
+        "nll": 1.1638606786727905,
         "target_tokens": 52,
         "token_accuracy": 0.7692307692307693,
-        "context_tokens": 6779
+        "context_tokens": 7298
       }
     },
     {
       "history_tokens_estimate": 82440,
-      "active_tokens_estimate": 6444,
+      "active_tokens_estimate": 6953,
       "turns": 52,
-      "summariser_calls": 5,
-      "summary_reuses": 6,
+      "summariser_calls": 8,
+      "summary_tokens_in_view": 512,
+      "summary_reuses": 21,
       "full": {
         "nll": 1.2861322164535522,
         "target_tokens": 35,
@@ -761,18 +797,19 @@
         "context_tokens": 82626
       },
       "active": {
-        "nll": 1.1117881536483765,
+        "nll": 1.1469290256500244,
         "target_tokens": 35,
         "token_accuracy": 0.7714285714285715,
-        "context_tokens": 6606
+        "context_tokens": 7122
       }
     },
     {
       "history_tokens_estimate": 82645,
-      "active_tokens_estimate": 6649,
+      "active_tokens_estimate": 7158,
       "turns": 54,
-      "summariser_calls": 5,
-      "summary_reuses": 6,
+      "summariser_calls": 8,
+      "summary_tokens_in_view": 512,
+      "summary_reuses": 21,
       "full": {
         "nll": 0.45087382197380066,
         "target_tokens": 309,
@@ -780,18 +817,19 @@
         "context_tokens": 82839
       },
       "active": {
-        "nll": 0.43233412504196167,
+        "nll": 0.43294408917427063,
         "target_tokens": 309,
-        "token_accuracy": 0.8964401294498382,
-        "context_tokens": 6819
+        "token_accuracy": 0.8996763754045307,
+        "context_tokens": 7335
       }
     },
     {
       "history_tokens_estimate": 82972,
-      "active_tokens_estimate": 6652,
+      "active_tokens_estimate": 7164,
       "turns": 56,
-      "summariser_calls": 5,
-      "summary_reuses": 6,
+      "summariser_calls": 8,
+      "summary_tokens_in_view": 512,
+      "summary_reuses": 21,
       "full": {
         "nll": 0.7125861644744873,
         "target_tokens": 22,
@@ -799,18 +837,19 @@
         "context_tokens": 83174
       },
       "active": {
-        "nll": 0.6952423453330994,
+        "nll": 0.7534265518188477,
         "target_tokens": 22,
         "token_accuracy": 0.9090909090909091,
-        "context_tokens": 6808
+        "context_tokens": 7327
       }
     },
     {
       "history_tokens_estimate": 83662,
-      "active_tokens_estimate": 6650,
+      "active_tokens_estimate": 7162,
       "turns": 58,
-      "summariser_calls": 5,
-      "summary_reuses": 6,
+      "summariser_calls": 8,
+      "summary_tokens_in_view": 512,
+      "summary_reuses": 21,
       "full": {
         "nll": 0.27421870827674866,
         "target_tokens": 389,
@@ -818,18 +857,19 @@
         "context_tokens": 83871
       },
       "active": {
-        "nll": 0.2613702416419983,
+        "nll": 0.26544189453125,
         "target_tokens": 389,
         "token_accuracy": 0.9511568123393316,
-        "context_tokens": 6802
+        "context_tokens": 7321
       }
     },
     {
       "history_tokens_estimate": 84078,
-      "active_tokens_estimate": 6652,
+      "active_tokens_estimate": 7164,
       "turns": 60,
-      "summariser_calls": 5,
-      "summary_reuses": 6,
+      "summariser_calls": 8,
+      "summary_tokens_in_view": 512,
+      "summary_reuses": 21,
       "full": {
         "nll": 0.6455007791519165,
         "target_tokens": 29,
@@ -837,18 +877,19 @@
         "context_tokens": 84294
       },
       "active": {
-        "nll": 0.7159501314163208,
+        "nll": 0.7308681607246399,
         "target_tokens": 29,
         "token_accuracy": 0.896551724137931,
-        "context_tokens": 6802
+        "context_tokens": 7321
       }
     },
     {
       "history_tokens_estimate": 84617,
-      "active_tokens_estimate": 6653,
+      "active_tokens_estimate": 7165,
       "turns": 62,
-      "summariser_calls": 5,
-      "summary_reuses": 6,
+      "summariser_calls": 8,
+      "summary_tokens_in_view": 512,
+      "summary_reuses": 21,
       "full": {
         "nll": 1.3063937425613403,
         "target_tokens": 28,
@@ -856,18 +897,19 @@
         "context_tokens": 84840
       },
       "active": {
-        "nll": 1.3129212856292725,
+        "nll": 1.3500614166259766,
         "target_tokens": 28,
-        "token_accuracy": 0.7857142857142857,
-        "context_tokens": 6808
+        "token_accuracy": 0.8214285714285714,
+        "context_tokens": 7327
       }
     },
     {
       "history_tokens_estimate": 141159,
-      "active_tokens_estimate": 6643,
+      "active_tokens_estimate": 7155,
       "turns": 64,
-      "summariser_calls": 5,
-      "summary_reuses": 6,
+      "summariser_calls": 8,
+      "summary_tokens_in_view": 512,
+      "summary_reuses": 21,
       "full": {
         "nll": 7.486088275909424,
         "target_tokens": 9,
@@ -875,18 +917,19 @@
         "context_tokens": 131063
       },
       "active": {
-        "nll": 7.441473960876465,
+        "nll": 7.213616371154785,
         "target_tokens": 9,
         "token_accuracy": 0.1111111111111111,
-        "context_tokens": 6798
+        "context_tokens": 7317
       }
     },
     {
       "history_tokens_estimate": 59787,
-      "active_tokens_estimate": 6651,
+      "active_tokens_estimate": 7161,
       "turns": 40,
       "summariser_calls": 5,
-      "summary_reuses": 9,
+      "summary_tokens_in_view": 512,
+      "summary_reuses": 17,
       "full": {
         "nll": 1.284956932067871,
         "target_tokens": 115,
@@ -894,18 +937,19 @@
         "context_tokens": 59941
       },
       "active": {
-        "nll": 2.1759400367736816,
+        "nll": 2.1846718788146973,
         "target_tokens": 115,
-        "token_accuracy": 0.5391304347826087,
-        "context_tokens": 6705
+        "token_accuracy": 0.5304347826086957,
+        "context_tokens": 7221
       }
     },
     {
       "history_tokens_estimate": 60058,
-      "active_tokens_estimate": 6642,
+      "active_tokens_estimate": 7151,
       "turns": 42,
       "summariser_calls": 5,
-      "summary_reuses": 9,
+      "summary_tokens_in_view": 512,
+      "summary_reuses": 17,
       "full": {
         "nll": 0.6693096160888672,
         "target_tokens": 413,
@@ -913,18 +957,19 @@
         "context_tokens": 60220
       },
       "active": {
-        "nll": 0.6829957962036133,
+        "nll": 0.6785925626754761,
         "target_tokens": 413,
         "token_accuracy": 0.8547215496368039,
-        "context_tokens": 6754
+        "context_tokens": 7270
       }
     },
     {
       "history_tokens_estimate": 60941,
-      "active_tokens_estimate": 6651,
+      "active_tokens_estimate": 7163,
       "turns": 44,
       "summariser_calls": 5,
-      "summary_reuses": 9,
+      "summary_tokens_in_view": 512,
+      "summary_reuses": 17,
       "full": {
         "nll": 1.203172206878662,
         "target_tokens": 43,
@@ -932,18 +977,19 @@
         "context_tokens": 61110
       },
       "active": {
-        "nll": 1.461473822593689,
+        "nll": 1.4843451976776123,
         "target_tokens": 43,
-        "token_accuracy": 0.7209302325581395,
-        "context_tokens": 6740
+        "token_accuracy": 0.6976744186046512,
+        "context_tokens": 7259
       }
     },
     {
       "history_tokens_estimate": 99708,
-      "active_tokens_estimate": 6654,
+      "active_tokens_estimate": 7166,
       "turns": 46,
       "summariser_calls": 5,
-      "summary_reuses": 9,
+      "summary_tokens_in_view": 512,
+      "summary_reuses": 17,
       "full": {
         "nll": 1.2248154878616333,
         "target_tokens": 96,
@@ -951,18 +997,19 @@
         "context_tokens": 99885
       },
       "active": {
-        "nll": 1.5241260528564453,
+        "nll": 1.5694109201431274,
         "target_tokens": 96,
-        "token_accuracy": 0.65625,
-        "context_tokens": 6743
+        "token_accuracy": 0.6458333333333334,
+        "context_tokens": 7262
       }
     },
     {
       "history_tokens_estimate": 100207,
-      "active_tokens_estimate": 6654,
+      "active_tokens_estimate": 7164,
       "turns": 48,
       "summariser_calls": 5,
-      "summary_reuses": 9,
+      "summary_tokens_in_view": 512,
+      "summary_reuses": 17,
       "full": {
         "nll": 1.5564146041870117,
         "target_tokens": 36,
@@ -970,18 +1017,19 @@
         "context_tokens": 100391
       },
       "active": {
-        "nll": 1.54872727394104,
+        "nll": 1.5054888725280762,
         "target_tokens": 36,
         "token_accuracy": 0.75,
-        "context_tokens": 6738
+        "context_tokens": 7254
       }
     },
     {
       "history_tokens_estimate": 100927,
-      "active_tokens_estimate": 6654,
+      "active_tokens_estimate": 7164,
       "turns": 50,
       "summariser_calls": 5,
-      "summary_reuses": 9,
+      "summary_tokens_in_view": 512,
+      "summary_reuses": 17,
       "full": {
         "nll": 0.28187912702560425,
         "target_tokens": 512,
@@ -989,10 +1037,10 @@
         "context_tokens": 101119
       },
       "active": {
-        "nll": 0.2511110305786133,
+        "nll": 0.2492315173149109,
         "target_tokens": 512,
-        "token_accuracy": 0.951171875,
-        "context_tokens": 6742
+        "token_accuracy": 0.94921875,
+        "context_tokens": 7258
       }
     }
   ],
