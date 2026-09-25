@@ -647,8 +647,11 @@ the cold-start drill runs all of them in a fresh clone:
   receipts and asserts it - including that the routing cells which clear a strict
   retrieval-parity bar are exactly zero, and that the stricter end task's interval contains zero;
 * **receipt audit** - `benchmarks/check_receipts.py` reports any cited receipt that is missing, any
-  whose payload is a *partial* write (the harnesses write incrementally, so a killed run leaves a
-  partial artifact at its final path), and any that exists only in the working directory;
+  whose payload is a *partial* write (the harnesses write incrementally, so a killed or still-running
+  run leaves a partial artifact at its final path), and any that exists only in the working
+  directory.  It reads both citation styles - the manuscript and the ledger name receipts by bare
+  filename, earlier documents by full path - and treats `make_figures.py` as a citing document too,
+  because a figure whose input is untracked cannot be regenerated even though its CSV is committed;
 * **cold-start drill** - all of the above run in a fresh clone, which is how the untracked class was
   found: eleven receipts that this paper or the figure generator cites existed only in the working
   directory, so a reader could neither check those claims nor regenerate those figures.  A clone now

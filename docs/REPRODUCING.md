@@ -75,8 +75,10 @@ What each one is for:
   in the repository.
 * **`check_scripts.py`** is the other direction - script to output - and would have caught the
   failure that cost two rounds: a runner naming an `--out` path whose arm never started, because the
-  harness rejected a flag and the queue had no `set -e`.  `--config-audit` lists receipts that do not
-  record the flags that produced them; those predate the `config` block.
+  harness rejected a flag and the queue had no `set -e`.  It also compares the flags in each
+  invocation against the `config` block its receipt recorded (21 config-carrying outputs, 0
+  disagreements as of this writing), and `--config-audit` lists receipts that do not record the flags
+  that produced them at all; those predate the `config` block.
 * **`make_figures.py`** rebuilds each figure's CSV from the receipts, and **`make_svg_figures.py`**
   draws the SVGs from those CSVs.  Missing inputs are an error rather than a figure with an arm
   silently dropped.

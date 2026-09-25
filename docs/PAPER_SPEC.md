@@ -233,6 +233,9 @@ Open items, in the order they matter:
 6. **Float numbering.**  Figures and tables are numbered in this draft by the order they were
    generated; in a LaTeX build they are renumbered by order of appearance.  Figure 5 is a
    table-shaped CSV of the capacity numbers and has no drawing.
-7. **Configuration coverage.**  Receipts now record the flags that produced them;
-   `python benchmarks/check_scripts.py --config-audit` lists the ones that predate that block, and
-   re-running those arms is what closes the gap.
+7. **Configuration coverage.**  Receipts now record the flags that produced them and
+   `check_scripts.py` compares each script's invocation against the configuration its receipt
+   recorded (21 outputs, 0 disagreements); `--config-audit` lists the receipts that predate the
+   block, and re-running those arms is what closes the gap.  Six predate it: the tail-state arm and
+   the four tail-query sweep arms (`run_tail_rerun.sh`), and the 6,656-token window's fidelity arm
+   (`run_window_plus_compiler.sh`).
