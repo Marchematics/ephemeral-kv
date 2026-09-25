@@ -12,6 +12,11 @@ the paper cites.  They are numbered by the family they belong to rather than in 
 * `run_compaction.sh` - the model-written compaction baseline;
 * `run_g4_grid2.sh`, `run_g4_geometry.sh`, `run_g4_pressure.sh`, `run_g4_hotspot.sh` - the routing
   replay grids whose union is figure 4;
+* `run_g4_join.sh` - the join between those grids and the measured quality points, which is what
+  turns a cost result into a quality-admissible region (and the file a reader checks when asking
+  which active sizes the region may claim);
+* `run_figure_inputs.sh` - the decision arms figure 3 is drawn from and the equal-budget references
+  around them, reconstructed from each receipt's own `config` block;
 * `run_remaining.sh`, `run_longhist2.sh` - the equal-budget references and the long-history column.
 
 They assume the corpora under `data/` (not in the repository: 734 MB - 2.3 GB of public agent
