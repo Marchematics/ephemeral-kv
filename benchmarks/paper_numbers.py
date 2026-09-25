@@ -145,6 +145,24 @@ def main(argv=None) -> int:
     row4096 = next(r for r in join["rows"] if r["active_tokens"] == 4096)
     check("routing cells at 4096", row4096["cells"], 198, 0)
     check("advancing cells at 4096", row4096["advance"], 63, 0)
+    # gate-5 magnitudes at the admissible column: how much, not just where.  The advance rule is
+    # `goodput >= 1.5x or p99 gain >= 30%`, so these are the numbers behind the paper's sentence
+    advancing = [r for r in load("artifacts/g4-all-phase-summary-v2.json")["rows"]
+                 if r["active_tokens"] == 8192 and r["decision"] == "advance"]
+    finite = [r["goodput_ratio"] for r in advancing
+              if r["goodput_ratio"] not in (None, float("inf"))]
+    unbounded = [r for r in advancing if r["goodput_ratio"] == float("inf")]
+    balanced = [r["goodput_ratio"] for r in advancing
+                if r["regime"] == "balanced" and r["goodput_ratio"] not in (None, float("inf"))]
+    check("advancing cells clearing the goodput bar with a finite ratio",
+          sum(1 for g in finite if g >= 1.5), 26, 0)
+    check("advancing cells whose strongest baseline completes no work", len(unbounded), 26, 0)
+    check("balanced goodput ratio p50 (finite cells)",
+          round(statistics.median(balanced), 2), 2.15, 1e-2)
+    check("cells advancing via the p99 route",
+          sum(1 for r in advancing if (r["p99_reduction"] or -9) >= 0.30), 0, 0)
+    check("best p99 reduction in the admissible column",
+          round(max((r["p99_reduction"] or -9) for r in advancing), 2), 0.26, 1e-2)
     check("region if 4096 were admissible (8192 + 4096 columns)",
           row8192["advance"] + row4096["advance"], 115, 0)
     window3k = bucket_stats("artifacts/g2-compiler-window3k-b4096-v1.json").get("32K-128K") or {}

@@ -464,6 +464,17 @@ capacity-pressure regime: a warm cache holding a fraction of the fleet and no cl
 the baseline's alternative is a full re-prefill (1.6-14.3 s) against 0.203 s of rematerialisation.
 Against a tier that can move KV, the wins are worker loss plus the 1M-history mixes.
 
+**How much, not just where.**  Every one of the 52 advancing cells at the admissible state clears
+the 1.5x SLO-goodput bar that defines an advance, and none needs the alternative route through the
+tail (the best p99 improvement in that column is 26%, short of the 30% bar).  Half of them clear it
+with a finite ratio - median **1.72x**, max **5.06x** - and in the other half the strongest baseline
+completes *no* work at all, so the ratio is unbounded rather than large: 26 of 52.  By regime,
+balanced 10 cells (all finite, median **2.15x**), slow-worker 13 (5 finite, median 3.15x), worker
+loss 29 (11 finite, median 1.56x).  The honest limit is the tail: this is a throughput win, and in
+the regimes where the baseline stalls the ephemeral policy's own p99 is worse in absolute terms -
+the p99 reduction is positive only in the balanced cells (median +6%, max +26%), because a baseline
+that completes nothing still has a p99.
+
 **What the region's size is waiting on, stated as two numbers.**  The admissible column is the one
 whose quality point passes, and the columns differ by cell count: 4,096 advances in 63 cells of 198
 against the 8,192 column's 52 of 294, so moving the same system to a 4,096-token state would widen
