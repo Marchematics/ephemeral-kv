@@ -549,6 +549,7 @@ costs.
 | two-worker failover, owner SIGKILLed | fresh process rebuilds 8,192 tokens in 0.91-1.42 s (p50 1.387 s); recorded files named in 4/6 sessions; token accuracy identical to the killed owner's (0.593 both) |
 | model rollout | resumes on a model that never saw the session: end-task 0.137/0.145 against full history's 0.017/0.042 (Qwen2.5-0.5B/1.5B) |
 | data moved | ~32,455 bytes of state text against 0.38 GiB of KV the dissolved owner held at these 33K histories (12-128 GiB at 1M on the declared geometries) |
+| data moved, at any age | the state is 18-40 KB of text at every history length measured, from 111K to 984K tokens (Table 7b), so what a recovering worker reads does not grow with the session either |
 | cost | 0.55-1.04 s of active-set prefill against 6.31 s of re-prefill |
 
 ---
