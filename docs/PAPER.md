@@ -92,9 +92,10 @@ inside the 2 pp allowance against the full transcript, end-task score
    fixed budget, not an intrinsic ceiling on what a query needs.
 3. **Session age stops predicting placement cost.**  The inversion, and the ranking reversal that
    makes a footprint-based scheduler prefer exactly the wrong session.
-4. **The consequences are systemic**: 32x sessions per worker at the measured floor, lossless recovery on a fresh process
-   (0.91-1.42 s, no KV transfer), and a routing phase change at the 8,192-token state where fidelity
-   holds, in every regime we model, including a 10x-slow hotspot.
+4. **The consequences are systemic**: 32x sessions per worker at the 4,096-token floor, lossless
+   recovery on a fresh process (0.91-1.42 s, no KV transfer), and a routing phase change at the
+   4,096- and 8,192-token states where fidelity holds - 117 of 624 replay cells - in every regime we
+   model, including the slow-worker hotspot.
 5. **A negative result with an exact attribution.**  The obvious way to shrink the state - a semantic
    compiler - does not pay here: it is tied or worse on the decision, and the two stages that
    actually "compile state" are the ones that hurt.  The window and retrieval are what carry quality.
@@ -176,8 +177,9 @@ holds the surface; the way the far field is compiled is what the decision reads.
 2. **The decision is set by which evidence is retrieved.**  In the end-task configuration the
    window-plus-retrieval view and plain retrieval at the same budget produce byte-identical contexts
    on all 48 instances, and every bounded retrieval arm is statistically tied.  On **96 paired
-   sessions** the view the system ships - a verbatim window over a consolidated far field at 8,192
-   tokens - scores 0.165 against plain retrieval's 0.169 at 4,096: **paired +0.013, 95% CI
+   sessions** the view the system ships - a verbatim window over a consolidated far field, 8,192
+   tokens at the size that comparison was run at and 4,096 at the measured floor - scores 0.165
+   against plain retrieval's 0.169 at 4,096: **paired +0.013, 95% CI
    [-0.068, +0.092], 19 wins / 12 losses** - a tie, at fidelity parity, against an arm that is 25 pp
    out of tolerance.  More budget does not help either: the same family scores 0.191 at 8,192 and
    0.173 at 12,288 on the smaller set, so above ~4K the constraint is retrieval coverage, not budget.
