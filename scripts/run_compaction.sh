@@ -26,4 +26,5 @@ while pgrep -f "^/root/qcc/venv/bin/python benchmarks/g2_model_quality.py|^/root
   --jsonl data/sessions-patch-long.jsonl --model /root/qcc/models/Llama-3.2-1B-Instruct \
   --max-length 65536 --max-new 96 --max-examples 48 --min-history-tokens 32768 \
   --token-budget 8192 --compile-mode compact --tail-tokens 6656 --summary-tokens 512 \
+  --dedup-spans --consolidate --snippet-spans --retrieve-multiplier 2 \
   --out artifacts/g2b-patch-localization-compact-b8192-n48.json
