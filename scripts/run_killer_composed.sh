@@ -27,7 +27,11 @@ done
   "${fidelity[@]}" "${end_task[@]}" \
   --out artifacts/g2-killer-table-composed-v1.json
 
-# the state's size in the units a cold route moves, at each composed length
+# the quality side of the same buckets: the state's size and end-task score against the
+# 131,072-token reference view, which is the strongest thing a resident baseline can serve
+/root/qcc/venv/bin/python benchmarks/composed_killer_summary.py --json
+
+# and the state's size in the units a cold route moves, at each composed length
 /root/qcc/venv/bin/python - <<'PY'
 import json
 from pathlib import Path
