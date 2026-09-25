@@ -28,6 +28,14 @@ common=(--model /root/qcc/models/Llama-3.2-1B-Instruct --max-examples 48 --min-h
   --jsonl data/sessions-patch-long.jsonl "${common[@]}" --max-length 65536 --max-new 96 \
   --token-budget 4096 --tail-tokens 3584 \
   --out artifacts/g2b-patch-localization-window3584-b4096-n48.json
+# the compiler question at the floor size: the same 4,096-token total and the same 3,072-token
+# window as the -2.40 pp arm, but with a *materialised* far field (-2.48 pp) - no gain, which is
+# why the floor is bought by widening the window rather than by compiling harder
+/root/qcc/venv/bin/python benchmarks/g2_model_quality.py --jsonl data/sessions-64k.jsonl \
+  "${common[@]}" --max-length 131072 --token-budget 4096 --tail-tokens 3072 \
+  --far-compiler materialize \
+  --out artifacts/g2-compiler-window3k-farmaterialize-b4096-v1.json
+
 # 3,584-token window at a 4,608-token total: the same window with more far field
 /root/qcc/venv/bin/python benchmarks/g2_model_quality.py --jsonl data/sessions-64k.jsonl \
   "${common[@]}" --max-length 131072 --token-budget 4608 --tail-tokens 3584 \
