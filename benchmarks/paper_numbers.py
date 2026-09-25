@@ -176,6 +176,27 @@ def main(argv=None) -> int:
     results.append(("every active size has a quality point",
                     not join["summary"]["sizes_without_quality_points"],
                     f"missing: {join['summary']['sizes_without_quality_points'] or 'none'}"))
+    # gate-5 magnitudes for the region as it now stands: every admissible cell clears the bar, and
+    # the 4,096 column is a throughput result rather than a tail-latency one
+    admissible = [r for r in load("artifacts/g4-all-phase-summary-v2.json")["rows"]
+                  if r["active_tokens"] in (4096, 8192, 16384) and r["decision"] == "advance"]
+    finite = [r["goodput_ratio"] for r in admissible
+              if r["goodput_ratio"] not in (None, float("inf"))]
+    check("admissible cells clearing the goodput bar", len(finite), 79, 0)
+    check("admissible cells facing a baseline that completes nothing",
+          len(admissible) - len(finite), 38, 0)
+    check("admissible goodput ratio p50 (finite)",
+          round(statistics.median(finite), 2), 1.61, 1e-2)
+    results.append(("every admissible cell clears 1.5x", all(g >= 1.5 for g in finite),
+                    f"min {min(finite):.2f}x"))
+    cells_4096 = [r for r in load("artifacts/g4-all-phase-summary-v2.json")["rows"]
+                  if r["active_tokens"] == 4096 and r["decision"] == "advance"]
+    finite_4096 = [r["goodput_ratio"] for r in cells_4096
+                   if r["goodput_ratio"] not in (None, float("inf"))]
+    check("4,096 column finite-ratio cells", len(finite_4096), 53, 0)
+    check("4,096 column goodput ratio p50 (finite)",
+          round(statistics.median(finite_4096), 2), 1.57, 1e-2)
+
     check("region if 4096 were admissible (8192 + 4096 columns)",
           row8192["advance"] + row4096["advance"], 115, 0)
     # the measured state floor: a 3,584-token window inside a 4,608-token total holds the surface,

@@ -539,6 +539,15 @@ the regimes where the baseline stalls the ephemeral policy's own p99 is worse in
 the p99 reduction is positive only in the balanced cells (median +6%, max +26%), because a baseline
 that completes nothing still has a p99.
 
+**And the same at the smaller state.**  The 4,096 column's 63 cells behave the way the 8,192
+column's do: every one clears the 1.5x bar, 53 of them with a finite ratio (median **1.57x**, max
+2.19x) and 10 against a baseline that completes no work - balanced 8 cells (median 1.61x),
+slow-worker 11 (1.63x), worker loss 44 (1.50x).  Across the **117** admissible cells: 79 clear the
+bar with a finite ratio (median **1.61x**) and 38 face a baseline that completes nothing.  No cell in
+either column advances through the p99 route - the best reduction in the admissible region is +26%,
+under the 30% bar - so this is a throughput result, and the paper says so rather than implying a tail
+improvement it did not measure.
+
 **What the region's size was waiting on.**  The columns differ by cell count: 4,096 advances in 63
 cells of 198 against the 8,192 column's 52 of 294, so moving the system to a 4,096-token state
 widens the region from 52 to 115 cells at *half* the state size - and capacity and mobility improve
