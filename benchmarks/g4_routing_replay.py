@@ -48,6 +48,10 @@ HISTORY_CHOICES = (32768, 131072, 262144)
 # sits has to be located rather than assumed.  The lookup row for a 1M history is postings-growth
 # extrapolation - no trace in the public corpus is that long - and the receipt says so.
 HISTORY_CHOICES_LONG = (32768, 131072, 262144, 1048576)
+# the age axis of the placement decision, in session-history tokens
+AGE_BUCKETS = (("<=32K", 0, 32768), ("32K-128K", 32768, 131072),
+               ("128K-256K", 131072, 262144), (">=256K", 262144, None))
+
 SLO_SECONDS = 2.0
 
 
@@ -281,6 +285,12 @@ def route(turns: list[Turn], costs: Costs, *, workers: int, policy: str,
     tier = KvTier(tier_capacity)
     finished: list[tuple[float, float]] = []          # (completion, latency)
     unserved = 0
+    # `(history, served_cold)` for every turn a worker accepted.  The cost law says the ephemeral
+    # cold route does not grow with history while a KV move does, so a scheduler acting on it should
+    # decide to move a session *without regard to the session's age* - and a history-sized mover
+    # should move old sessions less often.  Counting migrations cannot show that (a policy can move
+    # the same number of sessions and be picking different ones); the cold rate per age bucket can.
+    placements: list[tuple[int, bool]] = []
     for turn in turns:
         if fail_at is not None and turn.arrival >= fail_at and fail_worker is not None:
             # the worker is *gone*: its warm state goes with it and the remaining fleet
@@ -348,8 +358,10 @@ def route(turns: list[Turn], costs: Costs, *, workers: int, policy: str,
         service = (tax + turn_service_s) / best.speed
         completion = start + service
         best.free_at = completion
-        if turn.session not in best.warm:
+        cold = turn.session not in best.warm
+        if cold:
             best.migrated += 1
+        placements.append((turn.history, cold))
         best.touch(turn.session, warm_capacity)
         tier.store(turn.session)
         best.served += 1
@@ -360,6 +372,16 @@ def route(turns: list[Turn], costs: Costs, *, workers: int, policy: str,
         if not latencies:
             return None
         return latencies[min(len(latencies) - 1, int(q * len(latencies)))]
+    cold_rate_by_age = {}
+    for label, low, high in AGE_BUCKETS:
+        bucket = [cold for history, cold in placements if history >= low
+                  and (high is None or history < high)]
+        cold_rate_by_age[label] = (sum(bucket) / len(bucket)) if bucket else None
+    present = [rate for rate in cold_rate_by_age.values() if rate is not None]
+    youngest = next((cold_rate_by_age[label] for label, _low, _high in AGE_BUCKETS
+                     if cold_rate_by_age[label] is not None), None)
+    oldest = next((cold_rate_by_age[label] for label, _low, _high in reversed(AGE_BUCKETS)
+                   if cold_rate_by_age[label] is not None), None)
     return {
         "policy": policy,
         "requests": len(latencies),
@@ -367,6 +389,13 @@ def route(turns: list[Turn], costs: Costs, *, workers: int, policy: str,
         "p50_s": pct(0.50), "p95_s": pct(0.95), "p99_s": pct(0.99),
         "slo_goodput": on_time / max(1, len(latencies)),
         "migrations": sum(w.migrated for w in fleet),
+        # whether the decision to move depends on the session's age: 1.0 means the policy moves the
+        # oldest sessions at the same rate as the youngest, which is what a cost law with no history
+        # term implies, and < 1.0 means age is still being used as a reason to stay
+        "cold_rate_by_age": cold_rate_by_age,
+        "cold_rate_oldest_over_youngest": (
+            (oldest / youngest) if youngest and oldest is not None else None),
+        "cold_rate_spread": (max(present) - min(present)) if present else None,
     }
 
 
@@ -521,6 +550,19 @@ def main(argv=None) -> int:
         "verdict": verdicts,
         "kind": "replay_simulation",
         "config": {**vars(args), "history_choices": list(history_choices)},
+        # What the workload actually contains, as opposed to what it was asked for.  The history
+        # choices are *targets*: a session's transcript starts at 2,048 tokens and grows 1.7x per
+        # turn, so with 8 turns no session can exceed 113,300 tokens whatever the largest choice is
+        # - measured, and the reason this field exists.  A receipt that says `1048576` in its
+        # history choices and 113,300 here is a receipt about 113K sessions, and the earlier grid
+        # did not distinguish the two.
+        "realised": {
+            "history_max": max((turn.history for turn in turns), default=None),
+            "history_p50": (sorted(turn.history for turn in turns)[len(turns) // 2]
+                             if turns else None),
+            "sessions": len({turn.session for turn in turns}),
+            "turns": len(turns),
+        },
         "costs": {
             "kv_bytes_per_token": costs.kv_bytes_per_token,
             "bandwidth_gbs": costs.bandwidth_gbs,

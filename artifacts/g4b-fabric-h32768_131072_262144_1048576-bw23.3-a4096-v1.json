@@ -1,0 +1,282 @@
+{
+  "schema": "ephemeral-kv-g4-routing-replay-v1",
+  "verdict": {
+    "balanced": {
+      "strongest_baseline": "full_kv_move",
+      "goodput_ratio": 1.1975806451612903,
+      "p99_reduction": -0.10876646042293432,
+      "decision": "not_established",
+      "median_regression_vs_full_kv_move": 0.21327514398007585,
+      "median_regression_ok": false
+    },
+    "slow_worker": {
+      "strongest_baseline": "sticky_saturated",
+      "goodput_ratio": 0.7379032258064516,
+      "p99_reduction": -0.2985485253904108,
+      "decision": "not_established"
+    },
+    "worker_failure": {
+      "strongest_baseline": "full_kv_move",
+      "goodput_ratio": 1.09375,
+      "p99_reduction": -0.7123267435721122,
+      "decision": "not_established"
+    }
+  },
+  "kind": "replay_simulation",
+  "config": {
+    "g3": "artifacts/g3-hardware-primitives-qwen05b-v1.json",
+    "g3_warm": "artifacts/g3-active-prefill-warm-qwen05b-v1.json",
+    "g3_prefill": "artifacts/g3-fullprefill-qwen05b-v1.json",
+    "out": "artifacts/g4b-fabric-h32768_131072_262144_1048576-bw23.3-a4096-v1.json",
+    "sessions": 16,
+    "turns_per_session": 8,
+    "workers": 4,
+    "active_tokens": 4096,
+    "bandwidth_gbs": 23.3,
+    "warm_capacity": 4,
+    "tier_capacity": 8,
+    "escape_s": 1.0,
+    "turn_service_s": 0.6,
+    "gap_model": "bursty",
+    "seed": 0,
+    "history_choices": [
+      32768,
+      131072,
+      262144,
+      1048576
+    ]
+  },
+  "costs": {
+    "kv_bytes_per_token": 12288,
+    "bandwidth_gbs": 23.3,
+    "lookup_s": {
+      "8192": 8.685199999547422e-05,
+      "32768": 0.00015024000001062632,
+      "131072": 0.00024597850000418475,
+      "1048576": 0.0004
+    },
+    "active_prefill_s": {
+      "2048": 0.052968500182032585,
+      "4096": 0.09496935456991196,
+      "8192": 0.20267114788293839,
+      "16384": 0.48538769222795963
+    },
+    "full_prefill_s": {
+      "32768": 1.5877592079341412,
+      "131072": 14.319944508373737,
+      "524288": null
+    }
+  },
+  "declared_workload": "turn arrivals and tool gaps come from an explicit model; the public corpus has no timestamps, so this replays sessions against measured costs rather than measured arrivals",
+  "slo_seconds": 2.0,
+  "balanced": {
+    "strict_sticky": {
+      "policy": "strict_sticky",
+      "requests": 48,
+      "unserved": 80,
+      "p50_s": 2.187759207934141,
+      "p95_s": 3.1620270283890264,
+      "p99_s": 3.8147666140624565,
+      "slo_goodput": 0.4791666666666667,
+      "migrations": 17
+    },
+    "sticky_saturated": {
+      "policy": "sticky_saturated",
+      "requests": 48,
+      "unserved": 80,
+      "p50_s": 1.173892299785619,
+      "p95_s": 2.6359997839148477,
+      "p99_s": 3.8147666140624565,
+      "slo_goodput": 0.6458333333333334,
+      "migrations": 25
+    },
+    "full_kv_move": {
+      "policy": "full_kv_move",
+      "requests": 48,
+      "unserved": 80,
+      "p50_s": 0.6850765647548052,
+      "p95_s": 2.832409521900189,
+      "p99_s": 3.8147666140624565,
+      "slo_goodput": 0.6458333333333334,
+      "migrations": 37
+    },
+    "full_reprefill": {
+      "policy": "full_reprefill",
+      "requests": 48,
+      "unserved": 80,
+      "p50_s": 2.187759207934141,
+      "p95_s": 3.1620270283890264,
+      "p99_s": 3.8147666140624565,
+      "slo_goodput": 0.4791666666666667,
+      "migrations": 17
+    },
+    "ephemeral": {
+      "policy": "ephemeral",
+      "requests": 128,
+      "unserved": 0,
+      "p50_s": 0.831186367740262,
+      "p95_s": 3.706109260642277,
+      "p99_s": 4.229685276013612,
+      "slo_goodput": 0.7734375,
+      "migrations": 70
+    }
+  },
+  "by_regime": {
+    "balanced": {
+      "strict_sticky": {
+        "policy": "strict_sticky",
+        "requests": 48,
+        "unserved": 80,
+        "p50_s": 2.187759207934141,
+        "p95_s": 3.1620270283890264,
+        "p99_s": 3.8147666140624565,
+        "slo_goodput": 0.4791666666666667,
+        "migrations": 17
+      },
+      "sticky_saturated": {
+        "policy": "sticky_saturated",
+        "requests": 48,
+        "unserved": 80,
+        "p50_s": 1.173892299785619,
+        "p95_s": 2.6359997839148477,
+        "p99_s": 3.8147666140624565,
+        "slo_goodput": 0.6458333333333334,
+        "migrations": 25
+      },
+      "full_kv_move": {
+        "policy": "full_kv_move",
+        "requests": 48,
+        "unserved": 80,
+        "p50_s": 0.6850765647548052,
+        "p95_s": 2.832409521900189,
+        "p99_s": 3.8147666140624565,
+        "slo_goodput": 0.6458333333333334,
+        "migrations": 37
+      },
+      "full_reprefill": {
+        "policy": "full_reprefill",
+        "requests": 48,
+        "unserved": 80,
+        "p50_s": 2.187759207934141,
+        "p95_s": 3.1620270283890264,
+        "p99_s": 3.8147666140624565,
+        "slo_goodput": 0.4791666666666667,
+        "migrations": 17
+      },
+      "ephemeral": {
+        "policy": "ephemeral",
+        "requests": 128,
+        "unserved": 0,
+        "p50_s": 0.831186367740262,
+        "p95_s": 3.706109260642277,
+        "p99_s": 4.229685276013612,
+        "slo_goodput": 0.7734375,
+        "migrations": 70
+      }
+    },
+    "slow_worker": {
+      "strict_sticky": {
+        "policy": "strict_sticky",
+        "requests": 48,
+        "unserved": 80,
+        "p50_s": 2.476451510206836,
+        "p95_s": 4.25034380999246,
+        "p99_s": 4.443362339944272,
+        "slo_goodput": 0.2708333333333333,
+        "migrations": 17
+      },
+      "sticky_saturated": {
+        "policy": "sticky_saturated",
+        "requests": 48,
+        "unserved": 80,
+        "p50_s": 1.5027870828981946,
+        "p95_s": 3.463028726937136,
+        "p99_s": 4.14282470021022,
+        "slo_goodput": 0.6458333333333334,
+        "migrations": 25
+      },
+      "full_kv_move": {
+        "policy": "full_kv_move",
+        "requests": 48,
+        "unserved": 80,
+        "p50_s": 1.5235038841280542,
+        "p95_s": 3.6614982754119154,
+        "p99_s": 4.14282470021022,
+        "slo_goodput": 0.625,
+        "migrations": 34
+      },
+      "full_reprefill": {
+        "policy": "full_reprefill",
+        "requests": 48,
+        "unserved": 80,
+        "p50_s": 2.476451510206835,
+        "p95_s": 4.045747474404951,
+        "p99_s": 4.14282470021022,
+        "slo_goodput": 0.2916666666666667,
+        "migrations": 19
+      },
+      "ephemeral": {
+        "policy": "ephemeral",
+        "requests": 128,
+        "unserved": 0,
+        "p50_s": 2.293921354819622,
+        "p95_s": 4.929822329221279,
+        "p99_s": 5.379658905408951,
+        "slo_goodput": 0.4765625,
+        "migrations": 79
+      }
+    },
+    "worker_failure": {
+      "strict_sticky": {
+        "policy": "strict_sticky",
+        "requests": 8,
+        "unserved": 56,
+        "p50_s": 2.476451510206835,
+        "p95_s": 2.663065745076862,
+        "p99_s": 2.663065745076862,
+        "slo_goodput": 0.25,
+        "migrations": 3
+      },
+      "sticky_saturated": {
+        "policy": "sticky_saturated",
+        "requests": 8,
+        "unserved": 56,
+        "p50_s": 2.187759207934141,
+        "p95_s": 2.476451510206835,
+        "p99_s": 2.476451510206835,
+        "slo_goodput": 0.5,
+        "migrations": 4
+      },
+      "full_kv_move": {
+        "policy": "full_kv_move",
+        "requests": 8,
+        "unserved": 56,
+        "p50_s": 2.187759207934141,
+        "p95_s": 2.476451510206835,
+        "p99_s": 2.476451510206835,
+        "slo_goodput": 0.5,
+        "migrations": 4
+      },
+      "full_reprefill": {
+        "policy": "full_reprefill",
+        "requests": 8,
+        "unserved": 56,
+        "p50_s": 2.476451510206835,
+        "p95_s": 2.663065745076862,
+        "p99_s": 2.663065745076862,
+        "slo_goodput": 0.25,
+        "migrations": 3
+      },
+      "ephemeral": {
+        "policy": "ephemeral",
+        "requests": 64,
+        "unserved": 0,
+        "p50_s": 1.7181588970790536,
+        "p95_s": 3.8919894135334454,
+        "p99_s": 4.240494150086709,
+        "slo_goodput": 0.546875,
+        "migrations": 30
+      }
+    }
+  }
+}

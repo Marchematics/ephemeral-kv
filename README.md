@@ -40,7 +40,11 @@ against a checked-in receipt, and the CPU-only path in
   where all workers evict at once and a history-sized cold route queues behind the spike - and that
   tail claim is swept over the burst's own parameters rather than quoted from one setting: it holds
   at the 4,096-token state in 6 of 9 burst shapes (advancing in the same 6) and at 8,192 in 1 of 9, so it is
-  stated as conditional on the workload rather than as a property of the regime.
+  stated as conditional on the workload rather than as a property of the regime.  On a workload whose
+  sessions **actually reach a million tokens** - the grid's history choices are targets, and with its
+  8 turns per session nothing exceeded 113K, now recorded per receipt as `realised.history_max` - the
+  region advances in **16 of 20 cells and every one clears the 30% p99 bar**, in four of the five
+  regimes at both the 4,096- and 8,192-token states.
 * **Recovery moves state, not history.**  A killed worker's replacement rebuilds 8,192 tokens in
   0.91-1.42 s with identical token accuracy, reading ~32 KB instead of the 0.38 GiB of KV the owner
   held; the durable object also resumes on a **different** model.

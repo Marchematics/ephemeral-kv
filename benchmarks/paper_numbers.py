@@ -331,6 +331,40 @@ def main(argv=None) -> int:
                     by_active["4096"]["clear_p99"] > by_active["8192"]["clear_p99"],
                     f"p99 clears {by_active['4096']['clear_p99']}/9 at 4,096 against "
                     f"{by_active['8192']['clear_p99']}/9 at 8,192"))
+    # the age axis, which the main grid's 8-turn sessions never exercised: every one of its receipts
+    # tops out at 113,300 tokens of history no matter what its history choices say, so a claim about
+    # session age could not be tested on it.  The long-age grid is the same 128 turns over 16 turns
+    # per session, and its receipts record what they actually contain.
+    from benchmarks.g4_routing_replay import build_turns as _build_turns
+
+    main_grid_receipt = load("artifacts/g4b-fabric-h32768_131072_262144_1048576-bw23.3-a4096-v1.json")
+    check("a main-grid receipt's largest history choice",
+          max(main_grid_receipt["config"]["history_choices"]), 1048576, 0)
+    # the ceiling is a property of the workload model, so it is asserted against the model: if the
+    # growth rule or the turn count changes, this check fails and the paragraph that depends on it
+    # has to be rewritten rather than silently going stale
+    main_turns = _build_turns(main_grid_receipt["config"]["sessions"],
+                              main_grid_receipt["config"]["turns_per_session"], seed=0,
+                              gap_model="bursty", active_tokens=4096,
+                              history_choices=(32768, 131072, 262144, 1048576))
+    check("...and the largest history that workload can contain",
+          max(turn.history for turn in main_turns), 113300, 0)
+    long_age = load("artifacts/g4b-long-age-summary-v1.json")
+    check("long-age grid cells", long_age["summary"]["cells"], 20, 0)
+    check("long-age grid advances", long_age["summary"]["advance"], 16, 0)
+    check("long-age grid p99 clears", long_age["summary"]["clear_p99"], 16, 0)
+    check("long-age grid realised history max",
+          max(long_age["summary"]["realised_history_max"]), 1048576, 0)
+    check("long-age regimes that advance", sum(1 for v in long_age["summary"]["by_regime"].values()
+                                               if v["advance"]), 4, 0)
+    check("long-age regimes that clear p99",
+          sum(1 for v in long_age["summary"]["by_regime"].values() if v["clear_p99"]), 4, 0)
+    check("long-age grid: the hotspot regime does not advance",
+          long_age["summary"]["by_regime"]["slow_worker"]["advance"], 0, 0)
+    results.append(("the age axis is exercised, and it strengthens the region",
+                    long_age["summary"]["realised_history_max"] == [1048576]
+                    and long_age["summary"]["clear_p99"] >= 16,
+                    "16/20 cells advance on a 1M workload, all via the tail, in 4 of 5 regimes"))
 
     # --- C8: capacity
     capacity = load("artifacts/g5-capacity-planning-v1.json")["rows"]

@@ -560,7 +560,8 @@ cells that advance there do so on cost, and a strict decision-parity bar clears 
 balanced and slow-worker wins are the capacity-pressure regime: a warm cache holding a fraction of
 the fleet and no cluster KV store, so the baseline's alternative is a full re-prefill (1.6-14.3 s)
 against 0.203 s of rematerialisation.  Against a tier that can move KV, the wins are worker loss
-plus the 1M-history mixes.
+plus the long-age mixes - the workload the paragraph below shows the grid was not actually
+producing.
 
 **How much, not just where.**  Across the **157** admissible cells, **117** clear the 1.5x
 SLO-goodput bar that defines an advance with a finite ratio (median **1.61x**, max 5.06x) and **40**
@@ -604,6 +605,19 @@ the floor at 6,144.  The stricter bar is a second, larger target: decision parit
 with plain retrieval at the same budget means reaching its floor of 0.237-0.243 F1, where the best
 fidelity-admissible arms sit at 0.161-0.179, a gap of 0.06-0.08.  We report both targets rather than
 treating the region's current width as a property of the workload.
+
+**The age axis, which the grid was not exercising.**  The grid's history *choices* are targets, and
+a session's transcript starts at 2,048 tokens and grows 1.7x per turn, so with the 8 turns per
+session the grid uses **no session can exceed 113,300 tokens** whatever the largest choice is -
+measured, and now recorded in every receipt as `realised.history_max`.  A receipt configured for a
+1M mix therefore describes 113K sessions, which is precisely the scale the placement argument is
+*not* about: a claim that age stops predicting placement cannot be tested on a workload that never
+ages.  Re-running the same 128 turns spread over 16 turns per session - utilisation and fleet sizing
+unchanged, the 1M target reached at turn 12 - **advances in 16 of 20 cells, and every one of the 16
+clears the 30% p99 bar**: balanced, worker loss, flash crowd and size mix, at both the 4,096- and
+8,192-token states, with the slow-worker hotspot the one regime that does not.  That is the strongest
+form of the cluster consequence in this paper, and it appears only once the workload contains
+sessions old enough to have one.
 
 **Where the width came from, stated because it is not where one would expect.**  The region was 4 of
 48 cells on the first grid and is **157 of 724** here, and none of that came from the compiler: the

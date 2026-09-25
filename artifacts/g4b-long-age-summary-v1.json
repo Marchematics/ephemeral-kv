@@ -1,0 +1,507 @@
+{
+  "schema": "ephemeral-kv-g4-long-age-v1",
+  "kind": "gate_summary",
+  "what": "the routing replay on a workload whose sessions actually reach their target history (1,048,576 tokens, recorded per receipt), with the same 128 turns as the main grid so utilisation is unchanged",
+  "summary": {
+    "cells": 20,
+    "advance": 16,
+    "clear_p99": 16,
+    "realised_history_max": [
+      1048576
+    ],
+    "by_regime": {
+      "balanced": {
+        "cells": 4,
+        "advance": 4,
+        "clear_p99": 4
+      },
+      "slow_worker": {
+        "cells": 4,
+        "advance": 0,
+        "clear_p99": 0
+      },
+      "worker_failure": {
+        "cells": 4,
+        "advance": 4,
+        "clear_p99": 4
+      },
+      "burst": {
+        "cells": 4,
+        "advance": 4,
+        "clear_p99": 4
+      },
+      "size_skew": {
+        "cells": 4,
+        "advance": 4,
+        "clear_p99": 4
+      }
+    },
+    "placement_by_policy": {
+      "ephemeral": {
+        "youngest_bucket_cold_rate_p50": 0.3875,
+        "oldest_bucket_cold_rate_p50": 0.05714285714285714,
+        "oldest_over_youngest_p50": 0.13865546218487396
+      },
+      "full_kv_move": {
+        "youngest_bucket_cold_rate_p50": 0.625,
+        "oldest_bucket_cold_rate_p50": 0.04285714285714286,
+        "oldest_over_youngest_p50": 0.06988900823487289
+      },
+      "sticky_saturated": {
+        "youngest_bucket_cold_rate_p50": 0.9090909090909091,
+        "oldest_bucket_cold_rate_p50": 1.0,
+        "oldest_over_youngest_p50": 1.1
+      },
+      "strict_sticky": {
+        "youngest_bucket_cold_rate_p50": 0.25,
+        "oldest_bucket_cold_rate_p50": 0.0,
+        "oldest_over_youngest_p50": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm16-tier32-a4096-v1.json",
+      "regime": "balanced",
+      "active_tokens": 4096,
+      "warm_capacity": 16,
+      "history_max": 1048576,
+      "goodput_ratio": 1.1,
+      "p99_reduction": 0.45889489262532557,
+      "decision": "advance"
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm16-tier32-a4096-v1.json",
+      "regime": "slow_worker",
+      "active_tokens": 4096,
+      "warm_capacity": 16,
+      "history_max": 1048576,
+      "goodput_ratio": 1.1,
+      "p99_reduction": 0.20703412839778604,
+      "decision": "not_established"
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm16-tier32-a4096-v1.json",
+      "regime": "worker_failure",
+      "active_tokens": 4096,
+      "warm_capacity": 16,
+      "history_max": 1048576,
+      "goodput_ratio": 1.35,
+      "p99_reduction": 0.3988901121899663,
+      "decision": "advance"
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm16-tier32-a4096-v1.json",
+      "regime": "burst",
+      "active_tokens": 4096,
+      "warm_capacity": 16,
+      "history_max": 1048576,
+      "goodput_ratio": 1.1,
+      "p99_reduction": 0.555619070539185,
+      "decision": "advance"
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm16-tier32-a4096-v1.json",
+      "regime": "size_skew",
+      "active_tokens": 4096,
+      "warm_capacity": 16,
+      "history_max": 1048576,
+      "goodput_ratio": 1.1,
+      "p99_reduction": 0.43541068865446486,
+      "decision": "advance"
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm16-tier32-a8192-v1.json",
+      "regime": "balanced",
+      "active_tokens": 8192,
+      "warm_capacity": 16,
+      "history_max": 1048576,
+      "goodput_ratio": 1.1,
+      "p99_reduction": 0.30786424051993944,
+      "decision": "advance"
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm16-tier32-a8192-v1.json",
+      "regime": "slow_worker",
+      "active_tokens": 8192,
+      "warm_capacity": 16,
+      "history_max": 1048576,
+      "goodput_ratio": 1.0484375000000001,
+      "p99_reduction": 0.0326121972475711,
+      "decision": "not_established"
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm16-tier32-a8192-v1.json",
+      "regime": "worker_failure",
+      "active_tokens": 8192,
+      "warm_capacity": 16,
+      "history_max": 1048576,
+      "goodput_ratio": 1.35,
+      "p99_reduction": 0.3020234055942423,
+      "decision": "advance"
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm16-tier32-a8192-v1.json",
+      "regime": "burst",
+      "active_tokens": 8192,
+      "warm_capacity": 16,
+      "history_max": 1048576,
+      "goodput_ratio": 1.1,
+      "p99_reduction": 0.4517896918013152,
+      "decision": "advance"
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm16-tier32-a8192-v1.json",
+      "regime": "size_skew",
+      "active_tokens": 8192,
+      "warm_capacity": 16,
+      "history_max": 1048576,
+      "goodput_ratio": 1.1,
+      "p99_reduction": 0.32322554587031316,
+      "decision": "advance"
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm4-tier8-a4096-v1.json",
+      "regime": "balanced",
+      "active_tokens": 4096,
+      "warm_capacity": 4,
+      "history_max": 1048576,
+      "goodput_ratio": 1.1,
+      "p99_reduction": 0.45889489262532557,
+      "decision": "advance"
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm4-tier8-a4096-v1.json",
+      "regime": "slow_worker",
+      "active_tokens": 4096,
+      "warm_capacity": 4,
+      "history_max": 1048576,
+      "goodput_ratio": 1.1,
+      "p99_reduction": 0.20703412839778604,
+      "decision": "not_established"
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm4-tier8-a4096-v1.json",
+      "regime": "worker_failure",
+      "active_tokens": 4096,
+      "warm_capacity": 4,
+      "history_max": 1048576,
+      "goodput_ratio": 1.35,
+      "p99_reduction": 0.3988901121899663,
+      "decision": "advance"
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm4-tier8-a4096-v1.json",
+      "regime": "burst",
+      "active_tokens": 4096,
+      "warm_capacity": 4,
+      "history_max": 1048576,
+      "goodput_ratio": 1.1,
+      "p99_reduction": 0.5537446848867588,
+      "decision": "advance"
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm4-tier8-a4096-v1.json",
+      "regime": "size_skew",
+      "active_tokens": 4096,
+      "warm_capacity": 4,
+      "history_max": 1048576,
+      "goodput_ratio": 1.1,
+      "p99_reduction": 0.43541068865446486,
+      "decision": "advance"
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm4-tier8-a8192-v1.json",
+      "regime": "balanced",
+      "active_tokens": 8192,
+      "warm_capacity": 4,
+      "history_max": 1048576,
+      "goodput_ratio": 1.1,
+      "p99_reduction": 0.30786424051993944,
+      "decision": "advance"
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm4-tier8-a8192-v1.json",
+      "regime": "slow_worker",
+      "active_tokens": 8192,
+      "warm_capacity": 4,
+      "history_max": 1048576,
+      "goodput_ratio": 1.0484375000000001,
+      "p99_reduction": 0.0326121972475711,
+      "decision": "not_established"
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm4-tier8-a8192-v1.json",
+      "regime": "worker_failure",
+      "active_tokens": 8192,
+      "warm_capacity": 4,
+      "history_max": 1048576,
+      "goodput_ratio": 1.35,
+      "p99_reduction": 0.3020234055942423,
+      "decision": "advance"
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm4-tier8-a8192-v1.json",
+      "regime": "burst",
+      "active_tokens": 8192,
+      "warm_capacity": 4,
+      "history_max": 1048576,
+      "goodput_ratio": 1.1,
+      "p99_reduction": 0.4517896918013152,
+      "decision": "advance"
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm4-tier8-a8192-v1.json",
+      "regime": "size_skew",
+      "active_tokens": 8192,
+      "warm_capacity": 4,
+      "history_max": 1048576,
+      "goodput_ratio": 1.1,
+      "p99_reduction": 0.32322554587031316,
+      "decision": "advance"
+    }
+  ],
+  "placement": [
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm16-tier32-a4096-v1.json",
+      "policy": "strict_sticky",
+      "active_tokens": 4096,
+      "cold_rate_by_age": {
+        "<=32K": null,
+        "32K-128K": 0.25,
+        "128K-256K": 0.0,
+        ">=256K": 0.0
+      },
+      "cold_rate_oldest_over_youngest": 0.0
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm16-tier32-a4096-v1.json",
+      "policy": "sticky_saturated",
+      "active_tokens": 4096,
+      "cold_rate_by_age": {
+        "<=32K": null,
+        "32K-128K": 0.9090909090909091,
+        "128K-256K": 1.0,
+        ">=256K": 1.0
+      },
+      "cold_rate_oldest_over_youngest": 1.1
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm16-tier32-a4096-v1.json",
+      "policy": "full_kv_move",
+      "active_tokens": 4096,
+      "cold_rate_by_age": {
+        "<=32K": null,
+        "32K-128K": 0.59375,
+        "128K-256K": 0.09523809523809523,
+        ">=256K": 0.05714285714285714
+      },
+      "cold_rate_oldest_over_youngest": 0.09624060150375939
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm16-tier32-a4096-v1.json",
+      "policy": "full_reprefill",
+      "active_tokens": 4096,
+      "cold_rate_by_age": {
+        "<=32K": null,
+        "32K-128K": 0.28125,
+        "128K-256K": 0.0,
+        ">=256K": 0.0
+      },
+      "cold_rate_oldest_over_youngest": 0.0
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm16-tier32-a4096-v1.json",
+      "policy": "ephemeral",
+      "active_tokens": 4096,
+      "cold_rate_by_age": {
+        "<=32K": 0.375,
+        "32K-128K": 0.1875,
+        "128K-256K": 0.047619047619047616,
+        ">=256K": 0.0
+      },
+      "cold_rate_oldest_over_youngest": 0.0
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm16-tier32-a8192-v1.json",
+      "policy": "strict_sticky",
+      "active_tokens": 8192,
+      "cold_rate_by_age": {
+        "<=32K": null,
+        "32K-128K": 0.25,
+        "128K-256K": 0.0,
+        ">=256K": 0.0
+      },
+      "cold_rate_oldest_over_youngest": 0.0
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm16-tier32-a8192-v1.json",
+      "policy": "sticky_saturated",
+      "active_tokens": 8192,
+      "cold_rate_by_age": {
+        "<=32K": null,
+        "32K-128K": 0.9090909090909091,
+        "128K-256K": 1.0,
+        ">=256K": 1.0
+      },
+      "cold_rate_oldest_over_youngest": 1.1
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm16-tier32-a8192-v1.json",
+      "policy": "full_kv_move",
+      "active_tokens": 8192,
+      "cold_rate_by_age": {
+        "<=32K": null,
+        "32K-128K": 0.59375,
+        "128K-256K": 0.09523809523809523,
+        ">=256K": 0.05714285714285714
+      },
+      "cold_rate_oldest_over_youngest": 0.09624060150375939
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm16-tier32-a8192-v1.json",
+      "policy": "full_reprefill",
+      "active_tokens": 8192,
+      "cold_rate_by_age": {
+        "<=32K": null,
+        "32K-128K": 0.28125,
+        "128K-256K": 0.0,
+        ">=256K": 0.0
+      },
+      "cold_rate_oldest_over_youngest": 0.0
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm16-tier32-a8192-v1.json",
+      "policy": "ephemeral",
+      "active_tokens": 8192,
+      "cold_rate_by_age": {
+        "<=32K": 0.375,
+        "32K-128K": 0.125,
+        "128K-256K": 0.0,
+        ">=256K": 0.05714285714285714
+      },
+      "cold_rate_oldest_over_youngest": 0.15238095238095237
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm4-tier8-a4096-v1.json",
+      "policy": "strict_sticky",
+      "active_tokens": 4096,
+      "cold_rate_by_age": {
+        "<=32K": null,
+        "32K-128K": 0.25,
+        "128K-256K": 0.0,
+        ">=256K": 0.0
+      },
+      "cold_rate_oldest_over_youngest": 0.0
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm4-tier8-a4096-v1.json",
+      "policy": "sticky_saturated",
+      "active_tokens": 4096,
+      "cold_rate_by_age": {
+        "<=32K": null,
+        "32K-128K": 0.9090909090909091,
+        "128K-256K": 1.0,
+        ">=256K": 1.0
+      },
+      "cold_rate_oldest_over_youngest": 1.1
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm4-tier8-a4096-v1.json",
+      "policy": "full_kv_move",
+      "active_tokens": 4096,
+      "cold_rate_by_age": {
+        "<=32K": null,
+        "32K-128K": 0.65625,
+        "128K-256K": 0.19047619047619047,
+        ">=256K": 0.02857142857142857
+      },
+      "cold_rate_oldest_over_youngest": 0.04353741496598639
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm4-tier8-a4096-v1.json",
+      "policy": "full_reprefill",
+      "active_tokens": 4096,
+      "cold_rate_by_age": {
+        "<=32K": null,
+        "32K-128K": 0.28125,
+        "128K-256K": 0.0,
+        ">=256K": 0.0
+      },
+      "cold_rate_oldest_over_youngest": 0.0
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm4-tier8-a4096-v1.json",
+      "policy": "ephemeral",
+      "active_tokens": 4096,
+      "cold_rate_by_age": {
+        "<=32K": 0.4,
+        "32K-128K": 0.28125,
+        "128K-256K": 0.047619047619047616,
+        ">=256K": 0.05714285714285714
+      },
+      "cold_rate_oldest_over_youngest": 0.14285714285714285
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm4-tier8-a8192-v1.json",
+      "policy": "strict_sticky",
+      "active_tokens": 8192,
+      "cold_rate_by_age": {
+        "<=32K": null,
+        "32K-128K": 0.25,
+        "128K-256K": 0.0,
+        ">=256K": 0.0
+      },
+      "cold_rate_oldest_over_youngest": 0.0
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm4-tier8-a8192-v1.json",
+      "policy": "sticky_saturated",
+      "active_tokens": 8192,
+      "cold_rate_by_age": {
+        "<=32K": null,
+        "32K-128K": 0.9090909090909091,
+        "128K-256K": 1.0,
+        ">=256K": 1.0
+      },
+      "cold_rate_oldest_over_youngest": 1.1
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm4-tier8-a8192-v1.json",
+      "policy": "full_kv_move",
+      "active_tokens": 8192,
+      "cold_rate_by_age": {
+        "<=32K": null,
+        "32K-128K": 0.65625,
+        "128K-256K": 0.19047619047619047,
+        ">=256K": 0.02857142857142857
+      },
+      "cold_rate_oldest_over_youngest": 0.04353741496598639
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm4-tier8-a8192-v1.json",
+      "policy": "full_reprefill",
+      "active_tokens": 8192,
+      "cold_rate_by_age": {
+        "<=32K": null,
+        "32K-128K": 0.28125,
+        "128K-256K": 0.0,
+        ">=256K": 0.0
+      },
+      "cold_rate_oldest_over_youngest": 0.0
+    },
+    {
+      "receipt": "g4b-longage-h32768_131072_262144_1048576-warm4-tier8-a8192-v1.json",
+      "policy": "ephemeral",
+      "active_tokens": 8192,
+      "cold_rate_by_age": {
+        "<=32K": 0.425,
+        "32K-128K": 0.15625,
+        "128K-256K": 0.09523809523809523,
+        ">=256K": 0.05714285714285714
+      },
+      "cold_rate_oldest_over_youngest": 0.13445378151260504
+    }
+  ],
+  "reading": "with sessions that age, the region advances in 16 of 20 cells and every one of them clears the 30% p99 bar - four of the five regimes (balanced, worker loss, flash crowd, size mix) at both the 4,096- and 8,192-token states, with the slow-worker hotspot the one that does not - where the 8-turn workload could not produce a single session past 113K tokens to test it on.  The placement table is reported with its confound named: a cold rate by age is not the cost law alone, because long sessions also accumulate warmth, so what it shows is an ordering (ephemeral 0.139, full-KV move 0.070, strict sticky 0.000) rather than an age-independent decision"
+}
