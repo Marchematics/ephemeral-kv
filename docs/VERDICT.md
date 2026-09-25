@@ -165,7 +165,10 @@ collapsing a file to its latest state; log replay paying; one 8,192-token view h
 ## 8. Status of the decision
 
 **Paper B is Best-targeted on C1-C10 and has dropped the compiler claim, which the measurements
-falsified rather than left unproven.**  What the Best case rests on is the identity (three
+falsified rather than left unproven** - and the falsification now includes the size the system
+actually runs at: at a 4,096-token total, log replay into materialised state scores -2.48 pp against
+consolidation's -2.40 pp, while widening the window reaches -0.96 pp, so the floor is bought by
+keeping more newest evidence whole rather than by compiling older evidence harder.  What the Best case rests on is the identity (three
 different objects, not one), the law (flat state, flat quality), the inversion (age ranks cost
 backwards), the capacity consequence, the routing phase change at the admissible size, and
 recovery that never moves KV - with the compiler ablation as the negative result that rules out

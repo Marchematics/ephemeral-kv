@@ -216,6 +216,15 @@ better**, and the absolute rates are low because the metric demands both an edit
 right file.  We report it as a bound our claim must clear rather than as a result: the stronger
 metric neither confirms nor refutes the weaker one, and task success remains unmeasured.
 
+**The compiler does not rescue the floor; the window does.**  The one remaining place a state
+compiler could have paid is the size the system actually runs at, where the far field has least room
+and materialised state is most attractive.  Measured there, log replay into materialised state
+scores **-2.48 pp** at a 4,096-token total against consolidation's **-2.40 pp** - the same total,
+the same window, no gain - while widening the window to 3,584 at that total reaches **-0.96 pp**.
+So the surface is bought by keeping more of the newest evidence whole, not by compiling the older
+evidence harder, which is the negative result Section 2.2's two laws predict and Section 3.2's
+ablation attributes.
+
 **Why 4,096 and not less.**  The budget is measured, not chosen for convenience, and Table 4 varies
 the total *and* the window, because which of the two binds depends on the other:
 
@@ -288,7 +297,7 @@ stages, what each means, and what each is worth when measured.
 | supersede by state identity, no path collapse | a file's or command's newest state stands for its earlier views, replaced turns kept as provenance | fidelity -6.94 -> -5.44 pp; decision 0.237 -> 0.292 (n=24) |
 | collapse each path to its latest state | (the ablation) | **-13.90 pp**, i.e. 8.5 pp worse |
 | snippet re-selection of an oversized newest span | keep the query-relevant lines | **-20 pp** on fidelity |
-| log replay into materialised state | dumps set content, diffs and SEARCH/REPLACE apply, repeated commands collapse | 0.231 against 0.237 on the decision; neutral, because only **6%** of retrieved spans are file events |
+| log replay into materialised state | dumps set content, diffs and SEARCH/REPLACE apply, repeated commands collapse | 0.231 against 0.237 on the decision; neutral, because only **6%** of retrieved spans are file events.  At the 4,096-token floor it is also *worse on the surface* than mere consolidation: -2.48 pp against -2.40 pp at the same total, where widening the window instead reaches -0.96 pp |
 | identifier provenance | pull spans sharing paths/ids with the query | part of the 4K -> 2K improvement |
 
 **Figure 3** draws the end-task ladder these stages sit on.

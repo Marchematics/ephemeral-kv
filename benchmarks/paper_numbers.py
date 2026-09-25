@@ -219,6 +219,19 @@ def main(argv=None) -> int:
                     > 100 * (narrow.get("token_accuracy_delta_p50") or 0.0) + 1.0,
                     f"window 3,584: {100 * (floor.get('token_accuracy_delta_p50') or 0.0):+.2f} pp vs "
                     f"window 3,072: {100 * (narrow.get('token_accuracy_delta_p50') or 0.0):+.2f} pp"))
+    # the compiler question at the size the system runs at: materialised state does not rescue the
+    # floor, and the window does - the paper's negative result, now measured where it matters most
+    materialised = bucket_stats("artifacts/g2-compiler-window3k-farmaterialize-b4096-v1.json").get("32K-128K") or {}
+    check("materialised far field at the 4,096 floor pp",
+          100 * (materialised.get("token_accuracy_delta_p50") or 0.0), -2.48, TOL_PP)
+    narrow_window = bucket_stats("artifacts/g2-compiler-window3k-b4096-v1.json").get("32K-128K") or {}
+    window_pp = 100 * (narrow_window.get("token_accuracy_delta_p50") or 0.0)
+    materialised_pp = 100 * (materialised.get("token_accuracy_delta_p50") or 0.0)
+    results.append(("consolidation beats materialisation at the floor",
+                    window_pp > materialised_pp,
+                    f"consolidation {window_pp:+.2f} pp vs materialisation {materialised_pp:+.2f} pp "
+                    f"at a 4,096-token total"))
+
     window3k = bucket_stats("artifacts/g2-compiler-window3k-b4096-v1.json").get("32K-128K") or {}
     check("best 4096-token state fidelity pp",
           100 * (window3k.get("token_accuracy_delta_p50") or 0.0), -2.40, TOL_PP)
