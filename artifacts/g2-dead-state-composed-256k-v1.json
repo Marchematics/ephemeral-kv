@@ -1,0 +1,77 @@
+{
+  "schema": "ephemeral-kv-dead-state-v1",
+  "kind": "structural_measurement",
+  "interpretation": "the share of a session's tokens held by its largest spans; the tail is what a turn-by-turn view actually walks",
+  "config": {
+    "jsonl": "data/sessions-composed-256k.jsonl",
+    "max_sessions": 8,
+    "min_history_tokens": 32768,
+    "model": "/root/qcc/models/Llama-3.2-1B-Instruct"
+  },
+  "rows": [
+    {
+      "history_tokens": 301349,
+      "spans": 661,
+      "largest_span": 15952,
+      "top2_share": 0.088,
+      "top5_share": 0.155,
+      "tail_share": 0.845
+    },
+    {
+      "history_tokens": 279400,
+      "spans": 647,
+      "largest_span": 24158,
+      "top2_share": 0.112,
+      "top5_share": 0.17,
+      "tail_share": 0.83
+    },
+    {
+      "history_tokens": 269633,
+      "spans": 610,
+      "largest_span": 7551,
+      "top2_share": 0.048,
+      "top5_share": 0.108,
+      "tail_share": 0.892
+    },
+    {
+      "history_tokens": 276224,
+      "spans": 617,
+      "largest_span": 17043,
+      "top2_share": 0.097,
+      "top5_share": 0.165,
+      "tail_share": 0.835
+    },
+    {
+      "history_tokens": 283549,
+      "spans": 529,
+      "largest_span": 14445,
+      "top2_share": 0.084,
+      "top5_share": 0.18,
+      "tail_share": 0.82
+    },
+    {
+      "history_tokens": 265680,
+      "spans": 498,
+      "largest_span": 29102,
+      "top2_share": 0.159,
+      "top5_share": 0.26,
+      "tail_share": 0.74
+    },
+    {
+      "history_tokens": 271550,
+      "spans": 574,
+      "largest_span": 55269,
+      "top2_share": 0.222,
+      "top5_share": 0.276,
+      "tail_share": 0.724
+    },
+    {
+      "history_tokens": 275223,
+      "spans": 665,
+      "largest_span": 8840,
+      "top2_share": 0.064,
+      "top5_share": 0.133,
+      "tail_share": 0.867
+    }
+  ]
+}

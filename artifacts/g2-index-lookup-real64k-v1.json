@@ -1,0 +1,95 @@
+{
+  "schema": "ephemeral-kv-index-lookup-v1",
+  "kind": "measured_primitive",
+  "what": "durable-index lookup (the cold route's first operation) on real transcripts",
+  "config": {
+    "jsonl": "data/sessions-64k.jsonl",
+    "max_examples": 8,
+    "max_spans": 128,
+    "model": "/root/qcc/models/Llama-3.2-1B-Instruct",
+    "repeats": 20
+  },
+  "interpretation": "indexed lookup is CPU work over the durable index; it is the term the mobility law adds to active-set prefill, and it is what the paper previously extrapolated to 1M",
+  "rows": [
+    {
+      "session_id": "swe-smith-claude-3-7-sonnet::pydata__patsy.a5d16484.func_pm_remove_cond__o2tvssrw.91hmylr4",
+      "history_tokens": 156207,
+      "spans": 45,
+      "query_tokens": 45039,
+      "lookup_ms_p50": 2.5275,
+      "lookup_ms_p95": 2.6479,
+      "lookup_ms_min": 2.492,
+      "spans_returned": 42
+    },
+    {
+      "session_id": "swe-smith-claude-3-7-sonnet::pydata__patsy.a5d16484.func_pm_remove_assign__8wn2nvte.91hmylr4",
+      "history_tokens": 155997,
+      "spans": 61,
+      "query_tokens": 45416,
+      "lookup_ms_p50": 2.6202,
+      "lookup_ms_p95": 2.7152,
+      "lookup_ms_min": 2.5318,
+      "spans_returned": 57
+    },
+    {
+      "session_id": "swe-smith-claude-3-7-sonnet::pyparsing__pyparsing.533adf47.combine_file__8ryl6tk3.4tw4cp8h",
+      "history_tokens": 155292,
+      "spans": 97,
+      "query_tokens": 45347,
+      "lookup_ms_p50": 6.7399,
+      "lookup_ms_p95": 7.1464,
+      "lookup_ms_min": 6.0199,
+      "spans_returned": 96
+    },
+    {
+      "session_id": "swe-smith-claude-3-7-sonnet::Mimino666__langdetect.a1598f1a.combine_module__dfelkw8k.3qdud4nz",
+      "history_tokens": 123210,
+      "spans": 29,
+      "query_tokens": 55320,
+      "lookup_ms_p50": 6.049,
+      "lookup_ms_p95": 6.7606,
+      "lookup_ms_min": 5.4713,
+      "spans_returned": 29
+    },
+    {
+      "session_id": "swe-smith-claude-3-7-sonnet::joke2k__faker.8b401a7d.func_pm_remove_cond__f33evq9f.91hmylr4",
+      "history_tokens": 141168,
+      "spans": 65,
+      "query_tokens": 56514,
+      "lookup_ms_p50": 15.1459,
+      "lookup_ms_p95": 16.2942,
+      "lookup_ms_min": 11.6117,
+      "spans_returned": 62
+    },
+    {
+      "session_id": "swe-smith-claude-3-7-sonnet::pdfminer__pdfminer.six.1a8bd2f7.lm_rewrite__ws3v7w3a.3qdud4nz",
+      "history_tokens": 141239,
+      "spans": 55,
+      "query_tokens": 38724,
+      "lookup_ms_p50": 5.5357,
+      "lookup_ms_p95": 6.1822,
+      "lookup_ms_min": 5.0974,
+      "spans_returned": 55
+    },
+    {
+      "session_id": "swe-smith-claude-3-7-sonnet::pyasn1__pyasn1.0f07d724.func_pm_class_rm_funcs__0lwi20lq.91hmylr4",
+      "history_tokens": 127126,
+      "spans": 83,
+      "query_tokens": 28232,
+      "lookup_ms_p50": 2.8335,
+      "lookup_ms_p95": 3.3146,
+      "lookup_ms_min": 2.652,
+      "spans_returned": 83
+    },
+    {
+      "session_id": "swe-smith-claude-3-7-sonnet::getmoto__moto.694ce1f4.pr_5515.oosvj10h",
+      "history_tokens": 124995,
+      "spans": 61,
+      "query_tokens": 531,
+      "lookup_ms_p50": 0.093,
+      "lookup_ms_p95": 0.206,
+      "lookup_ms_min": 0.0905,
+      "spans_returned": 40
+    }
+  ]
+}
