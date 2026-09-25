@@ -116,6 +116,13 @@ def main(argv=None) -> int:
     check("failover rebuild s p50",
           round(statistics.median(r["state_rebuild_s"] for r in failover), 3), 1.387, 1e-2)
 
+    # --- C4b: the compaction baseline
+    compact = bucket_stats("artifacts/g2-compiler-compact-b8192-v1.json").get("32K-128K") or {}
+    check("compaction fidelity pp",
+          round(100 * (compact.get("token_accuracy_delta_p50") or 0), 2), -23.86, TOL_PP)
+    compaction_arm = load("artifacts/g2b-patch-localization-compact-b8192-n48.json")["summary"]
+    check("compaction decision", round(compaction_arm["active"]["f1"], 3), 0.191, TOL)
+
     # --- C3 (stricter end task): the action-level rescoring must stay a bound, not a win
     action = load("artifacts/g2b-action-metric-v1.json")["rows"]
     joint_action = next(r for r in action if r["arm"].startswith("windowcompiler-b8192-n96"))
