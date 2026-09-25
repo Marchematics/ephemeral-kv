@@ -240,7 +240,7 @@ says the window rather than the total is what the surface needs.
 | total budget | window | fidelity (window + consolidated far field) | end-task F1 |
 |---:|---:|---:|---:|
 | 4,096 | 3,072 | -2.40 pp (outside the 2 pp allowance) | 0.117 |
-| **4,096** | **3,584** | **-0.96 pp** (inside the allowance) | measured in the join, below |
+| **4,096** | **3,584** | **-0.96 pp** (inside the allowance) | **0.134** (n=48) against full history's 0.089 |
 | 4,608 | 3,584 | 0.00 pp | - |
 | 6,144 | 3,072 | 0.00 pp | 0.150 (tied with retrieval at 4,096: +0.093, CI [-0.030, +0.217], 13W/9L) |
 | 8,192 | ~4.1K | 0.00 pp | 0.161 |
@@ -588,7 +588,9 @@ cells of 198 against the 8,192 column's 52 of 294, so moving the system to a 4,0
 widens the region from 52 to 115 cells at *half* the state size - and capacity and mobility improve
 with it.  That needed one measurement, and it was the window rather than the budget: the same
 4,096-token total with a 3,584-token window scores **-0.96 pp** and puts the column inside the
-allowance, so the region is **117 cells** (with the 16,384 column's 2) and the state is 4-8K.  The
+allowance, so the region is **117 cells** (with the 16,384 column's 2) and the state is 4-8K.  Its
+decision at that size is **0.134** on 48 instances against full history's 0.089 - a win over the
+transcript, still short of plain retrieval's parity bar, which is why the strict count stays zero.  The
 same 3,072-token window holds 0.00 pp once the total is 6,144, which is why the earlier reading put
 the floor at 6,144.  The stricter bar is a second, larger target: decision parity
 with plain retrieval at the same budget means reaching its floor of 0.237-0.243 F1, where the best

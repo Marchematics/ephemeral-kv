@@ -28,7 +28,7 @@
       "advance": 63,
       "arm": "window 3,584 + consolidated far field at a 4,096-token total",
       "fidelity_pp": -0.96,
-      "decision_f1": 0.117,
+      "decision_f1": 0.134,
       "fidelity_admissible": true,
       "decision_admissible": true,
       "decision_parity_admissible": false

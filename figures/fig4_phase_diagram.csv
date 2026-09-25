@@ -2,6 +2,6 @@
 # receipts: g4-quality-join-v2.json
 active_tokens,cells,advance,fidelity_pp,decision_f1,fidelity_admissible,decision_admissible
 2048,66,17,-27.92,0.179,False,True
-4096,198,63,-0.96,0.117,True,True
+4096,198,63,-0.96,0.134,True,True
 8192,294,52,0.0,0.161,True,True
 16384,66,2,-1.94,0.142,True,True

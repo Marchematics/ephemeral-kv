@@ -239,6 +239,10 @@ def main(argv=None) -> int:
     # version of the points file scored this column at -25 pp, which overstated the distance to
     # admissibility by a factor of ten and contradicted C11
     check("join 4096 fidelity point is the best measured state", row4096["fidelity_pp"], -0.96, TOL)
+    floor_decision = [r["active"]["f1"] for r in
+                      load("artifacts/g2b-patch-localization-window3584-b4096-n48.json")["rows"]
+                      if r.get("recorded_files")]
+    check("4,096-token floor decision (n=48)", round(statistics.mean(floor_decision), 3), 0.134, TOL)
     check("best 4096-token state with the wider window",
           100 * (bucket_stats("artifacts/g2-compiler-window3584-b4096-v1.json")
                  .get("32K-128K", {}).get("token_accuracy_delta_p50") or 0.0), -0.96, TOL_PP)

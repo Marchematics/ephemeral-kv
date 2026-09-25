@@ -26,7 +26,7 @@ common=(--model /root/qcc/models/Llama-3.2-1B-Instruct --max-examples 48 --min-h
 # and the end task at the same configuration, which the routing join needs as its quality point
 /root/qcc/venv/bin/python benchmarks/g2b_patch_localization.py \
   --jsonl data/sessions-patch-long.jsonl "${common[@]}" --max-length 65536 --max-new 96 \
-  --token-budget 4096 --tail-tokens 3584 \
+  --snippet-spans --token-budget 4096 --tail-tokens 3584 \
   --out artifacts/g2b-patch-localization-window3584-b4096-n48.json
 # the compiler question at the floor size: the same 4,096-token total and the same 3,072-token
 # window as the -2.40 pp arm, but with a *materialised* far field (-2.48 pp) - no gain, which is

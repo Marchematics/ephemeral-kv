@@ -24,14 +24,13 @@
       "active_tokens": 4096,
       "arm": "window 3,584 + consolidated far field at a 4,096-token total",
       "fidelity_pp": -0.96,
-      "decision_f1": 0.117,
+      "decision_f1": 0.134,
       "receipts": {
         "fidelity": "artifacts/g2-compiler-window3584-b4096-v1.json",
-        "decision": "artifacts/g2b-patch-localization-window3k-b4096-n48.json",
-        "decision_pending": "artifacts/g2b-patch-localization-window3584-b4096-n48.json",
+        "decision": "artifacts/g2b-patch-localization-window3584-b4096-n48.json",
         "fidelity_alt": "artifacts/g2-compiler-window3k-b4096-v1.json"
       },
-      "note": "the window is what carries the surface: at this total a 3,072-token window scores -2.40 pp and a 3,584-token one -0.96 pp, which is the difference between this column being admissible and not.  The decision is still read from the 3,072-window arm (0.117) until the 3,584-window decision arm lands."
+      "note": "the window is what carries the surface: at this total a 3,072-token window scores -2.40 pp and a 3,584-token one -0.96 pp, which is the difference between this column being admissible and not.  The decision at the floor is 0.134 on 48 instances against full history's 0.089"
     },
     {
       "active_tokens": 8192,
