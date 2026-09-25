@@ -1,0 +1,1129 @@
+{
+  "schema": "ephemeral-kv-g2d-window-comparison-v1",
+  "kind": "derived_measurement",
+  "baseline_receipt": "artifacts/g2d-action-turns-state4096-v1.json",
+  "candidate_receipt": "/tmp/aw_partial.json",
+  "summary": {
+    "turns_in_common": 30,
+    "turns_scored_by_both": 30,
+    "full_arm_continuations_identical": true,
+    "history_tokens_p50": 40736,
+    "arms": {
+      "full_transcript": {
+        "emits_an_action": 0.6333333333333333,
+        "tool_match": 0.8947368421052632,
+        "target_match": 0.7142857142857143
+      },
+      "recency_window": {
+        "emits_an_action": 0.36666666666666664,
+        "tool_match": 0.7272727272727273,
+        "target_match": 0.42857142857142855
+      },
+      "action_window": {
+        "emits_an_action": 0.16666666666666666,
+        "tool_match": 0.2,
+        "target_match": 1.0
+      },
+      "plain_retrieval": {
+        "emits_an_action": 0.06666666666666667,
+        "tool_match": 0.5,
+        "target_match": 0.0
+      }
+    },
+    "action_window_vs_recency": {
+      "metric": "emits_an_action",
+      "n": 30,
+      "mean_diff": -0.2,
+      "ci95": [
+        -0.3667,
+        -0.0333
+      ],
+      "includes_zero": false,
+      "wins": 1,
+      "losses": 7
+    }
+  },
+  "rows": [
+    {
+      "session_id": "nebius-swe-rebench-openhands::chatcmpl-001958ec05de484109affffb7e57723c",
+      "turn_index": 1,
+      "history_tokens": 33887,
+      "recorded_action": {
+        "tool": "bash",
+        "raw_tool": "execute_bash",
+        "verb": "cd",
+        "target": "debug_missing.py",
+        "command": "cd /workspace/Ouranosinc__xclim__0.9 && python debug_missing.py"
+      },
+      "recency": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "action_window": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "retrieval": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "full": {
+        "parseable": true,
+        "tool": true,
+        "target": true,
+        "exact": true
+      }
+    },
+    {
+      "session_id": "nebius-swe-rebench-openhands::chatcmpl-001958ec05de484109affffb7e57723c",
+      "turn_index": 13,
+      "history_tokens": 48216,
+      "recorded_action": {
+        "tool": "bash",
+        "raw_tool": "execute_bash",
+        "verb": "cd",
+        "target": "debug_logic.py",
+        "command": "cd /workspace/Ouranosinc__xclim__0.9 && python debug_logic.py"
+      },
+      "recency": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "action_window": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "retrieval": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "full": {
+        "parseable": true,
+        "tool": true,
+        "target": true,
+        "exact": true
+      }
+    },
+    {
+      "session_id": "nebius-swe-rebench-openhands::chatcmpl-090c62ae5116fc6dcb09d59c3057f8cf",
+      "turn_index": 4,
+      "history_tokens": 35534,
+      "recorded_action": {
+        "tool": "bash",
+        "raw_tool": "execute_bash",
+        "verb": "cd",
+        "target": "reproduce_issue.py",
+        "command": "cd /workspace/mit-ll-responsible-ai__hydra-zen__0.11 && python reproduce_issue.py"
+      },
+      "recency": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "action_window": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "retrieval": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "full": {
+        "parseable": true,
+        "tool": true,
+        "target": null,
+        "exact": false
+      }
+    },
+    {
+      "session_id": "nebius-swe-rebench-openhands::chatcmpl-090c62ae5116fc6dcb09d59c3057f8cf",
+      "turn_index": 22,
+      "history_tokens": 46031,
+      "recorded_action": {
+        "tool": "bash",
+        "raw_tool": "execute_bash",
+        "verb": "cd",
+        "target": "debug_dataclass_defaults.py",
+        "command": "cd /workspace/mit-ll-responsible-ai__hydra-zen__0.11 && python debug_dataclass_defaults.py"
+      },
+      "recency": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "action_window": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "retrieval": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "full": {
+        "parseable": true,
+        "tool": true,
+        "target": null,
+        "exact": false
+      }
+    },
+    {
+      "session_id": "nebius-swe-rebench-openhands::chatcmpl-4ef6bd3ea33175dee9d46b903877143d",
+      "turn_index": 0,
+      "history_tokens": 35134,
+      "recorded_action": {
+        "tool": "bash",
+        "raw_tool": "execute_bash",
+        "verb": "cd",
+        "target": "test_reproduction.py",
+        "command": "cd /workspace/nolar__kopf__1.29 && python test_reproduction.py"
+      },
+      "recency": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "action_window": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "retrieval": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "full": {
+        "parseable": true,
+        "tool": true,
+        "target": true,
+        "exact": true
+      }
+    },
+    {
+      "session_id": "nebius-swe-rebench-openhands::chatcmpl-4ef6bd3ea33175dee9d46b903877143d",
+      "turn_index": 11,
+      "history_tokens": 45261,
+      "recorded_action": {
+        "tool": "bash",
+        "raw_tool": "execute_bash",
+        "verb": "cd",
+        "target": "tests/registries/test_matching_for_spawning.py",
+        "command": "cd /workspace/nolar__kopf__1.29 && python -m pytest tests/registries/test_matching_for_spawning.py -v"
+      },
+      "recency": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "action_window": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "retrieval": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "full": {
+        "parseable": true,
+        "tool": true,
+        "target": false,
+        "exact": false
+      }
+    },
+    {
+      "session_id": "nebius-swe-rebench-openhands::chatcmpl-54e1444a523480f684b99b0218d87e93",
+      "turn_index": 0,
+      "history_tokens": 32798,
+      "recorded_action": {
+        "tool": "bash",
+        "raw_tool": "execute_bash",
+        "verb": "cd",
+        "target": "gen_index_tuple_repro.py",
+        "command": "cd /workspace/numba__numba__0.48 && python gen_index_tuple_repro.py"
+      },
+      "recency": {
+        "parseable": true,
+        "tool": true,
+        "target": true,
+        "exact": true
+      },
+      "action_window": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "retrieval": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "full": {
+        "parseable": true,
+        "tool": true,
+        "target": true,
+        "exact": true
+      }
+    },
+    {
+      "session_id": "nebius-swe-rebench-openhands::chatcmpl-54e1444a523480f684b99b0218d87e93",
+      "turn_index": 12,
+      "history_tokens": 41629,
+      "recorded_action": {
+        "tool": "bash",
+        "raw_tool": "execute_bash",
+        "verb": "cd",
+        "target": "reproduce_issue_debug.py",
+        "command": "cd /workspace/numba__numba__0.48 && python reproduce_issue_debug.py"
+      },
+      "recency": {
+        "parseable": true,
+        "tool": true,
+        "target": null,
+        "exact": false
+      },
+      "action_window": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "retrieval": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "full": {
+        "parseable": true,
+        "tool": true,
+        "target": true,
+        "exact": true
+      }
+    },
+    {
+      "session_id": "nebius-swe-rebench-openhands::chatcmpl-728ab3a3565f950eababfb20b2cda379",
+      "turn_index": 0,
+      "history_tokens": 34260,
+      "recorded_action": {
+        "tool": "bash",
+        "raw_tool": "execute_bash",
+        "verb": "cd",
+        "target": "test_comprehensive_detection.py",
+        "command": "cd /workspace/burnash__gspread__5.12 && python test_comprehensive_detection.py"
+      },
+      "recency": {
+        "parseable": true,
+        "tool": true,
+        "target": false,
+        "exact": false
+      },
+      "action_window": {
+        "parseable": true,
+        "tool": true,
+        "target": null,
+        "exact": false
+      },
+      "retrieval": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "full": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      }
+    },
+    {
+      "session_id": "nebius-swe-rebench-openhands::chatcmpl-728ab3a3565f950eababfb20b2cda379",
+      "turn_index": 14,
+      "history_tokens": 44119,
+      "recorded_action": {
+        "tool": "bash",
+        "raw_tool": "execute_bash",
+        "verb": "cd",
+        "target": "gspread/worksheet.py",
+        "command": "cd /workspace/burnash__gspread__5.12 && grep -n \"deprecation_warning\" gspread/worksheet.py"
+      },
+      "recency": {
+        "parseable": true,
+        "tool": true,
+        "target": false,
+        "exact": false
+      },
+      "action_window": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "retrieval": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "full": {
+        "parseable": true,
+        "tool": true,
+        "target": false,
+        "exact": false
+      }
+    },
+    {
+      "session_id": "nebius-swe-rebench-openhands::chatcmpl-7541045a50ac83a3a675d28deca68380",
+      "turn_index": 0,
+      "history_tokens": 34183,
+      "recorded_action": {
+        "tool": "bash",
+        "raw_tool": "execute_bash",
+        "verb": "cd",
+        "target": "reproduce_issue.py",
+        "command": "cd /workspace/CS-SI__eodag__2.3 && timeout 30 python reproduce_issue.py"
+      },
+      "recency": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "action_window": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "retrieval": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "full": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      }
+    },
+    {
+      "session_id": "nebius-swe-rebench-openhands::chatcmpl-7541045a50ac83a3a675d28deca68380",
+      "turn_index": 16,
+      "history_tokens": 48636,
+      "recorded_action": {
+        "tool": "bash",
+        "raw_tool": "execute_bash",
+        "verb": "cd",
+        "target": "reproduce_issue.py",
+        "command": "cd /workspace/CS-SI__eodag__2.3 && python reproduce_issue.py"
+      },
+      "recency": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "action_window": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "retrieval": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "full": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      }
+    },
+    {
+      "session_id": "nebius-swe-rebench-openhands::chatcmpl-7b2b016682960621c1d63be82b3ef783",
+      "turn_index": 0,
+      "history_tokens": 33529,
+      "recorded_action": {
+        "tool": "bash",
+        "raw_tool": "execute_bash",
+        "verb": "cd",
+        "target": "reproduce_issue.py",
+        "command": "cd /workspace/Textualize__textual__0.75 && python reproduce_issue.py"
+      },
+      "recency": {
+        "parseable": true,
+        "tool": true,
+        "target": true,
+        "exact": true
+      },
+      "action_window": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "retrieval": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "full": {
+        "parseable": true,
+        "tool": true,
+        "target": true,
+        "exact": true
+      }
+    },
+    {
+      "session_id": "nebius-swe-rebench-openhands::chatcmpl-7b2b016682960621c1d63be82b3ef783",
+      "turn_index": 21,
+      "history_tokens": 47981,
+      "recorded_action": {
+        "tool": "bash",
+        "raw_tool": "execute_bash",
+        "verb": "cd",
+        "target": "src/textual/widgets/_input.py",
+        "command": "cd /workspace/Textualize__textual__0.75 && grep -n \"watch.*value\\|def.*value\" src/textual/widgets/_input.py"
+      },
+      "recency": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "action_window": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "retrieval": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "full": {
+        "parseable": true,
+        "tool": true,
+        "target": null,
+        "exact": false
+      }
+    },
+    {
+      "session_id": "nebius-swe-rebench-openhands::chatcmpl-906a064b1daad11673069a62694c165d",
+      "turn_index": 0,
+      "history_tokens": 33805,
+      "recorded_action": {
+        "tool": "bash",
+        "raw_tool": "execute_bash",
+        "verb": "cd",
+        "target": "reproduce_issue.py",
+        "command": "cd /workspace/einsteinpy__einsteinpy__0.2 && python reproduce_issue.py"
+      },
+      "recency": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "action_window": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "retrieval": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "full": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      }
+    },
+    {
+      "session_id": "nebius-swe-rebench-openhands::chatcmpl-906a064b1daad11673069a62694c165d",
+      "turn_index": 12,
+      "history_tokens": 43780,
+      "recorded_action": {
+        "tool": "bash",
+        "raw_tool": "execute_bash",
+        "verb": "cd",
+        "target": "comprehensive_test.py",
+        "command": "cd /workspace/einsteinpy__einsteinpy__0.2 && python comprehensive_test.py"
+      },
+      "recency": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "action_window": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "retrieval": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "full": {
+        "parseable": true,
+        "tool": true,
+        "target": false,
+        "exact": false
+      }
+    },
+    {
+      "session_id": "nebius-swe-rebench-openhands::chatcmpl-b70964a270870dcb9f159684d164dfb5",
+      "turn_index": 5,
+      "history_tokens": 36085,
+      "recorded_action": {
+        "tool": "bash",
+        "raw_tool": "execute_bash",
+        "verb": "cd",
+        "target": "debug_parse.py",
+        "command": "cd /workspace/tobymao__sqlglot__25.7 && python debug_parse.py"
+      },
+      "recency": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "action_window": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "retrieval": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "full": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      }
+    },
+    {
+      "session_id": "nebius-swe-rebench-openhands::chatcmpl-b70964a270870dcb9f159684d164dfb5",
+      "turn_index": 23,
+      "history_tokens": 48880,
+      "recorded_action": {
+        "tool": "bash",
+        "raw_tool": "execute_bash",
+        "verb": "cd",
+        "target": "sqlglot/parser.py",
+        "command": "cd /workspace/tobymao__sqlglot__25.7 && grep -n -A 15 \"def _parse_assignment\" sqlglot/parser.py"
+      },
+      "recency": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "action_window": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "retrieval": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "full": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      }
+    },
+    {
+      "session_id": "nebius-swe-rebench-openhands::chatcmpl-daed2caaf01795d901c1ddeb55f2f4cc",
+      "turn_index": 1,
+      "history_tokens": 35631,
+      "recorded_action": {
+        "tool": "bash",
+        "raw_tool": "execute_bash",
+        "verb": "cd",
+        "target": "test_query_job_retry.py",
+        "command": "cd /workspace/googleapis__python-bigquery__3.23 && python test_query_job_retry.py"
+      },
+      "recency": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "action_window": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "retrieval": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "full": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      }
+    },
+    {
+      "session_id": "nebius-swe-rebench-openhands::chatcmpl-daed2caaf01795d901c1ddeb55f2f4cc",
+      "turn_index": 22,
+      "history_tokens": 48944,
+      "recorded_action": {
+        "tool": "bash",
+        "raw_tool": "execute_bash",
+        "verb": "cd",
+        "target": "debug_retry_test.py",
+        "command": "cd /workspace/googleapis__python-bigquery__3.23 && python debug_retry_test.py"
+      },
+      "recency": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "action_window": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "retrieval": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "full": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      }
+    },
+    {
+      "session_id": "nebius-swe-rebench-openhands::chatcmpl-dc5eef8399a5568bbfdf03d49c18df57",
+      "turn_index": 0,
+      "history_tokens": 32822,
+      "recorded_action": {
+        "tool": "bash",
+        "raw_tool": "execute_bash",
+        "verb": "cd",
+        "target": "tests/conftest.py",
+        "command": "cd /workspace/beeware__briefcase__0.3 && grep -A 10 -B 5 \"base_command\" tests/conftest.py"
+      },
+      "recency": {
+        "parseable": true,
+        "tool": true,
+        "target": null,
+        "exact": false
+      },
+      "action_window": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "retrieval": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "full": {
+        "parseable": true,
+        "tool": true,
+        "target": null,
+        "exact": false
+      }
+    },
+    {
+      "session_id": "nebius-swe-rebench-openhands::chatcmpl-dc5eef8399a5568bbfdf03d49c18df57",
+      "turn_index": 22,
+      "history_tokens": 47609,
+      "recorded_action": {
+        "tool": "bash",
+        "raw_tool": "execute_bash",
+        "verb": "cd",
+        "target": "tests/commands/base/test_update_cookiecutter_cache.py",
+        "command": "cd /workspace/beeware__briefcase__0.3 && python -m pytest tests/commands/base/test_update_cookiecutter_cache.py -v"
+      },
+      "recency": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "action_window": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "retrieval": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "full": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      }
+    },
+    {
+      "session_id": "swe-smith-claude-3-7-sonnet::adrienverge__yamllint.8513d9b9.pr_591.cb713a4o",
+      "turn_index": 0,
+      "history_tokens": 39463,
+      "recorded_action": {
+        "tool": "editor",
+        "raw_tool": "str_replace_editor",
+        "verb": "str_replace",
+        "target": "/testbed/yamllint/config.py",
+        "command": "str_replace_editor str_replace /testbed/yamllint/config.py   --old_str 'def validate_rule_conf(rule, conf):"
+      },
+      "recency": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "action_window": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "retrieval": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "full": {
+        "parseable": true,
+        "tool": true,
+        "target": true,
+        "exact": true
+      }
+    },
+    {
+      "session_id": "swe-smith-claude-3-7-sonnet::adrienverge__yamllint.8513d9b9.pr_591.cb713a4o",
+      "turn_index": 19,
+      "history_tokens": 49085,
+      "recorded_action": {
+        "tool": "editor",
+        "raw_tool": "str_replace_editor",
+        "verb": "str_replace",
+        "target": "/testbed/yamllint/config.py",
+        "command": "str_replace_editor str_replace /testbed/yamllint/config.py   --old_str '                if opt not in rule.CONF:"
+      },
+      "recency": {
+        "parseable": true,
+        "tool": false,
+        "target": null,
+        "exact": false
+      },
+      "action_window": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "retrieval": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "full": {
+        "parseable": true,
+        "tool": false,
+        "target": null,
+        "exact": false
+      }
+    },
+    {
+      "session_id": "swe-smith-claude-3-7-sonnet::pyca__pyopenssl.04766a49.lm_rewrite__fogoyus4.3qdud4nz",
+      "turn_index": 0,
+      "history_tokens": 33282,
+      "recorded_action": {
+        "tool": "editor",
+        "raw_tool": "str_replace_editor",
+        "verb": "view",
+        "target": "/testbed/src/OpenSSL/SSL.py",
+        "command": "str_replace_editor view /testbed/src/OpenSSL/SSL.py  --view_range 1945 1965"
+      },
+      "recency": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "action_window": {
+        "parseable": true,
+        "tool": false,
+        "target": null,
+        "exact": false
+      },
+      "retrieval": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "full": {
+        "parseable": true,
+        "tool": true,
+        "target": true,
+        "exact": false
+      }
+    },
+    {
+      "session_id": "swe-smith-claude-3-7-sonnet::pyca__pyopenssl.04766a49.lm_rewrite__fogoyus4.3qdud4nz",
+      "turn_index": 15,
+      "history_tokens": 47781,
+      "recorded_action": {
+        "tool": "editor",
+        "raw_tool": "str_replace_editor",
+        "verb": "str_replace",
+        "target": "/testbed/src/OpenSSL/SSL.py",
+        "command": "str_replace_editor str_replace /testbed/src/OpenSSL/SSL.py   --old_str '    def DTLSv1_listen(self) -> None:"
+      },
+      "recency": {
+        "parseable": true,
+        "tool": true,
+        "target": true,
+        "exact": true
+      },
+      "action_window": {
+        "parseable": true,
+        "tool": false,
+        "target": null,
+        "exact": false
+      },
+      "retrieval": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "full": {
+        "parseable": true,
+        "tool": true,
+        "target": true,
+        "exact": true
+      }
+    },
+    {
+      "session_id": "swe-smith-claude-3-7-sonnet::pydantic__pydantic.acb0f10f.func_pm_remove_cond__dfm4nxbr.91hmylr4",
+      "turn_index": 0,
+      "history_tokens": 34049,
+      "recorded_action": {
+        "tool": "editor",
+        "raw_tool": "str_replace_editor",
+        "verb": "view",
+        "target": "/testbed/pydantic/_internal/_generate_schema.py",
+        "command": "str_replace_editor view /testbed/pydantic/_internal/_generate_schema.py  --view_range 1 50"
+      },
+      "recency": {
+        "parseable": true,
+        "tool": false,
+        "target": null,
+        "exact": false
+      },
+      "action_window": {
+        "parseable": true,
+        "tool": false,
+        "target": null,
+        "exact": false
+      },
+      "retrieval": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "full": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      }
+    },
+    {
+      "session_id": "swe-smith-claude-3-7-sonnet::pydantic__pydantic.acb0f10f.func_pm_remove_cond__dfm4nxbr.91hmylr4",
+      "turn_index": 31,
+      "history_tokens": 48237,
+      "recorded_action": {
+        "tool": "editor",
+        "raw_tool": "str_replace_editor",
+        "verb": "str_replace",
+        "target": "/testbed/pydantic/_internal/_schema_gather.py",
+        "command": "str_replace_editor str_replace /testbed/pydantic/_internal/_schema_gather.py   --old_str 'def traverse_definition_ref(def_ref_schema: DefinitionReferenceSchema, ctx: GatherContext) -> None:"
+      },
+      "recency": {
+        "parseable": true,
+        "tool": true,
+        "target": false,
+        "exact": false
+      },
+      "action_window": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "retrieval": {
+        "parseable": true,
+        "tool": true,
+        "target": false,
+        "exact": false
+      },
+      "full": {
+        "parseable": true,
+        "tool": true,
+        "target": false,
+        "exact": false
+      }
+    },
+    {
+      "session_id": "swe-smith-claude-3-7-sonnet::pydantic__pydantic.acb0f10f.func_pm_remove_cond__i2ojak9t.91hmylr4",
+      "turn_index": 0,
+      "history_tokens": 39843,
+      "recorded_action": {
+        "tool": "editor",
+        "raw_tool": "str_replace_editor",
+        "verb": "view",
+        "target": "/testbed/pydantic/json_schema.py",
+        "command": "str_replace_editor view /testbed/pydantic/json_schema.py"
+      },
+      "recency": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "action_window": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "retrieval": {
+        "parseable": true,
+        "tool": false,
+        "target": null,
+        "exact": false
+      },
+      "full": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      }
+    },
+    {
+      "session_id": "swe-smith-claude-3-7-sonnet::pydantic__pydantic.acb0f10f.func_pm_remove_cond__i2ojak9t.91hmylr4",
+      "turn_index": 15,
+      "history_tokens": 49116,
+      "recorded_action": {
+        "tool": "bash",
+        "raw_tool": "grep",
+        "verb": "grep",
+        "target": "/testbed/pydantic/_internal/_generate_schema.py",
+        "command": "grep -n \"to_string_ser_schema\" /testbed/pydantic/_internal/_generate_schema.py | head -5"
+      },
+      "recency": {
+        "parseable": true,
+        "tool": false,
+        "target": false,
+        "exact": false
+      },
+      "action_window": {
+        "parseable": true,
+        "tool": false,
+        "target": true,
+        "exact": false
+      },
+      "retrieval": {
+        "parseable": false,
+        "tool": null,
+        "target": null,
+        "exact": null
+      },
+      "full": {
+        "parseable": true,
+        "tool": false,
+        "target": true,
+        "exact": false
+      }
+    }
+  ],
+  "reading": "the two window rules scored the same turns, verified by the full-transcript arm reproducing byte-identically, so the difference between them is the selection rule"
+}

@@ -87,6 +87,10 @@ def main(argv=None) -> int:
                                  ("parseable", "tool", "target", "exact")}},
             "retrieval": {**{m: base_rows[k]["retrieval"].get(m) for m in
                              ("parseable", "tool", "target", "exact")}},
+            # the control, carried into the comparison rows so the table can show it beside the
+            # others; it is the baseline's arm because the two are identical by the check above
+            "full": {**{m: base_rows[k]["full"].get(m) for m in
+                        ("parseable", "tool", "target", "exact")}},
         })
 
     def arm_stats(arm):
@@ -110,7 +114,7 @@ def main(argv=None) -> int:
             "turns_scored_by_both": len(shared),
             "full_arm_continuations_identical": True,
             "history_tokens_p50": int(statistics.median([r["history_tokens"] for r in rows])),
-            "arms": {"full_transcript": arm_stats("full") if "full" in ARMS else None,
+            "arms": {"full_transcript": arm_stats("full"),
                      "recency_window": arm_stats("recency"),
                      "action_window": arm_stats("action_window"),
                      "plain_retrieval": arm_stats("retrieval")},

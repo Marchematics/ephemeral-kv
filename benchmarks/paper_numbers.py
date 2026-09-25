@@ -560,6 +560,27 @@ def main(argv=None) -> int:
                     seen["full"] > seen["active"] > seen["retrieval"],
                     f"prior actions per view: {seen['full']} / {seen['active']} / {seen['retrieval']}"))
 
+    # --- the intervention that falsified the composition mechanism.  Two things are asserted: that
+    # the window rule really did change what the view holds (or the experiment tested nothing), and
+    # that the emit rate moved the *other* way (or the mechanism would stand).
+    comparison = load("artifacts/g2d-window-comparison-v1.json")["summary"]
+    arms = comparison["arms"]
+    check("window comparison, turns shared", comparison["turns_in_common"], 30, 0)
+    check("window comparison: recency emits",
+          round(arms["recency_window"]["emits_an_action"], 3), 0.367, TOL)
+    check("window comparison: action window emits",
+          round(arms["action_window"]["emits_an_action"], 3), 0.167, TOL)
+    moved = comparison["action_window_vs_recency"]
+    check("action window vs recency, emits", round(moved["mean_diff"], 3), -0.2, TOL)
+    check("action window vs recency: losses", moved["losses"], 7, 0)
+    results.append(("the full-transcript control reproduced, so the comparison is the window rule",
+                    comparison["full_arm_continuations_identical"],
+                    "greedy generation from an untouched context, byte-identical across the runs"))
+    results.append(("the composition counts are a correlate, not the mechanism",
+                    not moved["includes_zero"] and moved["mean_diff"] < 0,
+                    f"more prior actions in the window (6 -> 13 median) and fewer actions emitted "
+                    f"({moved['mean_diff']:+.3f}, CI {moved['ci95']})"))
+
     # --- the figures must be *reproducible*, not merely present: regenerate every one of them from
     # the receipts in a temporary directory and require the tracked files to be identical.  This is
     # the data path asserted rather than documented - and because make_figures fails on a missing
