@@ -6,8 +6,8 @@
 # small consolidated far field holds fidelity at a 4,096-token total, the paper's headline state
 # halves - and the G4 region doubles, because 4,096 is the column with 63 advancing cells.
 set -x
-cd /root/ephemeral-kv || exit 1
-export PYTHONPATH=/root/ephemeral-kv
+cd "$(dirname "$0")/.." || exit 1
+export PYTHONPATH="$PWD"
 while pgrep -f "^/root/qcc/venv/bin/python benchmarks/g2" > /dev/null; do sleep 20; done
 
 g2common=(--min-history-tokens 32768 --dedup-spans --consolidate --retrieve-multiplier 2)

@@ -93,7 +93,7 @@ and the paper's contributions are its measured consequences:
    compiler - does not pay here: it is tied or worse on the decision, and the two stages that
    actually "compile state" are the ones that hurt.  The window and retrieval are what carry quality.
    Compaction, the baseline this space uses, is measured separately and is **equivalent** rather than
-   worse (Section 4.2b), so the paper claims no win over it either.
+   worse (Section 4.3), so the paper claims no win over it either.
 6. **A metric lesson.**  Teacher-forced next-token fidelity is saturated by the newest evidence on
    these traces and therefore cannot compare systems; the end task can, and we report both for every
    arm.
@@ -104,7 +104,11 @@ and the paper's contributions are its measured consequences:
 
 ### 2.1 Most of a session is state that is never needed again
 
-Measuring the token share held by the largest spans of each long session (`g2_dead_state.py`):
+**Table 1:** Where a long session's tokens sit. The spans that dominate a session are a small
+fraction of the turns that produced them - which is the whole reason a bounded state is possible.
+
+Table 1 measures the token share held by the largest spans of each long session
+(`g2_dead_state.py`):
 
 | session tokens | spans | largest span | top-2 share | top-5 share | the rest |
 |---:|---:|---:|---:|---:|---:|
@@ -120,8 +124,10 @@ turn-by-turn content is a minority.
 
 ### 2.2 Two laws, and the view that satisfies both
 
-Every arm measured at an 8,192-token view on the same examples (fidelity n=44 long-history
-examples, decision n=48 paired sessions, 26 scoreable):
+**Table 2:** Every arm at an 8,192-token view, on both metrics.
+
+Table 2 lists every arm measured at an 8,192-token view on the same examples (fidelity n=44
+long-history examples, decision n=48 paired sessions, 26 scoreable):
 
 | view | teacher-forced fidelity | end-task F1 |
 |---|---:|---:|
@@ -135,9 +141,14 @@ examples, decision n=48 paired sessions, 26 scoreable):
 | protected spans kept whole + ranked rest | -20.33 pp | 0.211 |
 | newest span only + compiled far field | -25.36 pp | 0.083 |
 
-*Figure 2 (`figures/fig2_two_metrics.svg`) plots these two columns against each other for every
-arm, and Figure 6 (`figures/fig6_metric_lesson.svg`) plots the fidelity column against how the
-newest evidence was rendered.*
+**Figure 2** plots the two metrics against each other and **Figure 6** plots the fidelity column
+against how the newest evidence was rendered.
+
+**Figure 2:** The two metrics against each other for every arm. No arm moves both: the arms that
+hold fidelity spend the budget on the window, the arms that win the decision spend it on retrieval.
+
+**Figure 6:** Fidelity against how the newest evidence was rendered. Rendering it whole is what
+holds the surface; the way the far field is compiled is what the decision reads.
 
 1. **Fidelity is set by how the newest evidence is rendered.**  Kept whole it is at parity with as
    little as 3K of window; prefix-truncated it costs 5-7 pp; reordered into a query-selected excerpt
@@ -160,7 +171,11 @@ ships, and it is the configuration in bold above.
 **A stricter end task, scored offline.**  File *mention* is a weak bar, so the same receipts are
 rescored one notch higher: `action_hit` requires the generated turn to name an edit-type tool or
 command (`str_replace_editor`, `apply_patch`, `sed -i`, `cat >`, `patch`, ...) *and* to target a file
-the recorded patch touched (`g2b_action_metric.py`, `artifacts/g2b-action-metric-v1.json`):
+the recorded patch touched (`g2b_action_metric.py`, `artifacts/g2b-action-metric-v1.json`);
+Table 3 reports it for every arm:
+
+**Table 3:** The stricter action-level end task: a continuation has to name the right kind of
+command *and* target a file the recorded patch touched.
 
 | arm | instances | full-history action rate | active action rate | paired delta |
 |---|---:|---:|---:|---:|
@@ -176,8 +191,11 @@ better**, and the absolute rates are low because the metric demands both an edit
 right file.  We report it as a bound our claim must clear rather than as a result: the stronger
 metric neither confirms nor refutes the weaker one, and task success remains unmeasured.
 
-**Why 6,144 and not less.**  The budget is measured, not chosen for convenience.  Holding the window
-at 3,072 tokens and varying the total:
+**Why 6,144 and not less.**  The budget is measured, not chosen for convenience.  Table 4 holds the
+window at 3,072 tokens and varies the total:
+
+**Table 4:** The budget floor. Below 6,144 tokens the fidelity delta leaves its 2 pp allowance,
+and above it more budget does not improve the decision.
 
 | total budget | fidelity (window + consolidated far field) | end-task F1 |
 |---:|---:|---:|
@@ -225,6 +243,11 @@ receipt:
 
 ### 3.2 The compiler, and what its stages are worth
 
+A compiler contract is only worth stating if its stages pay for themselves.  Table 5 lists the
+stages, what each means, and what each is worth when measured.
+
+**Table 5:** The compiler's stages, their semantics, and what each is worth when measured.
+
 | stage | semantics | measured effect |
 |---|---|---|
 | recency window | the current turn is not optional; newest evidence admitted whole | fidelity -6.94 -> **0.00 pp** |
@@ -235,7 +258,10 @@ receipt:
 | log replay into materialised state | dumps set content, diffs and SEARCH/REPLACE apply, repeated commands collapse | 0.231 against 0.237 on the decision; neutral, because only **6%** of retrieved spans are file events |
 | identifier provenance | pull spans sharing paths/ids with the query | part of the 4K -> 2K improvement |
 
-*Figure 3 (`figures/fig3_compiler_ablation.svg`) draws the end-task ladder these stages sit on.*
+**Figure 3** draws the end-task ladder these stages sit on.
+
+**Figure 3:** The end-task ladder the compiler's stages sit on. Dedup is neutral, and the two
+stages that re-select or collapse the newest evidence are what cost the decision.
 
 Two of these are negative results the paper keeps, because they bound what "executable state" can
 mean on this workload: the stages that *compile state* are the ones that hurt, and the reason is a
@@ -288,7 +314,12 @@ the recorded patch, with an offline action-level rescoring as a stricter variant
 
 ### 4.1 The state is bounded, and quality does not decay with age
 
-*Figure 1 (`figures/fig1_state_vs_age.svg`).*
+
+Table 6 gives raw history against the compiled state's size and the fidelity delta at three
+session lengths, Table 7 the same along the turn axis, and Figure 1 plots both against age.
+
+**Table 6:** The state does not grow with age: raw history against the compiled state's size and
+fidelity on the same sessions.
 
 | raw history p50 | execution state p50 | fidelity delta |
 |---:|---:|---:|
@@ -296,16 +327,26 @@ the recorded patch, with an offline action-level rescoring as a stricter variant
 | 82,972 | 7,133-7,899 | +0.00 pp |
 | 155,574 | 8,203 | +1.43 pp |
 
+**Table 7:** The same measurement along the turn axis.
+
 | turns p50 | raw history p50 | execution state p50 | fidelity delta |
 |---:|---:|---:|---:|
 | 40 | 79,769 | 8,121 | -1.43 pp |
 | 58 | 84,617 | 7,887 | **+0.00 pp** |
 | 96 | 155,222 | 8,203 | +0.00 pp |
 
+**Figure 1:** The compiled state against session age. Raw history grows by 2.4x across these
+sessions while the state stays inside its bound and the fidelity delta stays inside the allowance.
+
 A 22-turn example with 67K of history fails badly (-46.9 pp); it is a singleton, reported as one, and
 it points at a limitation: a short session whose individual turns are enormous.
 
 ### 4.2 The mobility law and the inversion
+
+Table 8 gives the two costs side by side.
+
+**Table 8:** Mobility: rebuilding and prefilling the compiled state, against moving the session's
+full KV.
 
 | session | state | mobility (lookup + active prefill) | full-KV move |
 |---|---:|---:|---:|
@@ -318,7 +359,7 @@ and the ranking consequence: with a 4,096 state the 1M session ranks *cheapest* 
 32K session carrying a 16K state ranks *most expensive* (0.4855 s); the footprint estimate ranks
 them 5.899 s against 0.184 s - exactly backwards.
 
-### 4.2b The baseline this space compares against: model-written compaction
+### 4.3 The baseline this space compares against: model-written compaction
 
 Other systems in this space report their gains *over* compaction-only context management, so the
 same baseline is measured here end to end: keep the newest 6,656 tokens verbatim, have a model
@@ -327,16 +368,18 @@ both into 8,192
 (`--compile-mode compact`, `scripts/run_compaction.sh`), with the summariser varied separately from
 the scorer (`--summarizer-model`).
 
-The corrected measurement is at **fidelity parity**: 0.00 pp (NLL -0.020) with 223 summariser calls
-and 395 summary reuses across 48 examples, and a view of 6,650 tokens p50 - because the window is
-6,656 tokens of untouched newest evidence and *that* is what carries the surface.  A **stronger
-summariser does not change it**: rewriting the same summaries with Qwen2.5-1.5B while the scorer
-stays Llama-3.2-1B also gives 0.00 pp (NLL -0.020), so the answer to "your summariser was weak" is
-that the summariser is not what the surface depends on.
+The corrected measurement is at **fidelity parity**: 0.00 pp (NLL -0.020 in the 32K-128K bucket,
+p50 over those examples) with 223 summariser calls and 395 summary reuses across 48 examples, and a
+view of 6,650 tokens p50 - because the window is 6,656 tokens of untouched newest evidence and
+*that* is what carries the surface.  The summariser is fixed (the scorer writes the summaries); one
+summariser family is a scope limit of this measurement, not a claim that the surface is
+summariser-independent.
 
 Which makes the comparison a controlled one: the two designs spend the same budget and keep the
 same window, and differ only in what the remaining ~1.5K buys.  On the decision, that comparison
-is the last cell of this table:
+is the last cell of Table 9:
+
+**Table 9:** What the remainder of an 8,192-token budget buys at a fixed 6,656-token window.
 
 | view (8,192 tokens) | window | remainder | fidelity | end-task F1 (n=48) |
 |---|---:|---|---:|---:|
@@ -371,10 +414,13 @@ the window respects the same budget as every other arm, the summary is counted i
 state, and every row records how many times the summariser was called and how often a summary was
 reused - so a receipt that claims to be a compaction can be checked rather than trusted.
 
-### 4.3 Capacity
+### 4.4 Capacity
 
 Sessions per worker with 20 GiB usable HBM (state sizes measured; KV geometry measured for the 0.5B
 model, declared for 8B/70B classes):
+
+**Table 10:** Sessions per worker at 20 GiB of usable HBM: resident history against resident
+compiled state.
 
 | geometry | resident history, 128K | resident history, 1M | resident compiled state, 8,192 |
 |---|---:|---:|---:|
@@ -382,12 +428,18 @@ model, declared for 8B/70B classes):
 | 8B-class (131,072 B/token) | 1.2 | 0.2 | **20** |
 | 70B-class (327,680 B/token) | 0.5 | 0.1 | **8** |
 
-### 4.4 Routing
+### 4.5 Routing
 
-*Figure 4 (`figures/fig4_phase_diagram.svg`).*
+**Figure 4** shows the phase diagram that replay produces.
+
+**Figure 4:** The routing phase diagram: cells where the bounded state advances against the
+history-resident baseline, by active-set size and by regime.
 
 Replay over measured G3 primitives (H2D 23.2-23.4 GB/s, active-set prefill 0.053/0.095/0.203/0.485 s
-at 2K/4K/8K/16K, lookup by history bucket), with declared arrival models and geometries:
+at 2K/4K/8K/16K, lookup by history bucket), with declared arrival models and geometries.  Table 11
+gives the advancing cells:
+
+**Table 11:** Advancing cells by active-set size in the routing replay, over the four regimes.
 
 | active set | advancing cells |
 |---|---:|
@@ -402,7 +454,12 @@ capacity-pressure regime: a warm cache holding a fraction of the fleet and no cl
 the baseline's alternative is a full re-prefill (1.6-14.3 s) against 0.203 s of rematerialisation.
 Against a tier that can move KV, the wins are worker loss plus the 1M-history mixes.
 
-### 4.5 Recovery and rollout
+### 4.6 Recovery and rollout
+
+Table 12 records what the runtime does under process loss and what reuse across models costs.
+
+**Table 12:** What the runtime does when it loses a worker, and what resuming on another model
+costs.
 
 | operation | measured |
 |---|---|
@@ -418,8 +475,7 @@ Against a tier that can move KV, the wins are worker loss plus the 1M-history mi
 Two lines of work are close enough that the difference has to be stated in objects and in cost
 laws rather than in adjectives.
 
-**Hierarchical context caching.**  [Strata](https://www.usenix.org/conference/osdi26/presentation/xie-zhiqiang)
-caches KV across GPU HBM, host memory and SSDs, and its contributions are a GPU-assisted I/O
+**Hierarchical context caching.**  Strata [1] caches KV across GPU HBM, host memory and SSDs, and its contributions are a GPU-assisted I/O
 mechanism that decouples layouts so large transfers are possible, and a cache-aware scheduler that
 mitigates delay hits and hides cache-loading latency; it is implemented in SGLang, deployed, and
 reports up to 5x throughput over vLLM-LMCache.  Its stated problem is that naive designs become
@@ -430,16 +486,18 @@ index, so what a cold route moves is ~32 KB of text and the transfer term leaves
 instead of being made efficient.  Strata's cache-aware scheduling remains the right design for the
 durable tier, where the transcript and index do live.
 
-**KV virtualisation for agent workspaces.**  [KVMem](https://www.alphaxiv.org/abs/2609.04852)
-preserves overflowed workspace history as paged KV state across GPU, host and NVMe, indexes it with
+**KV virtualisation for agent workspaces.**  KVMem [2] preserves overflowed workspace history as paged KV state across GPU, host and NVMe, indexes it with
 model-native attention-space summaries (Mean-K over blocks), and materialises a *query-dependent
 execution view* bounded by the model's native context window - 1M tokens of workspace on a 24 GB
 consumer GPU for a 27B model, with DeepSWE task success improving from 43.8% under compaction-only
 context management to 48.4%.  Two things are shared and we do not claim them: the idea of a
-query-dependent view, and the observation that compaction is lossy.  Two things differ, and they are
-the paper's subject:
+query-dependent view, and the observation that compaction is lossy.  Two things differ, and they
+are the paper's subject; Table 13 states them in objects and in costs.
 
-| | KVMem | this paper |
+**Table 13:** The two closest systems, compared in objects and in costs. The KVMem column is as
+reported in its paper.
+
+| | KVMem [2] | this paper |
 |---|---|---|
 | what the view is assembled from | paged **KV blocks**, with raw keys re-rotated at new positions | **text** compiled from a model-independent index |
 | what a cold route moves | KV blocks from host or NVMe | ~32 KB of state text; no model-specific state |
@@ -475,10 +533,10 @@ resident, against a tier that can move KV.
 
 **Compaction-based context management.**  Summarising or compacting history before it re-enters the
 model is a crowded space and predates this work; KVMem itself uses compaction as its baseline, and
-Section 4.2b measures that baseline under the same budget and the same window, with a summariser
-varied independently of the scorer.  The honest result is that **compaction is equivalent here, not
-worse**: fidelity 0.00 pp both ways, decision 0.122 against 0.089 with a paired interval that
-includes zero, and a stronger summariser changes nothing.  We therefore do not claim to beat
+Section 4.3 measures that baseline under the same budget and the same window, with the summariser
+written by the served model.  The honest result is that **compaction is equivalent here, not
+worse**: fidelity 0.00 pp both ways, and decision 0.122 against 0.089 with a paired interval that
+includes zero.  We therefore do not claim to beat
 compaction, and the paper's contribution is not in that comparison - it is the bound and its
 consequences.
 
@@ -532,6 +590,20 @@ compiler, is measured not to pay.  The session keeps growing; the state that mus
 
 ---
 
+## References
+
+The two systems Section 5 compares against are cited from their primary sources; the remaining
+systems named in that section (SGLang, vLLM-LMCache, SPIN/SparseServe, llm-d) are named as
+deployments rather than cited, and need citations before submission.
+
+[1] **Strata** - KV caching across GPU HBM, host memory and SSDs, with a GPU-assisted I/O path and a
+cache-aware scheduler, implemented in SGLang.  OSDI '26 presentation:
+<https://www.usenix.org/conference/osdi26/presentation/xie-zhiqiang>.  Full bibliographic details to
+be taken from the published paper.
+
+[2] **KVMem** - virtualises million-token agent workspaces as paged KV across GPU, host and NVMe,
+with a query-dependent bounded view.  arXiv:2609.04852, <https://www.alphaxiv.org/abs/2609.04852>.
+
 ## Appendix A. Claims, receipts and reproduction
 
 ### A.1 The claim map
@@ -541,7 +613,14 @@ produced it.  `benchmarks/paper_numbers.py` re-derives the headline numbers from
 asserts them (including the figures' own CSVs, so a figure cannot drift from its receipt);
 `benchmarks/check_receipts.py` verifies that every receipt a document cites exists and is not a
 partial write; `benchmarks/check_scripts.py` checks that every script's promised output exists;
-`benchmarks/make_figures.py` regenerates the figures from the receipts.
+`benchmarks/make_figures.py` regenerates the figures from the receipts.  The figures are stored as
+`figures/figN_*.csv` (the numbers, each row traceable to a receipt) and `figures/figN_*.svg` (the
+drawing), so a caption carries no path: figure 5 is a table-shaped CSV of the capacity numbers in
+Table 10 and has no drawing.
+
+Table 14 maps each claim to the receipt that backs it and to the script that produced it.
+
+**Table 14:** Each claim, the receipt that backs it, and the script that produced it.
 
 | claim | receipt | script |
 |---|---|---|
@@ -550,7 +629,7 @@ partial write; `benchmarks/check_scripts.py` checks that every script's promised
 | the budget floor is 6,144 tokens | `g2-compiler-window3k-b{4096,6144,12288}-v1.json` | `scripts/run_budget_lower.sh`, `-window3k_raw.sh` |
 | the joint view ties the best retrieval arm (n=96) | `g2b-patch-localization-{windowcompiler-b8192-n96,raw-b4096-n96}.json` | `scripts/run_joint_n96.sh` |
 | the stricter action-level end task is a bound, not a win | `g2b-action-metric-v1.json` | `benchmarks/g2b_action_metric.py` |
-| compaction costs ~24 pp of fidelity at the same budget | `g2-compiler-compact-b8192-v1.json` | `scripts/run_compaction.sh` |
+| compaction is equivalent at the same budget and window, not worse | `g2-compiler-compact-b8192-v1.json`, `g2b-patch-localization-compact-b8192-n48.json` | `scripts/run_compaction.sh` |
 | the compiler's stages do not pay, with attribution | `g2-compiler-{consolidate,dedup,materialize,statefirst,protectwhole}-*.json` | `scripts/run_tail_rerun.sh` |
 | the mobility law and the inversion | `g2-killer-table-v4.json`, G3 receipts | `benchmarks/g6_placement_inversion.py` |
 | the routing phase change at an admissible state | `g4-quality-join-v2.json` | `scripts/run_g4_{grid2,geometry,pressure,hotspot}.sh` |
@@ -558,7 +637,8 @@ partial write; `benchmarks/check_scripts.py` checks that every script's promised
 
 ### A.2 How these numbers are kept honest
 
-Four checks run against the repository rather than against the prose:
+Seven checks run against the repository rather than against the prose - five of them automated, and
+the cold-start drill runs all of them in a fresh clone:
 
 * **value audit** - `benchmarks/paper_numbers.py` re-derives every headline number from the
   receipts and asserts it - including that the routing cells which clear a strict
@@ -580,7 +660,18 @@ Four checks run against the repository rather than against the prose:
   arm that never produced its receipt.  This is the check that answers "did this experiment
   actually run", which a queue cannot answer while it is still waiting;
 * **figure regeneration** - `benchmarks/make_figures.py` and `make_svg_figures.py` rebuild every
-  figure from the receipts, and re-running them leaves the tree unchanged.
+  figure from the receipts, and re-running them leaves the tree unchanged.  A missing input is an
+  error (non-zero exit) rather than a figure written with an arm silently dropped;
+* **configuration audit** - a receipt records the flags that produced it, and
+  `benchmarks/check_scripts.py --config-audit` lists the receipts that predate that block.  This
+  closes the last gap: two different runs can leave receipts whose *numbers* look alike, and then an
+  arm cannot be re-run, only believed.  It found a live instance in this repository - the compaction
+  baseline was produced with a 6,656-token window while its runner script passed 3,072, and the two
+  cannot be told apart from the fidelity column (both hold the surface) or from the view size alone
+  (a 3,072 window with a 512-token summary and a 5,120 window with a 1,536-token one both cap the
+  view at 6,656 tokens).  The receipt was matched to its configuration by re-running candidate
+  configurations and comparing per-example view sizes, summariser call counts and scores; the script
+  was corrected, and the two compaction arms were re-run through it.
 
 Two failure modes were found while building this and are worth naming, because both produced
 *plausible-looking* evidence rather than errors.  A killed duplicate run left a **partial artifact
@@ -593,7 +684,9 @@ partial-receipt check, the semantic checks (`summariser_calls`), and queues that
 The runner scripts that produced each family of receipts are in `scripts/`, so the path from a
 claim to its evidence is a claim -> receipt -> script triple, and the paper states which of the
 three things that triple cannot cover: extrapolated rows, declared geometries, simulated clusters,
-and unmeasured task success.
+and unmeasured task success.  `docs/REPRODUCING.md` gives the CPU-only path that re-derives every
+number and figure here from the receipts, the rules that derive the corpora from the downloaded
+corpus, and the cold-start drill that checks the repository is self-contained.
 
 What is *not* here is as deliberate: the 1M lookup row is extrapolated (no public trace is that
 long), the 8B/70B geometries are declared rather than measured, the fleet-level scheduler is a replay

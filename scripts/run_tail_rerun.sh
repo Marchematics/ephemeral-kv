@@ -11,8 +11,8 @@
 # Order is by what decides the paper: both halves of the 8K claim first, then the arm that
 # spends on both (tail_query), then the small-active-set rows that G4's 4,096 column needs.
 set -x
-cd /root/ephemeral-kv || exit 1
-export PYTHONPATH=/root/ephemeral-kv
+cd "$(dirname "$0")/.." || exit 1
+export PYTHONPATH="$PWD"
 # match only the interpreter running the harness: a pattern like "g2_model_quality.py"
 # also matches the shell that launched this script (its command line carries the heredoc
 # text), which deadlocks the wait

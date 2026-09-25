@@ -261,6 +261,11 @@ def main(argv=None) -> int:
                 "history_tokens": example.history_tokens_estimate,
                 "active_tokens": example.active_tokens_estimate,
                 "recorded_files": sorted(recorded),
+                # what the view builder did, recorded rather than inferred: the decision arm's
+                # compaction row is quoted in the paper, and without this a reader cannot tell an
+                # arm that called its summariser from one that silently skipped it
+                "summariser_calls": getattr(example, "summariser_calls", 0),
+                "summary_reuses": getattr(example, "summary_reuses", 0),
                 "full": {"continuation": full_text,
                          **score_continuation(full_text, recorded),
                          "next_turn": score_continuation(full_text, next_turn_files)

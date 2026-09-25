@@ -9,8 +9,8 @@
 # The 4,096 and 2,048 rows are the G4 link: routing wants a ~2K active set, and the question is
 # whether a view that small can keep the decision once the tail is protected rather than cut.
 set -x
-cd /root/ephemeral-kv || exit 1
-export PYTHONPATH=/root/ephemeral-kv
+cd "$(dirname "$0")/.." || exit 1
+export PYTHONPATH="$PWD"
 # match only the interpreter running the harness: a pattern like "g2_model_quality.py"
 # also matches the shell that launched this script (its command line carries the heredoc
 # text), which deadlocks the wait

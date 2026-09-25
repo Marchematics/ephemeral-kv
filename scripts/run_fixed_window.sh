@@ -14,8 +14,8 @@
 # If the 12,288 row holds fidelity parity and the 8,192 row does too, the paper's claim is that a
 # bounded execution state of 8-12K carries both quality metrics - which is the 16K -> 8/12K gate.
 set -x
-cd /root/ephemeral-kv || exit 1
-export PYTHONPATH=/root/ephemeral-kv
+cd "$(dirname "$0")/.." || exit 1
+export PYTHONPATH="$PWD"
 while pgrep -f "^/root/qcc/venv/bin/python benchmarks/g2" > /dev/null; do sleep 20; done
 
 for b in 8192 12288; do

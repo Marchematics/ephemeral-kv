@@ -6,8 +6,8 @@
 # 4,096 with a 95% CI of [-0.016, +0.177] and 13 wins / 3 losses - an interval whose lower end is
 # close enough to zero to deserve a second sample.  96 paired sessions halves the interval.
 set -x
-cd /root/ephemeral-kv || exit 1
-export PYTHONPATH=/root/ephemeral-kv
+cd "$(dirname "$0")/.." || exit 1
+export PYTHONPATH="$PWD"
 while pgrep -f "^/root/qcc/venv/bin/python benchmarks/g2" > /dev/null; do sleep 20; done
 
 /root/qcc/venv/bin/python benchmarks/g2b_patch_localization.py \

@@ -16,6 +16,10 @@ import statistics
 import sys
 from pathlib import Path
 
+# the repository root: some headline numbers are re-derived through the harnesses' own code, which
+# imports the `ephemeralkv` package, so a direct run must not depend on an exported PYTHONPATH
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 TOL = 5e-3          # absolute tolerance for accuracy-like quantities
 TOL_PP = 0.05       # percentage points
 
@@ -123,30 +127,50 @@ def main(argv=None) -> int:
     check("failover rebuild s p50",
           round(statistics.median(r["state_rebuild_s"] for r in failover), 3), 1.387, 1e-2)
 
-    # --- receipts must do what their name claims, not merely contain the expected value
-    # (the compaction arm once reported a plausible number while never calling its summariser)
-    for name in ("artifacts/g2-compiler-compact-b8192-v1.json",
-                 "artifacts/g2-compiler-compact-strongsummary-b8192-v1.json"):
+    # --- receipts must do what their name claims, not merely contain the expected value: the
+    # fidelity arm of the compaction baseline once reported a plausible number while never calling
+    # its summariser, and the decision arm used to not record whether it had called one at all
+    for name, view_proves_summary in (
+            ("artifacts/g2-compiler-compact-b8192-v1.json", False),
+            ("artifacts/g2b-patch-localization-compact-b8192-n48.json", True)):
         path = Path(name)
         if not path.exists():
+            results.append((f"{path.stem} present", False, "receipt absent"))
             continue
-        rows = load(name)["rows"]
-        calls = sum(int(r.get("summariser_calls") or 0) for r in rows)
-        results.append((f"{path.stem} actually summarised",
-                        calls > 0 and len(rows) > 0,
-                        f"{calls} summariser calls over {len(rows)} rows"))
+        payload = load(name)
+        rows = payload["rows"]
+        recorded = all("summariser_calls" in row for row in rows)
+        calls = sum(int(row.get("summariser_calls") or 0) for row in rows)
+        results.append((f"{path.stem} records and makes summariser calls",
+                        recorded and calls > 0 and bool(rows),
+                        f"{calls} calls over {len(rows)} rows"
+                        + ("" if recorded else " (field absent: the arm ran without the fix)")))
+        window = (payload.get("config") or {}).get("tail_tokens")
+        view_key = ("active_tokens_estimate" if "active_tokens_estimate" in rows[0]
+                    else "active_tokens")
+        view_max = max(row[view_key] for row in rows)
+        if view_proves_summary:
+            # a compacted view larger than the verbatim window the arm may keep is a summary *in*
+            # the view; the fidelity arm's window packs to just under its cap, so its evidence is
+            # the call count above rather than the view size
+            results.append((f"{path.stem} view holds the summary",
+                            bool(window) and view_max > window,
+                            f"max view {view_max} vs window {window}"))
 
-    # --- C4b: the compaction baseline.  Withdrawn once (the arm never called its summariser), so
-    # an absent receipt is reported rather than crashing the audit; when the corrected receipts
-    # exist their numbers are asserted and their summariser use is checked above.
+    # --- C4b: the compaction baseline, asserted in the bucket the paper quotes rather than
+    # reported from whatever the receipt happens to hold (this arm was withdrawn once)
     compact_path = Path("artifacts/g2-compiler-compact-b8192-v1.json")
     if compact_path.exists():
         compact = bucket_stats(str(compact_path)).get("32K-128K") or {}
-        results.append(("compaction fidelity pp (recorded)",
-                        True, f"{round(100 * (compact.get('token_accuracy_delta_p50') or 0), 2)}"))
+        check("compaction fidelity pp (32K-128K)",
+              100 * (compact.get("token_accuracy_delta_p50") or 0.0), 0.0, TOL_PP)
+        check("compaction NLL delta p50 (32K-128K)",
+              round(compact.get("nll_delta_active_minus_full_p50") or 0.0, 3), -0.020, TOL)
+        compact_view = statistics.median(row["active_tokens_estimate"]
+                                         for row in load(str(compact_path))["rows"])
+        check("compaction view tokens p50", round(compact_view), 6650, 5)
     else:
-        results.append(("compaction baseline",
-                        True, "WITHDRAWN - receipt absent, no claim in the paper"))
+        results.append(("compaction baseline", False, "receipt absent - the paper quotes it"))
 
     # --- the figures must carry the same numbers as the receipts (data path: receipt -> CSV -> SVG)
     fig3 = Path("figures/fig3_compiler_ablation.csv")

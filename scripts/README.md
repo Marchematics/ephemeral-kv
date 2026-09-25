@@ -21,3 +21,16 @@ knowing before running them: the GPU is shared, so a script waits for other harn
 shell that launched the script, which deadlocks the wait), and the harnesses write their artifact
 incrementally, so a killed run leaves a *partial* receipt at the final path - `benchmarks/`
 `check_receipts.py` reports any cited receipt whose payload is partial.
+
+Each script derives the repository root from its own location
+(`cd "$(dirname "$0")/.."`, `export PYTHONPATH="$PWD"`), so a script run from a clone reads the
+clone: hardcoding the original checkout path made a clone's drill exercise the wrong tree.  The
+interpreter path (`/root/qcc/venv/bin/python`) and the model paths are the local environment's and
+have to be adjusted for a different machine.
+
+**Every output a script writes is tracked in `artifacts/`**, including the sweep arms that only
+feed a figure's CSV, because a figure is regenerated *from* its receipts: `benchmarks/make_figures.py`
+fails (exit 1) rather than writing a figure with an arm missing.  Receipts written after the
+`config` block was added record the flags that produced them; `benchmarks/check_scripts.py`
+reports the ones that predate it (`--config-audit`), which is what makes an arm's exact
+configuration - not just its numbers - checkable from the repository alone.

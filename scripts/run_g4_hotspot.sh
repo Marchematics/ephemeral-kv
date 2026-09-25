@@ -4,8 +4,8 @@
 # approximates.  Same measured primitives; only the regime parameter changes, and the receipt
 # records it.  Run at the quality-admissible 8,192-token state.
 set -x
-cd /root/ephemeral-kv || exit 1
-export PYTHONPATH=/root/ephemeral-kv
+cd "$(dirname "$0")/.." || exit 1
+export PYTHONPATH="$PWD"
 
 common=(--g3 artifacts/g3-hardware-primitives-qwen05b-v1.json
         --g3-warm artifacts/g3-active-prefill-warm-qwen05b-v1.json

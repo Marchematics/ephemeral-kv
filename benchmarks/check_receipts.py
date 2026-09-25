@@ -17,7 +17,11 @@ from pathlib import Path
 
 DOCS = ("docs/CLAIMS.md", "docs/VERDICT.md", "docs/DRAFT.md", "docs/PLAN.md",
         "docs/PAPER_SPEC.md", "docs/NOVELTY.md", "docs/REPORT.md", "docs/REVIEW.md",
-        "docs/PAPER.md")
+        "docs/PAPER.md", "docs/REPRODUCING.md")
+# The figure generator is a citing document too: it names the receipts each figure is built from,
+# and a figure whose input is untracked cannot be regenerated in a clone even though the figure's
+# own CSV is committed.
+FIGURE_SOURCES = ("benchmarks/make_figures.py",)
 # receipts that exist only as part of an external run (models, corpora, GPU sweeps) or that are
 # deliberately not tracked; listing them here is the documented-omission mechanism
 OPTIONAL_PREFIXES = ("data/", "models/")
@@ -30,12 +34,26 @@ def main(argv=None) -> int:
     args = p.parse_args(argv)
 
     cited: dict[str, set[str]] = {}
-    pattern = re.compile(r"`([^`]*artifacts/[^`]+?)`")
-    for name in args.docs:
+    # Two citation styles have to be recognised.  A document may name a receipt in full
+    # (`artifacts/x.json`) or, as the manuscript's claim map and ledger do, by its bare filename
+    # (`x.json`).  Matching only the first style is what let a load-bearing receipt look uncited:
+    # the audit's "cited" set was missing everything the paper's own table names.
+    full = re.compile(r"`([^`]*artifacts/[^`]+?)`")
+    bare = re.compile(r"`([A-Za-z0-9][A-Za-z0-9._+-]*\.json)`")
+    quoted = re.compile(r"\"([^\"]*artifacts/[^\"]+?\.json)\"")
+    sources = [(name, full, bare) for name in args.docs]
+    sources += [(name, quoted, None) for name in FIGURE_SOURCES]
+    for name, first, second in sources:
         path = Path(name)
         if not path.exists():
             continue
-        for match in pattern.findall(path.read_text()):
+        text = path.read_text()
+        found = list(first.findall(text))
+        if second is not None:
+            for candidate in second.findall(text):
+                if (Path(args.artifacts) / candidate).exists():
+                    found.append(f"{args.artifacts}/{candidate}")
+        for match in found:
             entry = match.strip()
             # skip globs, shell commands and placeholder paths: they are patterns or invocations,
             # not receipts

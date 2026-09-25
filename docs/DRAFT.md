@@ -1,5 +1,8 @@
 # Draft — what the system state of a long-lived session is
 
+> Historical.  This is the earlier draft of the framing; the manuscript is
+> [`PAPER.md`](PAPER.md), which supersedes it wherever the two differ.
+
 ## Abstract (draft)
 
 A long-lived LLM session is served today as if its KV cache *were* the session: the resident

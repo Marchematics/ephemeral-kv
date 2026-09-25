@@ -14,8 +14,8 @@
 #
 # Every cost is a G3 measurement; the arrival model is declared in the receipt.
 set -x
-cd /root/ephemeral-kv || exit 1
-export PYTHONPATH=/root/ephemeral-kv
+cd "$(dirname "$0")/.." || exit 1
+export PYTHONPATH="$PWD"
 common=(--g3 artifacts/g3-hardware-primitives-qwen05b-v1.json
         --g3-warm artifacts/g3-active-prefill-warm-qwen05b-v1.json
         --g3-prefill artifacts/g3-fullprefill-qwen05b-v1.json

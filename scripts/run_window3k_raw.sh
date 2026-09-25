@@ -8,8 +8,8 @@
 # and varies only the window, at 8,192 and at 12,288 - where the ranked share becomes 9,216
 # tokens, the budget at which the compiled arm reached 0.213.
 set -x
-cd /root/ephemeral-kv || exit 1
-export PYTHONPATH=/root/ephemeral-kv
+cd "$(dirname "$0")/.." || exit 1
+export PYTHONPATH="$PWD"
 while pgrep -f "^/root/qcc/venv/bin/python benchmarks/g2" > /dev/null; do sleep 20; done
 
 for b in 8192 12288; do

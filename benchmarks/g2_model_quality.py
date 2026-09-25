@@ -23,6 +23,12 @@ from pathlib import Path
 from statistics import median
 from typing import Iterable
 
+import sys
+
+# the repository root, so a direct `python benchmarks/<harness>.py` run works from a
+# clone without an exported PYTHONPATH; the runner scripts set it as well
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 from ephemeralkv.consolidate import compile_units, consolidate, render
 from ephemeralkv.index import terms
 from ephemeralkv.statecompile import classify, compile_executable_state, state_first_units
@@ -780,6 +786,11 @@ def main(argv=None):
         "model": args.model,
         "token_budget": args.token_budget,
         "max_length": args.max_length,
+        # the run's own configuration: a receipt whose numbers cannot be traced back to the flags
+        # that produced them cannot be reproduced, and from the rows alone an arm that kept a
+        # 3,072-token window with a 512-token summary is indistinguishable from one that kept
+        # 5,120 with 1,536 - both cap the view at 6,656
+        "config": {k: v for k, v in sorted(vars(args).items()) if k != "out"},
         "compiler": {"recency_spans": args.recency_spans,
                      "recency_fraction": args.recency_fraction,
                      "max_span_fraction": args.max_span_fraction,

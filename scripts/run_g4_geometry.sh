@@ -20,8 +20,8 @@
 #
 # Everything except the declared geometry is a measured primitive; each receipt records both.
 set -x
-cd /root/ephemeral-kv || exit 1
-export PYTHONPATH=/root/ephemeral-kv
+cd "$(dirname "$0")/.." || exit 1
+export PYTHONPATH="$PWD"
 # no GPU is involved (the replay is pure simulation over measured costs), so this must not wait
 # on the harness queue
 

@@ -214,12 +214,25 @@ does not beat plain retrieval on the decision (+0.055 at n=24, -0.104 on one 48-
 it is worse, and tied at equal budget), and two of its stages measurably hurt.  That claim is
 withdrawn rather than softened, and the paper reports the ablation that says why.
 
-## Immediate experiment order
+## Before submission
 
-1. G2 public real-trajectory structural run.
-2. G2 model/task quality on a non-QCC compiler.
-3. G3 matched hardware sweep on one GPU + host/remote transfer path.
-4. Only if G2/G3 pass: implement multi-worker G4.
-5. G5 after the mobility primitive is real.
+Open items, in the order they matter:
 
-No additional cache heuristic is allowed to preempt this order.
+1. **Citations for the deployments named in Section 5.**  The two systems compared against (Strata,
+   KVMem) are cited from their primary sources; SGLang, vLLM-LMCache, SPIN/SparseServe and llm-d are
+   named as deployments, without citations, and need them.
+2. **Task success on a benchmark like DeepSWE.**  The end task here is file-level localisation of the
+   next turn plus an offline action-level rescoring, which is weaker evidence than task success, and
+   Section 6 says so.
+3. **The 8B/70B capacity geometries are declared**, from published KV geometries, rather than
+   measured on those models; the 0.5B geometry is measured.
+4. **The routing consequence is a replay, not a cluster**: the primitives (H2D bandwidth, lookup,
+   active-set prefill) are measured; the arrival models and the fleet geometries are declared.
+5. **The corpus stops at 96 turns and 156K tokens.**  The 1M rows are composed with one extrapolated
+   lookup input and are labelled wherever they appear.
+6. **Float numbering.**  Figures and tables are numbered in this draft by the order they were
+   generated; in a LaTeX build they are renumbered by order of appearance.  Figure 5 is a
+   table-shaped CSV of the capacity numbers and has no drawing.
+7. **Configuration coverage.**  Receipts now record the flags that produced them;
+   `python benchmarks/check_scripts.py --config-audit` lists the ones that predate that block, and
+   re-running those arms is what closes the gap.

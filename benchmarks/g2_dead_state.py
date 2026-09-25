@@ -22,6 +22,12 @@ from transformers import AutoTokenizer
 
 from benchmarks.g2_model_quality import classify
 from benchmarks.g2_trace_index import _content, messages_from_row
+import sys
+
+# the repository root, so a direct `python benchmarks/<harness>.py` run works from a
+# clone without an exported PYTHONPATH; the runner scripts set it as well
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 from ephemeralkv.index import DurableSpanIndex
 
 

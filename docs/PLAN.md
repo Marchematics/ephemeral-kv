@@ -1,5 +1,10 @@
 # Kill gates
 
+> Historical.  The gates and their failure conditions in this file were written *before* their
+> measurements, which is what makes them a pre-registration rather than a summary.  What was
+> measured, and which gates are met, is in [`PAPER_SPEC.md`](PAPER_SPEC.md) and
+> [`VERDICT.md`](VERDICT.md).
+
 EphemeralKV is now a **session-mobility** project. Five gates decide whether the
 central claim survives. Every gate has a failure condition written before its
 measurement.

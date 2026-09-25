@@ -6,8 +6,8 @@
 # near the end of one.  `data/sessions-patch-64k.jsonl` is those 338 sessions, so the scan is
 # replaced by a read.
 set -x
-cd /root/ephemeral-kv || exit 1
-export PYTHONPATH=/root/ephemeral-kv
+cd "$(dirname "$0")/.." || exit 1
+export PYTHONPATH="$PWD"
 while pgrep -f "^/root/qcc/venv/bin/python benchmarks/g2" > /dev/null; do sleep 20; done
 
 /root/qcc/venv/bin/python benchmarks/g2b_patch_localization.py \

@@ -43,6 +43,8 @@ def main(argv=None) -> int:
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     p.add_argument("--scripts", default="scripts")
     p.add_argument("--only-missing", action="store_true")
+    p.add_argument("--config-audit", action="store_true",
+                   help="list complete receipts that do not record the flags that produced them")
     args = p.parse_args(argv)
 
     rows = []
@@ -57,6 +59,7 @@ def main(argv=None) -> int:
                 outputs.append(path)
         for path in outputs:
             target = Path(path)
+            recorded = False
             if path in SUPERSEDED:
                 state = "superseded"
             elif not target.exists():
@@ -65,9 +68,15 @@ def main(argv=None) -> int:
                 try:
                     payload = json.loads(target.read_text())
                     state = "partial" if payload.get("partial") else "complete"
+                    # A receipt that does not record the flags that produced it cannot be
+                    # reproduced, and from the rows alone some arms are indistinguishable: the
+                    # compaction arm caps its view at 6,656 whether the window was 3,072 tokens
+                    # with a 512-token summary or 5,120 with 1,536.
+                    recorded = isinstance(payload.get("config"), dict)
                 except (json.JSONDecodeError, OSError):
                     state = "unreadable"
-            rows.append({"script": script.name, "output": path, "state": state})
+            rows.append({"script": script.name, "output": path, "state": state,
+                         "config_recorded": recorded})
 
     counts = {"complete": 0, "partial": 0, "missing": 0, "unreadable": 0, "superseded": 0}
     for row in rows:
@@ -75,9 +84,16 @@ def main(argv=None) -> int:
     for row in rows:
         if args.only_missing and row["state"] in ("complete", "superseded"):
             continue
-        print(f"{row['state']:<10} {row['script']:<32} {row['output']}")
+        if args.config_audit and (row["state"] != "complete" or row["config_recorded"]):
+            continue
+        note = "   [no config recorded]" if row["state"] == "complete" and not row["config_recorded"] else ""
+        print(f"{row['state']:<10} {row['script']:<32} {row['output']}{note}")
+    complete = [r for r in rows if r["state"] == "complete"]
+    with_config = sum(1 for r in complete if r["config_recorded"])
     print(f"\n{len(rows)} outputs across the scripts: " +
           ", ".join(f"{k} {v}" for k, v in sorted(counts.items())))
+    print(f"complete receipts recording their run configuration: {with_config}/{len(complete)} "
+          f"(the rest predate the config block; --config-audit lists them)")
     return 0
 
 

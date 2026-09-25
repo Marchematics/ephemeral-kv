@@ -11,7 +11,13 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import sys
 from pathlib import Path
+
+# the repository root: this tool loads the harness modules to reuse their bucket statistics, and
+# those import the `ephemeralkv` package, so a direct run must not depend on an exported
+# PYTHONPATH
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 FIGURES = {
     # figure -> (receipts, columns)
@@ -266,9 +272,13 @@ def main(argv=None) -> int:
     for path in written:
         print("wrote", path)
     if missing:
+        # a missing receipt used to be a warning while the figure was still written without that
+        # arm, so a figure could silently lose a row and the generator still exit 0: in a fresh
+        # clone that is how a reader gets a CSV that no longer matches the paper
         print(f"\nMISSING RECEIPTS ({len(missing)}):")
         for name in missing:
             print(" ", name)
+        return 1
     return 0
 
 
