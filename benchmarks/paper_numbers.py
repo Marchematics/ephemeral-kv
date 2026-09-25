@@ -13,7 +13,9 @@ import argparse
 import importlib.util
 import json
 import statistics
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 # the repository root: some headline numbers are re-derived through the harnesses' own code, which
@@ -172,6 +174,20 @@ def main(argv=None) -> int:
     else:
         results.append(("compaction baseline", False, "receipt absent - the paper quotes it"))
 
+    # --- the decision column of the same table, and the reference it is read against: the two arms
+    # are scored on the same instances, so their full-history means must agree
+    for name, want in (("artifacts/g2b-patch-localization-compact-b8192-n48.json", 0.122),
+                       ("artifacts/g2b-patch-localization-window6656-b8192-n48.json", 0.089)):
+        path = Path(name)
+        if not path.exists():
+            results.append((f"{path.stem} decision", False, "receipt absent"))
+            continue
+        rows = [row for row in load(name)["rows"] if row.get("recorded_files")]
+        check(f"{path.stem} mean F1", round(statistics.mean(r["active"]["f1"] for r in rows), 3),
+              want, TOL)
+        check(f"{path.stem} full-history reference",
+              round(statistics.mean(r["full"]["f1"] for r in rows), 3), 0.089, TOL)
+
     # --- the figures must carry the same numbers as the receipts (data path: receipt -> CSV -> SVG)
     fig3 = Path("figures/fig3_compiler_ablation.csv")
     if fig3.exists():
@@ -184,6 +200,25 @@ def main(argv=None) -> int:
         if raw96:
             check("figure 3 carries the retrieval arm's decision",
                   float(raw96["active_f1"]), 0.169, TOL)
+
+    # --- the figures must be *reproducible*, not merely present: regenerate every one of them from
+    # the receipts in a temporary directory and require the tracked files to be identical.  This is
+    # the data path asserted rather than documented - and because make_figures fails on a missing
+    # input, it also asserts that every figure's inputs are in the repository.
+    with tempfile.TemporaryDirectory() as tmp:
+        rebuilt = subprocess.run([sys.executable, "benchmarks/make_figures.py", "--outdir", tmp],
+                                 capture_output=True, text=True, check=False)
+        drawn = subprocess.run([sys.executable, "benchmarks/make_svg_figures.py", "--dir", tmp],
+                               capture_output=True, text=True, check=False)
+        tracked = sorted(Path("figures").glob("*"))
+        drifted = [path.name for path in tracked
+                   if not (Path(tmp) / path.name).exists()
+                   or (Path(tmp) / path.name).read_bytes() != path.read_bytes()]
+        ok = rebuilt.returncode == 0 and drawn.returncode == 0 and not drifted
+        detail = f"{len(tracked)} files, drift: {drifted or 'none'}"
+        if not ok and not drifted:
+            detail += f" (make_figures exit {rebuilt.returncode}, svg exit {drawn.returncode})"
+        results.append(("figures regenerate byte-identically from the receipts", ok, detail))
 
     # --- C3 (stricter end task): the action-level rescoring must stay a bound, not a win
     action = load("artifacts/g2b-action-metric-v1.json")["rows"]

@@ -89,7 +89,8 @@ def main(argv=None) -> int:
         for name in untracked:
             print(f"  {name}   <- {', '.join(sorted(cited[name]))}")
     if partial:
-        print(f"\nCITED BUT PARTIAL ({len(partial)}) - a killed run wrote these; re-run before use:")
+        print(f"\nCITED BUT PARTIAL ({len(partial)}) - written incrementally, so this is a run that "
+              f"was killed or is still in flight; re-run before quoting:")
         for name in partial:
             print(f"  {name}   <- {', '.join(sorted(cited[name]))}")
     if missing:

@@ -6,7 +6,7 @@ in this file requires a GPU until the last section.
 ## What is in the repository, and what is not
 
 **In:** the harnesses (`benchmarks/`), the runner scripts that produced the receipts (`scripts/`),
-the receipts themselves (`artifacts/`, 115 files), the figures (`figures/`, CSV plus SVG), the
+the receipts themselves (`artifacts/`, 123 files), the figures (`figures/`, CSV plus SVG), the
 library (`ephemeralkv/`) and its test suite (`tests/`), and the manuscript and its ledgers
 (`docs/`).
 
