@@ -193,15 +193,15 @@ now carries what was measured, what its scope is, and whether the gate is met.
 
 | gate | threshold | measured | status |
 |---|---|---|---|
-| 1a view size | <= 8,192 tokens | the shipped view is 8,192 and the *floor* is measured: 4,096 scores -2.40 pp, 6,144 scores 0.00 pp, above that neither metric improves | **met** |
-| 1b fidelity | within 2 pp of full history | window 3-7K kept whole: **0.00 pp** (NLL -0.020); plain retrieval at the same budget: -6.94 pp; model-written compaction at the same budget and window: **0.00 pp** (the window carries the surface) | **met** |
-| 1c end task | no regression vs full history | 96 paired sessions: the shipped view 0.165 against plain retrieval's 0.169, paired **+0.013, 95% CI [-0.068, +0.092]**; a stricter action-level rescoring is also a bound (every interval includes zero, no arm measurably better) | **met as no-regression**; "better than retrieval" is not claimed |
-| 2 G3 law | 128K -> 1M grows <= 1.25x at fixed active demand | active prefill depends only on the active count; lookup grows 2.8x while the corpus grows ~16x; the 1M lookup row is extrapolated and labelled | **met within measured buckets** |
+| 1a view size | <= 8,192 tokens, ideally 4-8K | the state is **4-8K, measured**: a 3,584-token window inside a 4,096-token total holds the surface (-0.96 pp), 6,144 holds 0.00 pp, and above that neither metric improves | **met at 4-8K** |
+| 1b fidelity | within 2 pp of full history | 4,096/3,584: **-0.96 pp**; 6,144/3,072 and above: **0.00 pp**; model-written compaction at the same budget and window: **+0.13 pp** with its summary in the scored context; plain retrieval at 4,096: -22.84 pp | **met** |
+| 1c end task | no regression vs full history | 96 paired sessions: the shipped view 0.165 against plain retrieval's 0.169, paired **+0.013, 95% CI [-0.068, +0.092]**; at 6,144 the decision is 0.150 against full history's 0.089; a stricter action-level rescoring is a bound (every interval includes zero, no arm measurably better) | **met as no-regression**; "better than retrieval" is not claimed |
+| 2 G3 law | 128K -> 1M grows <= 1.25x at fixed active demand | active prefill depends only on the active count; lookup is **measured** at 1M on composed histories (0.68 ms p50 at 1,086K tokens, query-driven rather than history-driven), and the H2D payload grows with the session by construction | **met, with composed histories past 156K** |
 | 3 G3 inversion | 1M/2K cheaper than 32K/16K | 1M with a 4,096-token state: 0.0954 s; with 8,192: 0.2031 s; 32K with the pre-compiler 16,384-token view: 0.4855 s; a session 32x older is 2.4x (5.1x) cheaper, and the footprint estimate ranks the two backwards | **met** |
-| 4 G4 consequence | >= 1.5x goodput or >= 30% p99 in several regimes | **134 of 624 cells advance, 54 at a fidelity-admissible state**: 52 at the 8,192-token active set across balanced, hotspot, slow-worker and worker-loss, and 2 at 16,384; all 52 at 8,192 clear the **1.5x SLO-goodput** bar (26 with a finite ratio, median 1.72x) and none needs the p99 route; the balanced/hotspot/slow-worker wins are the no-cluster-KV-store regime, and a strict retrieval-parity bar clears **0** cells | **met with the scope stated** |
-| 5 G5 ownership | worker loss transfers no history-sized object | process-level kill: a fresh worker rebuilds 8,192 tokens in 0.91-1.42 s with identical token accuracy and 32,455 bytes read; model rollout keeps the decision on two foreign models (0.137/0.145 against 0.017/0.042) | **met** |
-| 6 honest boundary | a region where the baseline wins, measured | balanced load with every session resident against a KV-moving tier does not advance; the 4,096 and 16,384 columns barely advance; the decision advantage vanishes into a tie at 64K-96K histories | **met** |
-| 7 deeper: `dM/dL ~ 0` | state flat in age with quality flat | state 7.1-8.2K while history grows 64K -> 156K and on the turn axis 40 -> 96 turns, fidelity delta +0.00/+0.00/+1.43 pp; **and** the lexical evidence mass does grow with age, so the bound is a design choice validated by quality, not an intrinsic ceiling | **met, with the caveat** |
+| 4 G4 consequence | >= 1.5x goodput or >= 30% p99 in several regimes | **134 of 624 cells advance, 117 at a fidelity-admissible state**: **63 at the 4,096-token floor**, 52 at 8,192, 2 at 16,384, across balanced, slow-worker (the hotspot) and worker-loss; **all 117 clear the 1.5x SLO-goodput bar** (79 with a finite ratio, median 1.61x; the other 38 against a baseline that completes no work) and none needs the p99 route (best +26%); a strict retrieval-parity bar clears **0** cells | **met with the scope stated** |
+| 5 G5 ownership | worker loss transfers no history-sized object | process-level kill: a fresh worker rebuilds 8,192 tokens in 0.91-1.42 s with identical token accuracy and 32,455 bytes read; the state is 18-40 KB of text at every measured age (111K-984K tokens); model rollout keeps the decision on two foreign models (0.137/0.145 against 0.017/0.042) | **met** |
+| 6 honest boundary | a region where the baseline wins, measured | balanced load with every session resident against a KV-moving tier does not advance; the 2,048 and 16,384 columns barely advance (17 and 2 cells) and the 2,048 column is not fidelity-admissible; the decision advantage vanishes into a tie at 64K-96K histories | **met** |
+| 7 deeper: `dM/dL ~ 0` | state flat in age with quality flat | state **4,588-8,439 tokens across an 8.9x range of raw history and 45x of turns** (composed past 156K), transfer 18-40 KB, lookup 0.27-0.68 ms, and paired against a resident 131K-window reference the accuracy gap is **-2.41 pp at 145K and -2.50 pp at 278K** - flat in age on every axis; **and** the lexical evidence mass does grow with age (395K of 764K tokens still match the query), so the bound is a design choice validated by quality, not an intrinsic ceiling | **met, with the caveat** |
 
 Two comparisons the space will ask for, and their honest state: **compaction** (the de facto
 baseline) is equivalent to the shipped view at the same budget and window on both metrics (paired
@@ -209,10 +209,16 @@ intervals include zero), so this paper does not claim to beat it; and the *compi
 project started from is not just unproven but measured worse or tied, which is why it was withdrawn
 rather than softened.
 
-The one gate that is *not* met is the compiler gate the project started from: a semantic compiler
-does not beat plain retrieval on the decision (+0.055 at n=24, -0.104 on one 48-instance set where
-it is worse, and tied at equal budget), and two of its stages measurably hurt.  That claim is
-withdrawn rather than softened, and the paper reports the ablation that says why.
+The one gate that is *not* met is the compiler gate the project started from, and the falsification
+now covers the size the system actually runs at.  A semantic compiler does not beat plain retrieval
+on the decision (+0.055 at n=24, -0.104 on one 48-instance set where it is worse, tied at equal
+budget); two of its stages measurably hurt; and at the 4,096-token floor, where the far field has
+least room and materialised state is most attractive, log replay into materialised state scores
+**-2.48 pp** against consolidation's **-2.40 pp**, while widening the window at the same total
+reaches **-0.96 pp**.  The claim is withdrawn rather than softened: the surface is bought by keeping
+more of the newest evidence whole, not by compiling the older evidence harder, and Paper B's identity
+rests on the object and its consequences rather than on a compiler that was measured and did not
+pay.
 
 ## Before submission
 
