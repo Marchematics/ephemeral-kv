@@ -533,6 +533,34 @@ def main(argv=None) -> int:
                         f"{rebuilt_summary.get('advances')} advances against the tracked "
                         f"{tracked_summary['cells']} / {tracked_summary['advances']}"))
 
+        # ...and the same question for every other derived receipt: each one is a summary of
+        # receipts, and a summary whose inputs are not in the repository is a number on one machine.
+        # The grid above was the one that was broken; this is the check that finds the next one.
+        derived = [
+            ("g4-quality-join-v3.json",
+             ["benchmarks/g4_quality_join.py", "--phase", "artifacts/g4-all-phase-summary-v3.json",
+              "--points", "artifacts/quality-points-v1.json"]),
+            ("g4b-burst-sensitivity-v1.json", ["benchmarks/g4_burst_sensitivity.py"]),
+            ("g4b-long-age-summary-v1.json", ["benchmarks/g4_long_age_summary.py"]),
+            ("g2d-window-comparison-v1.json", ["benchmarks/g2d_window_comparison.py"]),
+            ("g2d-action-summary-v1.json", ["benchmarks/g2d_action_summary.py"]),
+        ]
+        unreproducible = []
+        for name, command in derived:
+            out = f"{tmp}/{name}"
+            run = subprocess.run([sys.executable, *command, "--out", out],
+                                 capture_output=True, text=True, check=False)
+            if run.returncode != 0 or not Path(out).exists():
+                unreproducible.append(f"{name} (did not build)")
+                continue
+            if json.loads(Path(out).read_text()).get("summary") != load(f"artifacts/{name}").get("summary"):
+                unreproducible.append(f"{name} (differs)")
+        check("derived receipts that do not rebuild from the repository",
+              len(unreproducible), 0, 0)
+        results.append(("every derived receipt rebuilds from the repository",
+                        not unreproducible,
+                        f"{len(derived)} rebuilt; {unreproducible or 'all identical'}"))
+
     # --- the floats: numbered by order of appearance, and every reference resolving to one.  The
     # numbering was by generation order until it was fixed, which put Figure 1 in Section 4 and
     # Table 1 in the appendix, so this check exists to keep the draft matching a LaTeX build.

@@ -148,6 +148,16 @@ python benchmarks/make_svg_figures.py --dir /tmp/coldfigs
 diff -r /tmp/coldfigs figures
 ```
 
+### Derived receipts must rebuild
+
+`paper_numbers.py` re-derives the routing grid and every summary built from receipts, into a
+temporary directory, and requires the tracked one to match.  This is not belt-and-braces: the grid
+check was added because 220 of the 282 receipts `run_g4_join.sh` globs were on disk but never in
+git, so in a clone the same script produced **30 cells of 67** against the checked-in summary's
+**174 of 724**.  Every audit passed anyway, because they checked that a script's *named* outputs
+exist rather than that a derived receipt can be produced from the repository at all.  If you add a
+receipt that summarises others, add it to that list.
+
 A clone has no `data/` and no checkpoints, so anything that needs them is out of scope for the
 drill; everything else must pass.  The drill is what found four cited receipts that existed only in
 the working directory, ten script outputs that were never tracked, figure-generation inputs that
