@@ -1,0 +1,283 @@
+{
+  "schema": "ephemeral-kv-g4-routing-replay-v1",
+  "verdict": {
+    "balanced": {
+      "strongest_baseline": "full_kv_move",
+      "goodput_ratio": 1.40625,
+      "p99_reduction": 0.029415069962035585,
+      "decision": "not_established",
+      "median_regression_vs_full_kv_move": 0.5677836989709334,
+      "median_regression_ok": false
+    },
+    "slow_worker": {
+      "strongest_baseline": "full_kv_move",
+      "goodput_ratio": Infinity,
+      "p99_reduction": -0.4784141127750351,
+      "decision": "advance"
+    },
+    "worker_failure": {
+      "strongest_baseline": "full_kv_move",
+      "goodput_ratio": Infinity,
+      "p99_reduction": -1.6874769622150212,
+      "decision": "advance"
+    }
+  },
+  "kind": "replay_simulation",
+  "config": {
+    "g3": "artifacts/g3-hardware-primitives-qwen05b-v1.json",
+    "g3_warm": "artifacts/g3-active-prefill-warm-qwen05b-v1.json",
+    "g3_prefill": "artifacts/g3-fullprefill-qwen05b-v1.json",
+    "out": "artifacts/g4e-hotspot-g131072-warm2-tier0-h32768_131072_262144-v1.json",
+    "sessions": 16,
+    "turns_per_session": 8,
+    "workers": 4,
+    "active_tokens": 8192,
+    "bandwidth_gbs": null,
+    "warm_capacity": 2,
+    "tier_capacity": 0,
+    "escape_s": 1.0,
+    "turn_service_s": 0.6,
+    "slow_worker_speed": 0.1,
+    "gap_model": "bursty",
+    "seed": 0,
+    "kv_bytes_per_token": 131072,
+    "history_choices": [
+      32768,
+      131072,
+      262144
+    ]
+  },
+  "costs": {
+    "kv_bytes_per_token": 131072,
+    "bandwidth_gbs": 23.252871653821966,
+    "lookup_s": {
+      "8192": 8.685199999547422e-05,
+      "32768": 0.00015024000001062632,
+      "131072": 0.00024597850000418475,
+      "1048576": 0.0004
+    },
+    "active_prefill_s": {
+      "2048": 0.052968500182032585,
+      "4096": 0.09496935456991196,
+      "8192": 0.20267114788293839,
+      "16384": 0.48538769222795963
+    },
+    "full_prefill_s": {
+      "32768": 1.5877592079341412,
+      "131072": 14.319944508373737,
+      "524288": null
+    }
+  },
+  "declared_workload": "turn arrivals and tool gaps come from an explicit model; the public corpus has no timestamps, so this replays sessions against measured costs rather than measured arrivals",
+  "slo_seconds": 2.0,
+  "balanced": {
+    "strict_sticky": {
+      "policy": "strict_sticky",
+      "requests": 48,
+      "unserved": 80,
+      "p50_s": 2.476451510206834,
+      "p95_s": 4.699504587620732,
+      "p99_s": 4.781275489194492,
+      "slo_goodput": 0.16666666666666666,
+      "migrations": 22
+    },
+    "sticky_saturated": {
+      "policy": "sticky_saturated",
+      "requests": 48,
+      "unserved": 80,
+      "p50_s": 2.476451510206836,
+      "p95_s": 4.6549547393238235,
+      "p99_s": 6.654353649773169,
+      "slo_goodput": 0.16666666666666666,
+      "migrations": 26
+    },
+    "full_kv_move": {
+      "policy": "full_kv_move",
+      "requests": 48,
+      "unserved": 80,
+      "p50_s": 2.476451510206836,
+      "p95_s": 4.6549547393238235,
+      "p99_s": 6.654353649773169,
+      "slo_goodput": 0.16666666666666666,
+      "migrations": 26
+    },
+    "full_reprefill": {
+      "policy": "full_reprefill",
+      "requests": 48,
+      "unserved": 80,
+      "p50_s": 2.476451510206836,
+      "p95_s": 4.6549547393238235,
+      "p99_s": 6.654353649773169,
+      "slo_goodput": 0.16666666666666666,
+      "migrations": 26
+    },
+    "ephemeral": {
+      "policy": "ephemeral",
+      "requests": 128,
+      "unserved": 0,
+      "p50_s": 3.882540308994227,
+      "p95_s": 6.005140306462835,
+      "p99_s": 6.458615371612964,
+      "slo_goodput": 0.234375,
+      "migrations": 89
+    }
+  },
+  "by_regime": {
+    "balanced": {
+      "strict_sticky": {
+        "policy": "strict_sticky",
+        "requests": 48,
+        "unserved": 80,
+        "p50_s": 2.476451510206834,
+        "p95_s": 4.699504587620732,
+        "p99_s": 4.781275489194492,
+        "slo_goodput": 0.16666666666666666,
+        "migrations": 22
+      },
+      "sticky_saturated": {
+        "policy": "sticky_saturated",
+        "requests": 48,
+        "unserved": 80,
+        "p50_s": 2.476451510206836,
+        "p95_s": 4.6549547393238235,
+        "p99_s": 6.654353649773169,
+        "slo_goodput": 0.16666666666666666,
+        "migrations": 26
+      },
+      "full_kv_move": {
+        "policy": "full_kv_move",
+        "requests": 48,
+        "unserved": 80,
+        "p50_s": 2.476451510206836,
+        "p95_s": 4.6549547393238235,
+        "p99_s": 6.654353649773169,
+        "slo_goodput": 0.16666666666666666,
+        "migrations": 26
+      },
+      "full_reprefill": {
+        "policy": "full_reprefill",
+        "requests": 48,
+        "unserved": 80,
+        "p50_s": 2.476451510206836,
+        "p95_s": 4.6549547393238235,
+        "p99_s": 6.654353649773169,
+        "slo_goodput": 0.16666666666666666,
+        "migrations": 26
+      },
+      "ephemeral": {
+        "policy": "ephemeral",
+        "requests": 128,
+        "unserved": 0,
+        "p50_s": 3.882540308994227,
+        "p95_s": 6.005140306462835,
+        "p99_s": 6.458615371612964,
+        "slo_goodput": 0.234375,
+        "migrations": 89
+      }
+    },
+    "slow_worker": {
+      "strict_sticky": {
+        "policy": "strict_sticky",
+        "requests": 48,
+        "unserved": 80,
+        "p50_s": 4.245300560277755,
+        "p95_s": 7.538990812849065,
+        "p99_s": 7.9131776032403565,
+        "slo_goodput": 0.0,
+        "migrations": 24
+      },
+      "sticky_saturated": {
+        "policy": "sticky_saturated",
+        "requests": 48,
+        "unserved": 80,
+        "p50_s": 4.5207798188139225,
+        "p95_s": 7.249233135389076,
+        "p99_s": 7.538990812849065,
+        "slo_goodput": 0.0,
+        "migrations": 26
+      },
+      "full_kv_move": {
+        "policy": "full_kv_move",
+        "requests": 48,
+        "unserved": 80,
+        "p50_s": 4.5207798188139225,
+        "p95_s": 7.249233135389076,
+        "p99_s": 7.538990812849065,
+        "slo_goodput": 0.0,
+        "migrations": 26
+      },
+      "full_reprefill": {
+        "policy": "full_reprefill",
+        "requests": 48,
+        "unserved": 80,
+        "p50_s": 4.5207798188139225,
+        "p95_s": 7.249233135389076,
+        "p99_s": 7.538990812849065,
+        "slo_goodput": 0.0,
+        "migrations": 26
+      },
+      "ephemeral": {
+        "policy": "ephemeral",
+        "requests": 128,
+        "unserved": 0,
+        "p50_s": 8.06799956997557,
+        "p95_s": 10.825685899451173,
+        "p99_s": 11.14575041379739,
+        "slo_goodput": 0.1171875,
+        "migrations": 99
+      }
+    },
+    "worker_failure": {
+      "strict_sticky": {
+        "policy": "strict_sticky",
+        "requests": 6,
+        "unserved": 58,
+        "p50_s": 2.4764515102068345,
+        "p95_s": 2.476451510206835,
+        "p99_s": 2.476451510206835,
+        "slo_goodput": 0.0,
+        "migrations": 3
+      },
+      "sticky_saturated": {
+        "policy": "sticky_saturated",
+        "requests": 6,
+        "unserved": 58,
+        "p50_s": 2.4764515102068345,
+        "p95_s": 2.476451510206835,
+        "p99_s": 2.476451510206835,
+        "slo_goodput": 0.0,
+        "migrations": 3
+      },
+      "full_kv_move": {
+        "policy": "full_kv_move",
+        "requests": 6,
+        "unserved": 58,
+        "p50_s": 2.4764515102068345,
+        "p95_s": 2.476451510206835,
+        "p99_s": 2.476451510206835,
+        "slo_goodput": 0.0,
+        "migrations": 3
+      },
+      "full_reprefill": {
+        "policy": "full_reprefill",
+        "requests": 6,
+        "unserved": 58,
+        "p50_s": 2.4764515102068345,
+        "p95_s": 2.476451510206835,
+        "p99_s": 2.476451510206835,
+        "slo_goodput": 0.0,
+        "migrations": 3
+      },
+      "ephemeral": {
+        "policy": "ephemeral",
+        "requests": 64,
+        "unserved": 0,
+        "p50_s": 3.8820617066112577,
+        "p95_s": 6.341788281630326,
+        "p99_s": 6.655406381723466,
+        "slo_goodput": 0.1875,
+        "migrations": 33
+      }
+    }
+  }
+}
