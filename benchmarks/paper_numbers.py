@@ -651,6 +651,30 @@ def main(argv=None) -> int:
                     f"({moved['mean_diff']:+.3f}, CI {moved['ci95']}, includes zero: "
                     f"{moved['includes_zero']})"))
 
+    # --- the dose-response: the emit gap is not a budget effect either.  Both halves matter - the
+    # rate does not move with twice the state, and the actions it does emit are as good - because a
+    # check carrying only the first would report a failure where the measurement reports a split.
+    big = load("artifacts/g2d-action-summary-state8192-v1.json")["summary"]
+    big_arms = big["arms"]
+    check("8,192 action turns", big["action_turns"], 48, 0)
+    check("8,192 emit rate, full transcript",
+          round(big_arms["full"]["emits_an_action"], 3), 0.625, TOL)
+    check("8,192 emit rate, bounded state",
+          round(big_arms["active"]["emits_an_action"], 3), 0.333, TOL)
+    big_gap = big["comparisons"]["active_vs_full_emits"]
+    check("8,192 bounded vs full, emits", round(big_gap["mean_diff"], 3), -0.292, 1e-3)
+    check("8,192 bounded vs full: losses", big_gap["losses"], 19, 0)
+    check("8,192 same-file rate, bounded state",
+          round(big_arms["active"]["target_match"], 3), 0.7, TOL)
+    results.append(("the emit gap is not a budget effect",
+                    not big_gap["includes_zero"] and big_gap["mean_diff"] < -0.25,
+                    f"twice the state and the same gap ({big_gap['mean_diff']:+.3f}, "
+                    f"CI {big_gap['ci95']})"))
+    results.append(("but the actions it does emit are as good",
+                    abs(big_arms["active"]["target_match"] - big_arms["full"]["target_match"]) <= 0.05,
+                    f"same file: bounded {big_arms['active']['target_match']:.3f} against full "
+                    f"{big_arms['full']['target_match']:.3f}"))
+
     # --- the figures must be *reproducible*, not merely present: regenerate every one of them from
     # the receipts in a temporary directory and require the tracked files to be identical.  This is
     # the data path asserted rather than documented - and because make_figures fails on a missing

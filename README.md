@@ -68,6 +68,9 @@ against a checked-in receipt, and the CPU-only path in
   holds (median 6 -> 12) and *lowers* the emit rate, 0.229 against 0.375 (paired -0.146,
   CI [-0.313, +0.021]).  The direction is opposite to the hypothesis, so the counts are reported as a
   correlate; what the evidence supports is narrower - a continuation needs a coherent recent turn.
+  Doubling the state does not close it either (0.333 at 8,192 against 0.375 at 4,096, paired -0.292,
+  CI [-0.480, -0.104]) - but what the bounded state does emit is as good: the same tool and the same
+  file as the transcript's, with a paired difference of exactly zero where both act.
 * **Past 156K tokens the histories are composed** out of whole real sessions, and the 8B/70B
   geometries are declared rather than measured.  Both are labelled wherever they appear.
 

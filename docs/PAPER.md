@@ -247,6 +247,18 @@ lacks, since a bag of query-ranked evidence fragments contains no turn boundary 
 and how to close the remaining gap between 0.375 and the transcript's 0.625 is left open rather than
 explained by a mechanism we could not confirm.
 
+**And it is not a budget effect either.**  Doubling the state to 8,192 tokens - the size whose
+quality point the paper already carries, at 0.00 pp fidelity and a 0.161 decision, and where 59 of
+310 routing cells advance - leaves the rate where it was: **0.333 against the transcript's 0.625**,
+paired **-0.292, 95% CI [-0.480, -0.104]**, 5 wins to 19 losses
+(`artifacts/g2d-action-summary-state8192-v1.json`).  What the larger state does buy is visible in
+the conditional column: of the actions the bounded state does emit, **the same tool and the same
+file as the transcript's** - the paired difference on both is exactly zero on the turns where both
+act, and its file rate is nominally the higher of the two (0.700 against 0.684).  So the honest
+statement is narrow but sharp: **when the bounded state acts, it acts as well as the full
+transcript; it acts less often, and neither more budget nor more prior actions in the view changes
+that.**  Two explanations are ruled out by measurement and the third is left open.
+
 **The compiler does not rescue the floor; the window does.**  The one remaining place a state
 compiler could have paid is the size the system actually runs at, where the far field has least room
 and materialised state is most attractive.  Measured there, log replay into materialised state
@@ -858,7 +870,8 @@ Table 12 maps each claim to the receipt that backs it and to the script that pro
 | the dead-state concentration does not extrapolate to composed lengths | `g2-dead-state-composed-1m-v1.json` | `benchmarks/g2_dead_state.py` |
 | lexical evidence mass grows with session length | `g2-evidence-mass-composed-1m-v1.json` | `benchmarks/g2_evidence_mass.py` |
 | 157 of 724 replay cells sit at an admissible state, 117 of them clearing 1.5x goodput | `g4-quality-join-v3.json`, `g4-all-phase-summary-v3.json`, `g4b-burst-*-v1.json` | `scripts/run_g4_join.sh`, `scripts/run_g4_regimes.sh` |
-| a window that holds more prior actions does not emit more of them (0.229 against 0.375, paired -0.146, CI [-0.313, +0.021]), so the composition counts are a correlate | `g2d-window-comparison-v1.json`, `g2d-view-composition-v1.json` | `scripts/run_g2d_action_window.sh`, `benchmarks/g2d_window_comparison.py` |
+| a window that holds more prior actions does not emit more of them (0.229 against 0.375, paired -0.146, CI [-0.313, +0.021]), so the composition counts are a correlate |
+| doubling the state to 8,192 does not close the emit gap either (0.333 against 0.625, paired -0.292, CI [-0.480, -0.104]), while the actions it does emit are as good | `g2d-action-summary-state8192-v1.json`, `g2d-action-turns-state8192-v1.json` | `scripts/run_g2d_action_turns_b8192.sh` | `g2d-window-comparison-v1.json`, `g2d-view-composition-v1.json` | `scripts/run_g2d_action_window.sh`, `benchmarks/g2d_window_comparison.py` |
 | the p99 half of the gate is conditional on the burst parameters, and where it holds | `g4b-burst-sensitivity-v1.json`, `g4b-burstsweep-*-v1.json` | `scripts/run_g4_burst_sweep.sh`, `benchmarks/g4_burst_sensitivity.py` |
 | the compiler does not rescue the 4,096-token floor | `g2-compiler-window3k-farmaterialize-b4096-v1.json`, `g2-compiler-window3584-b4096-v1.json` | `scripts/run_floor_3584.sh` |
 
