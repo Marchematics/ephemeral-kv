@@ -1,0 +1,71 @@
+{
+  "schema": "ephemeral-kv-composed-quality-v1",
+  "kind": "derived_summary",
+  "what": "the state's size and end-task score at composed history lengths, against a 131,072-token reference view",
+  "rows": [
+    {
+      "bucket": "128k",
+      "state_tokens_p50": 7163.0,
+      "state_decision_f1": 0.07685185185185185,
+      "decision_instances": 12,
+      "state_vs_reference_pp_p50": -0.37878787878787845,
+      "state_vs_reference_pp_range": [
+        -12.109375,
+        2.3809523809523836
+      ],
+      "state_accuracy_p50": 69.93975903614458,
+      "fidelity_instances": 12,
+      "state_receipt": "artifacts/g2-composed-128k-state8192-v1.json",
+      "decision_receipt": "artifacts/g2b-patch-localization-composed-128k-b8192-v1.json",
+      "reference_receipt": "artifacts/g2-composed-128k-reference131k-v1.json"
+    },
+    {
+      "bucket": "256k",
+      "state_tokens_p50": 7218.0,
+      "state_decision_f1": 0.1648354942758273,
+      "decision_instances": 12,
+      "state_vs_reference_pp_p50": -3.258145363408521,
+      "state_vs_reference_pp_range": [
+        -10.606060606060607,
+        0.0
+      ],
+      "state_accuracy_p50": 65.21120075937353,
+      "fidelity_instances": 12,
+      "state_receipt": "artifacts/g2-composed-256k-state8192-v1.json",
+      "decision_receipt": "artifacts/g2b-patch-localization-composed-256k-b8192-v1.json",
+      "reference_receipt": "artifacts/g2-composed-256k-reference131k-v1.json"
+    },
+    {
+      "bucket": "512k",
+      "state_tokens_p50": 7245.5,
+      "state_decision_f1": 0.12222222222222222,
+      "decision_instances": 12,
+      "state_vs_reference_pp_p50": -4.905437352245867,
+      "state_vs_reference_pp_range": [
+        -20.000000000000007,
+        0.0
+      ],
+      "state_accuracy_p50": 60.90909090909091,
+      "fidelity_instances": 12,
+      "state_receipt": "artifacts/g2-composed-512k-state8192-v1.json",
+      "decision_receipt": "artifacts/g2b-patch-localization-composed-512k-b8192-v1.json",
+      "reference_receipt": "artifacts/g2-composed-512k-reference131k-v1.json"
+    },
+    {
+      "bucket": "1m",
+      "state_tokens_p50": 6161.5,
+      "state_decision_f1": 0.16666666666666666,
+      "decision_instances": 12,
+      "state_vs_reference_pp_p50": -3.3482142857142847,
+      "state_vs_reference_pp_range": [
+        -25.78125,
+        0.0
+      ],
+      "state_accuracy_p50": 88.87362637362637,
+      "fidelity_instances": 12,
+      "state_receipt": "artifacts/g2-composed-1m-state8192-v1.json",
+      "decision_receipt": "artifacts/g2b-patch-localization-composed-1m-b8192-v1.json",
+      "reference_receipt": "artifacts/g2-composed-1m-reference131k-v1.json"
+    }
+  ]
+}

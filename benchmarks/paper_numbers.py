@@ -544,7 +544,21 @@ def main(argv=None) -> int:
             ("g4b-long-age-summary-v1.json", ["benchmarks/g4_long_age_summary.py"]),
             ("g2d-window-comparison-v1.json", ["benchmarks/g2d_window_comparison.py"]),
             ("g2d-action-summary-v1.json", ["benchmarks/g2d_action_summary.py"]),
+            ("g2-composed-quality-v1.json", ["benchmarks/composed_killer_summary.py", "--json"]),
         ]
+        # ...and the values inside one of them, because that receipt was *stale* rather than
+        # missing: it recorded an empty decision row for the 256k bucket, written before the end
+        # task for that bucket existed, and only the whole-payload comparison above found it.  These
+        # are the composed numbers the paper quotes.
+        composed = {row["bucket"]: row for row in load("artifacts/g2-composed-quality-v1.json")["rows"]}
+        for bucket, tokens, decision, pp in (("128k", 7163, 0.077, -0.38), ("256k", 7218, 0.165, -3.26),
+                                             ("512k", 7246, 0.122, -4.91), ("1m", 6162, 0.167, -3.35)):
+            check(f"composed {bucket}: state tokens p50",
+                  round(composed[bucket]["state_tokens_p50"]), tokens, 2)
+            check(f"composed {bucket}: decision", round(composed[bucket]["state_decision_f1"], 3),
+                  decision, TOL)
+            check(f"composed {bucket}: fidelity gap pp",
+                  round(composed[bucket]["state_vs_reference_pp_p50"], 2), pp, TOL)
         unreproducible = []
         for name, command in derived:
             out = f"{tmp}/{name}"
@@ -553,7 +567,9 @@ def main(argv=None) -> int:
             if run.returncode != 0 or not Path(out).exists():
                 unreproducible.append(f"{name} (did not build)")
                 continue
-            if json.loads(Path(out).read_text()).get("summary") != load(f"artifacts/{name}").get("summary"):
+            # the whole payload, not just its `summary`: one of these receipts has no summary key,
+            # and comparing `None == None` reported a rebuild that produced nothing as identical
+            if json.loads(Path(out).read_text()) != load(f"artifacts/{name}"):
                 unreproducible.append(f"{name} (differs)")
         check("derived receipts that do not rebuild from the repository",
               len(unreproducible), 0, 0)
