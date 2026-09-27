@@ -505,6 +505,34 @@ def main(argv=None) -> int:
             check("figure 3 carries the retrieval arm's decision",
                   float(raw96["active_f1"]), 0.169, TOL)
 
+    # --- the derived receipts must be re-derivable.  `run_g4_join.sh` rebuilds the phase summary
+    # by globbing the grid, and 220 of the 282 receipts it globbed were on disk but never in git:
+    # in a clone the same script produced 30 cells of 67 against the tracked summary's 174 of 724.
+    # Nothing caught it because the audits checked that a script's *named* outputs exist, not that a
+    # derived receipt can be produced from the repository at all.
+    with tempfile.TemporaryDirectory() as tmp:
+        rebuilt = subprocess.run(
+            [sys.executable, "benchmarks/g4_phase_summary.py",
+             "--glob", "artifacts/g4[b-e]-*.json",
+             "--exclude", "artifacts/g4b-burstsweep-*",
+             "--exclude", "artifacts/g4b-longage-*",
+             "--out", f"{tmp}/phase.json"], capture_output=True, text=True, check=False)
+        tracked_summary = load("artifacts/g4-all-phase-summary-v3.json")
+        rebuilt_summary = (json.loads(Path(f"{tmp}/phase.json").read_text())
+                           if Path(f"{tmp}/phase.json").exists() else {})
+        same = (rebuilt.returncode == 0
+                and rebuilt_summary.get("cells") == tracked_summary["cells"]
+                and rebuilt_summary.get("advances") == tracked_summary["advances"]
+                and rebuilt_summary.get("advances_by_regime_and_active")
+                == tracked_summary["advances_by_regime_and_active"])
+        check("the routing grid rebuilds from the repository",
+              len(rebuilt_summary.get("rows") or []), len(tracked_summary["rows"]), 0)
+        results.append(("the routing grid rebuilds from the repository",
+                        same,
+                        f"rebuilt {rebuilt_summary.get('cells')} cells / "
+                        f"{rebuilt_summary.get('advances')} advances against the tracked "
+                        f"{tracked_summary['cells']} / {tracked_summary['advances']}"))
+
     # --- the floats: numbered by order of appearance, and every reference resolving to one.  The
     # numbering was by generation order until it was fixed, which put Figure 1 in Section 4 and
     # Table 1 in the appendix, so this check exists to keep the draft matching a LaTeX build.
